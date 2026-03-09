@@ -1,22 +1,19 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import aboutHero from '../assets/images/hero-bg.png';
-import img8 from '../assets/images/authentic.jpg';
-import img9 from '../assets/images/authentic-image.jpg';
-import img10 from '../assets/images/bagara rice.jpg';
+
 
 const About = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const galleryImages = [img8, img9, img10];
+    const galleryImages = ["/images/authentic.jpg", "/images/authentic-image.jpg", "/images/bagara rice.jpg"];
 
     return (
         <div className="pt-14 min-h-screen">
             {/* Page Header with background image */}
             <section className="relative py-20 lg:py-32 overflow-hidden text-center">
-                <img src={aboutHero} alt="Our Story" className="absolute inset-0 w-full h-full object-cover" />
+                <img src="/images/hero-bg.png" alt="Our Story" className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-secondary/80" />
                 <div className="container mx-auto relative z-10 px-6">
                     <motion.span

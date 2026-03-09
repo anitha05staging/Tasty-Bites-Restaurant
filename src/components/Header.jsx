@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../assets/images/logo.png';
 import './Header.css';
 
 const Header = () => {
@@ -25,7 +24,7 @@ const Header = () => {
       <div className="container header-container">
         <div className="logo">
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Tasty Bites" className="h-12 w-auto object-contain" />
+            <img src="/images/logo.png" alt="Tasty Bites" className="h-12 w-auto object-contain" />
           </Link>
         </div>
 

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Phone, MessageSquare, Calendar, Users, Briefcase, Heart, PartyPopper, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import cateringHero from '../assets/images/authentic.jpg';
 import api from '../services/api';
 import PhoneInput from '../components/PhoneInput';
 import Flatpickr from 'react-flatpickr';
@@ -64,7 +63,7 @@ const CateringPage = () => {
         <div className="bg-brand-cream min-h-screen pb-24 font-poppins pt-10">
             {/* Hero Section */}
             <div className="relative h-[300px] md:h-[400px] w-full">
-                <img src={cateringHero} alt="Catering Header" className="w-full h-full object-cover" />
+                <img src="/images/authentic.jpg" alt="Catering Header" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/60" />
 
                 <div className="absolute inset-0 flex items-center container mx-auto px-6">

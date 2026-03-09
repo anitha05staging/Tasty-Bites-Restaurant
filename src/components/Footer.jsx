@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUp } from 'lucide-react';
-import logo from '../assets/images/logo.png';
+import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, Clock, ChevronRight, Heart } from 'lucide-react';
 
 const Footer = () => {
     const scrollToTop = () => {
@@ -23,7 +23,7 @@ const Footer = () => {
                     {/* Brand Info */}
                     <div className="lg:col-span-2">
                         <Link to="/" className="inline-block mb-8">
-                            <img src={logo} alt="Tasty Bites" className="h-12 w-auto object-contain" />
+                            <img src="/images/logo.png" alt="Tasty Bites" className="h-12 w-auto object-contain" />
                         </Link>
                         <p className="text-white/60 text-sm leading-relaxed mb-8 pr-4">
                             Global Indian Eats — Where Friends & Family Meets to Taste the Tradition in Style.

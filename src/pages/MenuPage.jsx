@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, ArrowLeft, Plus, Minus, X, Check, ShoppingBag, Leaf, Drumstick } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import heroImg from '../assets/images/authentic.jpg';
 import api from '../services/api';
 
 // Fallback data in case API is unavailable
@@ -154,7 +153,7 @@ const MenuPage = () => {
         <div className="min-h-screen bg-brand-cream pt-10 pb-24">
             {/* Hero Header */}
             <div className="relative h-[250px] md:h-[350px] w-full mt-4">
-                <img src={heroImg} alt="Menu Header" className="w-full h-full object-cover" />
+                <img src="/images/authentic.jpg" alt="Menu Header" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/60" />
 
                 <div className="absolute inset-0 flex items-center container mx-auto px-6 z-10">

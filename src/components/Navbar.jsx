@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, User } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import logo from '../assets/images/logo.png';
+import { Search, ShoppingCart, User, Menu, X, LogOut, ChevronDown, Package, History, Settings } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -48,7 +46,7 @@ const Navbar = () => {
             <div className="container mx-auto px-6 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="flex items-center group">
-                    <img src={logo} alt="Tasty Bites" className="h-10 w-auto object-contain transition-all" />
+                    <img src="/images/logo.png" alt="Tasty Bites" className="h-10 w-auto object-contain transition-all" />
                 </Link>
 
                 {/* Desktop Nav */}
