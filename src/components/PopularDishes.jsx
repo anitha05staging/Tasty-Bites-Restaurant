@@ -4,9 +4,9 @@ import { Leaf, Drumstick } from 'lucide-react';
 
 const popularDishes = [
     { id: 1, name: 'Mini Ghee Podi Idli', price: '£6.25', image: '/images/idly.jpg', isVeg: true },
-    { id: 2, name: 'Medhu Vada', price: '£5.95', image: '/images/Vadai.jpg', isVeg: true },
-    { id: 3, name: 'Chicken 65', price: '£8.50', image: '/images/chicken 65.jpg', isVeg: false },
-    { id: 4, name: 'Paneer 65', price: '£7.50', image: '/images/Paneer 65.jpg', isVeg: true },
+    { id: 2, name: 'Medhu Vada', price: '£5.95', image: '/images/vadai.jpg', isVeg: true },
+    { id: 3, name: 'Chicken 65', price: '£8.50', image: '/images/chicken-65.jpg', isVeg: false },
+    { id: 4, name: 'Paneer 65', price: '£7.50', image: '/images/paneer-65.jpg', isVeg: true },
 ];
 
 const VegIcon = ({ isVeg }) => (

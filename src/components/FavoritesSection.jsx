@@ -10,7 +10,7 @@ const favorites = [
         name: 'Classic Masala Dosa',
         description: 'Crispy rice and lentil crepe with potato masala.', // Changed desc to description to match modal expectations
         price: '£8.50',
-        image: '/images/masal dosa.jpg',
+        image: '/images/masal-dosa.jpg',
         rating: 5,
         isVeg: true
     },

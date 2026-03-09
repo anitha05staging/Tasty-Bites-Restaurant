@@ -21,7 +21,7 @@ const StorySection = () => {
                     >
                         <div className="relative z-10 rounded-3xl overflow-hidden shadow-premium aspect-[4/5]">
                             <img
-                                src="/images/authentic_spread.png"
+                                src="/images/authentic-spread.png"
                                 alt="Traditional Dosa Preparation"
                                 className="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-110"
                             />

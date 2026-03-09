@@ -10,7 +10,7 @@ const dishes = [
         name: 'Classic Masala Dosa',
         description: 'Crispy rice and lentil crepe filled with spiced potato masala, served with sambar and chutneys.',
         price: '£8.50',
-        image: '/images/masal dosa.jpg',
+        image: '/images/masal-dosa.jpg',
         isVeg: true
     },
     {
