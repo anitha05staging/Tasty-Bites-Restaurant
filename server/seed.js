@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { sequelize, User, MenuItem, Testimonial, FAQ } from './models/index.js';
+import { fileURLToPath } from 'url';
 
-const seed = async () => {
+export const seed = async (exitOnComplete = false) => {
     try {
         console.log('🌱 Seeding database...');
         await sequelize.sync({ force: true });
@@ -71,11 +72,15 @@ const seed = async () => {
         console.log(`✅ ${faqs.length} FAQs seeded`);
 
         console.log('\n🎉 Database seeded successfully!');
-        process.exit(0);
+        if (exitOnComplete) process.exit(0);
     } catch (err) {
         console.error('❌ Seed error:', err);
-        process.exit(1);
+        if (exitOnComplete) process.exit(1);
+        throw err;
     }
 };
 
-seed();
+// Check if file is being run directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    seed(true);
+}

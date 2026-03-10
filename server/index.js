@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sequelize } from './models/index.js';
+import { sequelize, MenuItem } from './models/index.js';
+import { seed } from './seed.js';
 
 import authRoutes from './routes/auth.js';
 import menuRoutes from './routes/menu.js';
@@ -43,6 +44,15 @@ const start = async () => {
     try {
         await sequelize.sync();
         console.log(`📦 Database synced (${process.env.NODE_ENV === 'production' ? 'PostgreSQL' : 'SQLite'})`);
+
+        // Auto-seed in production if database is empty
+        if (process.env.NODE_ENV === 'production' || process.env.AUTO_SEED === 'true') {
+            const count = await MenuItem.count();
+            if (count === 0) {
+                console.log('⚠️ Production database empty. Running auto-seed...');
+                await seed(false);
+            }
+        }
 
         app.listen(PORT, () => {
             console.log(`🚀 Tasty Bites API running on http://localhost:${PORT}`);

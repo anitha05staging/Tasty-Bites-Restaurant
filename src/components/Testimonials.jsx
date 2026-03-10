@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const reviews = [
     {
@@ -74,9 +75,9 @@ const Testimonials = () => {
                 </div>
 
                 <div className="text-center mt-16">
-                    <a href="/testimonials" className="text-accent font-bold uppercase tracking-widest text-sm py-2 border-b-2 border-accent/30 hover:border-accent transition-all">
+                    <Link to="/testimonials" className="text-accent font-bold uppercase tracking-widest text-sm py-2 border-b-2 border-accent/30 hover:border-accent transition-all">
                         View All Reviews
-                    </a>
+                    </Link>
                 </div>
             </div>
         </section>
