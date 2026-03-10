@@ -35,7 +35,7 @@ const Contact = () => {
         setIsLoading(true);
 
         try {
-            await api.sendContactMessage(formData); // Changed API call
+            await api.submitContact(formData);
             setFormData({
                 name: '',
                 email: '',
@@ -43,11 +43,9 @@ const Contact = () => {
                 subject: 'General Inquiry',
                 message: ''
             });
-            setSubmitted(true);
-            setTimeout(() => setSubmitted(false), 5000);
+            toast.success('Thank you! Your message has been sent successfully.');
         } catch (err) {
-            setError(err.message || 'Something went wrong. Please try again.'); // Kept for form display
-            toast.error('Failed to send message. Please try again.'); // Added error toast
+            toast.error(err.message || 'Failed to send message. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -152,48 +150,20 @@ const Contact = () => {
                                         ></textarea>
                                     </div>
 
-                                    {error && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-red-50 text-red-600 p-6 rounded-2xl flex items-center space-x-4 border border-red-100"
-                                        >
-                                            <AlertCircle size={28} />
-                                            <div>
-                                                <p className="font-bold">Submission Failed</p>
-                                                <p className="text-sm italic">{error}</p>
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {submitted ? (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-green-50 text-green-700 p-6 rounded-2xl flex items-center space-x-4 border border-green-100"
-                                        >
-                                            <CheckCircle size={28} />
-                                            <div>
-                                                <p className="font-bold">Message Sent!</p>
-                                                <p className="text-sm italic">We'll get back to you within 24 hours.</p>
-                                            </div>
-                                        </motion.div>
-                                    ) : (
-                                        <button
-                                            type="submit"
-                                            disabled={isLoading}
-                                            className={`btn-primary w-full group flex items-center justify-center space-x-3 py-5 text-base ${isLoading ? 'opacity-70 cursor-wait' : ''}`}
-                                        >
-                                            {isLoading ? (
-                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <span>Submit Inquiry</span>
-                                                    <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className={`btn-primary w-full group flex items-center justify-center space-x-3 py-5 text-base ${isLoading ? 'opacity-70 cursor-wait' : ''}`}
+                                    >
+                                        {isLoading ? (
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <>
+                                                <span>Submit Inquiry</span>
+                                                <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </button>
                                 </form>
                             </div>
                         </div>

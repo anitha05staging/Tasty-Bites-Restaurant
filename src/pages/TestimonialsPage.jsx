@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, MessageCircle, Quote, ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const reviewTypes = ['General', 'Order Review', 'Dine-in Experience', 'Catering Feedback'];
 
@@ -36,18 +37,23 @@ const TestimonialsPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.rating === 0) { alert('Please select a star rating.'); return; }
-        if (!formData.name.trim()) { alert('Please enter your name.'); return; }
+        if (formData.rating === 0) {
+            toast.warning('Please select a star rating.');
+            return;
+        }
+        if (!formData.name.trim()) {
+            toast.warning('Please enter your name.');
+            return;
+        }
         setIsSubmitting(true);
         try {
             await api.submitTestimonial(formData);
-            setSubmitted(true);
-            setTimeout(() => setSubmitted(false), 4000);
+            toast.success('Thank you! Your review has been submitted.');
             setFormData({ name: '', type: 'General', rating: 0, text: '' });
             fetchTestimonials(); // Refresh list to show new review
         } catch (error) {
             console.error('Failed to submit testimonial:', error);
-            alert('Failed to submit your review. Please try again later.');
+            toast.error('Failed to submit your review. Please try again later.');
         } finally {
             setIsSubmitting(false);
         }
@@ -153,92 +159,84 @@ const TestimonialsPage = () => {
                     >
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                        {submitted ? (
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-10 relative z-10">
-                                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"><Star size={32} fill="currentColor" /></div>
-                                <h3 className="text-2xl font-playfair text-secondary mb-2">Thank You!</h3>
-                                <p className="text-gray-600">Your review has been submitted successfully.</p>
-                            </motion.div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-                                {/* Customer Name */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Name <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
-                                        placeholder="John Doe"
-                                    />
-                                </div>
+                        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                            {/* Customer Name */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Your Name <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
+                                    placeholder="John Doe"
+                                />
+                            </div>
 
-                                {/* Review Type */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Review Type</label>
-                                    <select
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                        className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white text-gray-700 appearance-none cursor-pointer"
-                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.25rem center', backgroundSize: '1.5em 1.5em' }}
-                                    >
-                                        {reviewTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                                    </select>
-                                </div>
-
-                                {/* Star Rating */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">Star Rating <span className="text-red-500">*</span></label>
-                                    <div className="flex items-center space-x-2">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <button
-                                                type="button"
-                                                key={star}
-                                                onClick={() => setFormData({ ...formData, rating: star })}
-                                                onMouseEnter={() => setHoverRating(star)}
-                                                onMouseLeave={() => setHoverRating(0)}
-                                                className="focus:outline-none transition-transform hover:scale-125"
-                                            >
-                                                <Star
-                                                    size={36}
-                                                    className={`transition-colors ${(hoverRating || formData.rating) >= star ? 'text-accent fill-accent' : 'text-gray-300'}`}
-                                                />
-                                            </button>
-                                        ))}
-                                        <span className="ml-4 text-sm text-gray-500 font-medium">
-                                            {formData.rating > 0 ? `${formData.rating} / 5` : 'Select a rating'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Review Text */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Review <span className="text-red-500">*</span></label>
-                                    <textarea
-                                        required
-                                        rows="5"
-                                        value={formData.text}
-                                        onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                                        className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white resize-none"
-                                        placeholder="Tell us about your experience at Tasty Bites..."
-                                    />
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className={`w-full btn-primary py-4 text-lg rounded-xl flex items-center justify-center ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
+                            {/* Review Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Review Type</label>
+                                <select
+                                    value={formData.type}
+                                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                    className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white text-gray-700 appearance-none cursor-pointer"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.25rem center', backgroundSize: '1.5em 1.5em' }}
                                 >
-                                    {isSubmitting ? (
-                                        <>
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin flex-shrink-0 mr-3" />
-                                            <span>Submitting...</span>
-                                        </>
-                                    ) : 'Submit Review'}
-                                </button>
-                            </form>
-                        )}
+                                    {reviewTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+
+                            {/* Star Rating */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-3">Star Rating <span className="text-red-500">*</span></label>
+                                <div className="flex items-center space-x-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            type="button"
+                                            key={star}
+                                            onClick={() => setFormData({ ...formData, rating: star })}
+                                            onMouseEnter={() => setHoverRating(star)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            className="focus:outline-none transition-transform hover:scale-125"
+                                        >
+                                            <Star
+                                                size={36}
+                                                className={`transition-colors ${(hoverRating || formData.rating) >= star ? 'text-accent fill-accent' : 'text-gray-300'}`}
+                                            />
+                                        </button>
+                                    ))}
+                                    <span className="ml-4 text-sm text-gray-500 font-medium">
+                                        {formData.rating > 0 ? `${formData.rating} / 5` : 'Select a rating'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Review Text */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Your Review <span className="text-red-500">*</span></label>
+                                <textarea
+                                    required
+                                    rows="5"
+                                    value={formData.text}
+                                    onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                                    className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white resize-none"
+                                    placeholder="Tell us about your experience at Tasty Bites..."
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className={`w-full btn-primary py-4 text-lg rounded-xl flex items-center justify-center ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin flex-shrink-0 mr-3" />
+                                        <span>Submitting...</span>
+                                    </>
+                                ) : 'Submit Review'}
+                            </button>
+                        </form>
                     </motion.div>
                 </div>
             </section>

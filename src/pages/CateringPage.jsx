@@ -35,7 +35,7 @@ const CateringPage = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await api.sendCateringEnquiry({
+            await api.submitCatering({
                 name: formData.fullName,
                 email: formData.email,
                 phone: formData.phone,

@@ -43,7 +43,6 @@ const BookTable = () => {
             setIsConfirmed(true);
         } catch (err) {
             const errorMsg = err.message || 'Something went wrong. Please try again.';
-            setError(errorMsg);
             toast.error(errorMsg);
         } finally {
             setIsSubmitting(false);
@@ -306,20 +305,6 @@ const BookTable = () => {
                                 ></textarea>
                             </div>
 
-                            {/* Error Message */}
-                            <AnimatePresence>
-                                {error && (
-                                    <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center space-x-3 text-red-600"
-                                    >
-                                        <AlertCircle size={20} />
-                                        <p className="text-sm font-medium">{error}</p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
 
                             {/* Booking Information Box */}
                             <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 flex space-x-4 items-start shadow-sm">
