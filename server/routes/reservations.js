@@ -29,8 +29,8 @@ router.post('/', optionalAuth, async (req, res) => {
             bookingRef
         });
 
-        // Send confirmation email asynchronously (don't block the response)
-        sendBookingConfirmation({
+        // Send confirmation email synchronously so Vercel doesn't kill the background process
+        const emailSent = await sendBookingConfirmation({
             fullName,
             email,
             phone,
@@ -41,6 +41,10 @@ router.post('/', optionalAuth, async (req, res) => {
             specialRequests: specialRequests || '',
             referenceNumber: bookingRef // Use the generated bookingRef
         });
+
+        if (!emailSent) {
+            console.error("WARNING: Reservation created but email failed to send.");
+        }
 
         res.status(201).json({
             success: true,

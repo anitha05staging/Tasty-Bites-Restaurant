@@ -17,7 +17,11 @@ router.post('/', async (req, res) => {
         });
 
         // Send email notification to restaurant
-        sendContactNotification({ name, email, phone, subject, message });
+        const emailSent = await sendContactNotification({ name, email, phone, subject, message });
+
+        if (!emailSent) {
+            console.error("WARNING: Contact message saved but email failed to send.");
+        }
 
         res.status(201).json({ success: true, message: 'Message received successfully.' });
     } catch (err) {
