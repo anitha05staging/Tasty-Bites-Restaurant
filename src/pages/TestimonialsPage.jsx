@@ -22,7 +22,11 @@ const TestimonialsPage = () => {
     const fetchTestimonials = async () => {
         try {
             const data = await api.getTestimonials();
-            setTestimonials(data);
+            if (Array.isArray(data)) {
+                setTestimonials(data);
+            } else {
+                setTestimonials([]);
+            }
         } catch (error) {
             console.error('Failed to load testimonials:', error);
         } finally {

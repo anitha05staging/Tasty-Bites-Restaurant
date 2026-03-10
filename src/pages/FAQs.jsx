@@ -49,11 +49,16 @@ const FAQs = () => {
     const fetchFaqs = async () => {
         try {
             const data = await api.getFaqs();
-            setFaqCategories(data);
-            const keys = Object.keys(data);
-            setCategoryKeys(keys);
-            if (keys.length > 0) {
-                setActiveCategory(keys[0]);
+            if (data && !data.error) {
+                setFaqCategories(data);
+                const keys = Object.keys(data);
+                setCategoryKeys(keys);
+                if (keys.length > 0) {
+                    setActiveCategory(keys[0]);
+                }
+            } else {
+                setFaqCategories({});
+                setCategoryKeys([]);
             }
         } catch (error) {
             console.error('Failed to load FAQs:', error);
