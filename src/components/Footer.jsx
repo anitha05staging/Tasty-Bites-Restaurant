@@ -13,7 +13,7 @@ const Footer = () => {
             {/* Scroll to Top */}
             <button
                 onClick={scrollToTop}
-                className="absolute top-10 right-10 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-all transform hover:-translate-y-2 group"
+                className="absolute bottom-10 right-6 md:right-10 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-all transform hover:-translate-y-2 group z-50 shadow-xl"
             >
                 <ArrowUp size={20} className="group-hover:animate-bounce" />
             </button>
@@ -22,9 +22,11 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
                     {/* Brand Info */}
                     <div className="lg:col-span-2">
-                        <Link to="/" className="inline-block mb-8 mx-auto md:mx-0">
-                            <img src="/images/logo.png" alt="Tasty Bites" className="h-12 w-auto object-contain" />
-                        </Link>
+                        <div className="flex justify-center md:justify-start">
+                            <Link to="/" className="inline-block mb-8 mx-auto md:mx-0">
+                                <img src="/images/logo.png" alt="Tasty Bites" className="h-12 w-auto object-contain" />
+                            </Link>
+                        </div>
                         <p className="text-white/60 text-sm leading-relaxed mb-8 pr-4 text-center md:text-left">
                             Global Indian Eats — Where Friends & Family Meets to Taste the Tradition in Style.
                         </p>
