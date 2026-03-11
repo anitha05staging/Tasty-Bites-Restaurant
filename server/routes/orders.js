@@ -50,8 +50,20 @@ router.post('/', optionalAuth, async (req, res) => {
             id: order.id
         });
     } catch (err) {
-        console.error('Create order error:', err);
-        res.status(500).json({ error: 'Server error' });
+        console.error('CRITICAL: Create order error:', err);
+        const logPath = path.join(process.cwd(), 'server_error.log');
+        try {
+            const errorEntry = `[${new Date().toISOString()}] ORDER_CREATE_FAILURE\nMessage: ${err.message}\nStack: ${err.stack}\nBody: ${JSON.stringify(req.body)}\n\n`;
+            fs.appendFileSync(logPath, errorEntry);
+            console.log(`Error logged to ${logPath}`);
+        } catch (logErr) {
+            console.error('Failed to write to error log:', logErr);
+        }
+        res.status(500).json({
+            error: 'Server error',
+            details: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 });
 

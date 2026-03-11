@@ -49,7 +49,7 @@ app.use(async (req, res, next) => {
                 await sequelize.authenticate();
                 console.log('✅ Database connection established successfully.');
 
-                await sequelize.sync();
+                await sequelize.sync({ alter: true });
                 const dialect = sequelize.getDialect();
                 console.log(`📦 Database synced (Dialect: ${dialect})`);
 

@@ -246,6 +246,17 @@ export const sendOrderConfirmation = async (orderData) => {
             </div>
         `;
 
+        if (!customerEmail) {
+            console.log(`[Order #${orderId}] No customer email provided, only notifying restaurant.`);
+            await transporter.sendMail({
+                from: `"Tasty Bites Orders" <${process.env.SMTP_USER}>`,
+                to: RESTAURANT_EMAIL,
+                subject: `New Dine-In/Order Notification #${orderId}`,
+                html: `<h3>New Order Received</h3><p>Order ID: #${orderId}</p><p>Total: £${Number(totalAmount).toFixed(2)}</p><p>Please check the admin panel for details.</p>`,
+            });
+            return true;
+        }
+
         await transporter.sendMail({
             from: `"Tasty Bites Orders" <${process.env.SMTP_USER}>`,
             to: customerEmail,

@@ -1,22 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, ArrowLeft, Plus, Minus, X, Check, ShoppingBag, Leaf, Drumstick, Utensils } from 'lucide-react';
+import { Search, Filter, ArrowLeft, Plus, Minus, X, Check, ShoppingBag, Leaf, Drumstick, Utensils, Star, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
-// Fallback data in case API is unavailable
+// Fallback data with corrected image paths and premium descriptions
 const fallbackMenuData = [
-    { id: 1, name: 'Classic Masala Dosa', category: 'veg', description: 'Crispy rice and lentil crepe with potato masala.', price: '£8.50', image: '/images/masal-dosa.jpg', popular: true, vegetarian: true, dairyFree: false, glutenFree: true, type: 'veg' },
-    { id: 2, name: 'Chicken Tikka Dosa', category: 'non-veg', description: 'Spicy chicken tikka stuffed in a crispy dosa.', price: '£10.95', image: '/images/chicken-65.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' },
-    { id: 3, name: 'Mysore Masala Dosa', category: 'signatures', description: 'Spicy red chutney with potato filling.', price: '£9.25', image: '/images/mysore-dosa.png', popular: true, vegetarian: true, dairyFree: false, glutenFree: true, type: 'veg' },
-    { id: 4, name: 'Chettinad Fish Curry', category: 'sea food', description: 'Traditional spicy fish curry from Chettinad.', price: '£14.50', image: '/images/prawns-&-egg-curry--bagara-rice--1-drink.jpg', popular: false, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' },
-    { id: 5, name: 'Paneer Butter Masala', category: 'curries', description: 'Cottage cheese in rich tomato gravy.', price: '£11.95', image: '/images/paneer-butter-masala.jpg', popular: true, vegetarian: true, dairyFree: false, glutenFree: true, type: 'veg' },
-    { id: 6, name: 'Hyderabadi Chicken Biriyani', category: 'Biriyani', description: 'Aromatic basmati rice cooked with spiced chicken.', price: '£13.50', image: '/images/chicken-briyani.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' },
-    { id: 7, name: 'Lemon Rice', category: 'rice and breads', description: 'Tangy lemon-flavored basmati rice.', price: '£5.50', image: '/images/ghee-rice.jpg', popular: false, vegetarian: true, dairyFree: true, glutenFree: true, type: 'veg' },
-    { id: 8, name: 'Kerala Parotta', category: 'Parotta and Idiyappam', description: 'Flaky, layered flatbread from Kerala.', price: '£3.50', image: '/images/onion-pakoda.jpg', popular: true, vegetarian: true, dairyFree: false, glutenFree: false, type: 'veg' },
-    { id: 9, name: 'String Hoppers (Idiyappam)', category: 'Parotta and Idiyappam', description: 'Steamed rice flour noodles.', price: '£4.50', image: '/images/medhu-vada.jpg', popular: false, vegetarian: true, dairyFree: true, glutenFree: true, type: 'veg' },
-    { id: 10, name: 'Mutton Chukka', category: 'non-veg', description: 'Dry roasted spicy mutton chunks.', price: '£15.50', image: '/images/gongura-mutton.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' }
+    { id: 1, name: 'Classic Masala Dosa', category: 'veg', description: 'Crispy rice and lentil crepe with our signature potato masala filling.', price: '£8.50', image: '/images/masal-dosa.jpg', popular: true, vegetarian: true, dairyFree: false, glutenFree: true, type: 'veg' },
+    { id: 2, name: 'Chicken Tikka Dosa', category: 'non-veg', description: 'Hand-pulled spicy chicken tikka stuffed in a golden crispy dosa.', price: '£10.95', image: '/images/chicken-65.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' },
+    { id: 3, name: 'Mysore Masala Dosa', category: 'signatures', description: 'Tangy red chili-garlic chutney spread with spiced potato filling.', price: '£9.25', image: '/images/mysore-dosa.png', popular: true, vegetarian: true, dairyFree: false, glutenFree: true, type: 'veg' },
+    { id: 4, name: 'Chettinad Fish Curry', category: 'sea food', description: 'King fish simmered in a traditional aromatic Chettinad spice blend.', price: '£14.50', image: '/images/prawns-&-egg-curry--bagara-rice--1-drink.jpg', popular: false, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' },
+    { id: 5, name: 'Paneer Butter Masala', category: 'curries', description: 'Tandoori paneer cubes bathed in a rich, velvety tomato-butter gravy.', price: '£11.95', image: '/images/paneer-butter-masala.jpg', popular: true, vegetarian: true, dairyFree: false, glutenFree: true, type: 'veg' },
+    { id: 6, name: 'Hyderabadi Chicken Biriyani', category: 'Biriyani', description: 'Long-grain basmati rice slow-cooked with marinated chicken and saffron.', price: '£13.50', image: '/images/chicken-briyani.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' },
+    { id: 7, name: 'Lemon Rice', category: 'rice and breads', description: 'Bright and zesty tempered rice with mustard seeds and fresh curry leaves.', price: '£5.50', image: '/images/ghee-rice.jpg', popular: false, vegetarian: true, dairyFree: true, glutenFree: true, type: 'veg' },
+    { id: 8, name: 'Kerala Parotta', category: 'Parotta and Idiyappam', description: 'Traditional flaky, multi-layered flatbread toasted to perfection.', price: '£3.50', image: '/images/onion-pakoda.jpg', popular: true, vegetarian: true, dairyFree: false, glutenFree: false, type: 'veg' },
+    { id: 9, name: 'String Hoppers (Idiyappam)', category: 'Parotta and Idiyappam', description: 'Delicate steamed rice flour nests, served light and fresh.', price: '£4.50', image: '/images/medhu-vada.jpg', popular: false, vegetarian: true, dairyFree: true, glutenFree: true, type: 'veg' },
+    { id: 10, name: 'Mutton Chukka', category: 'non-veg', description: 'Succulent mutton slow-roasted with crushed peppercorns and dry spices.', price: '£15.50', image: '/images/gongura-mutton.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' }
 ];
 
 const categories = ['All', 'veg', 'non-veg', 'signatures', 'sea food', 'curries', 'Biriyani', 'rice and breads', 'Parotta and Idiyappam'];
@@ -33,7 +33,10 @@ const DineInMenuPage = () => {
     // Fetch menu from backend
     useEffect(() => {
         api.getMenu().then(data => {
-            if (data && data.length > 0) setMenuData(data);
+            if (data && data.length > 0) {
+                // Ensure data from backend also uses consistent paths or formatting if needed
+                setMenuData(data);
+            }
         }).catch(() => { /* use fallback */ });
     }, []);
 
@@ -43,7 +46,7 @@ const DineInMenuPage = () => {
 
     // Derived Data
     const filteredDishes = useMemo(() => {
-        let result = menuData;
+        let result = [...menuData];
 
         // Search
         if (searchQuery) {
@@ -53,7 +56,7 @@ const DineInMenuPage = () => {
 
         // Category
         if (activeCategory !== 'All') {
-            result = result.filter(d => d.category === activeCategory);
+            result = result.filter(d => d.category.toLowerCase() === activeCategory.toLowerCase());
         }
 
         // Checkbox Filters
@@ -65,8 +68,8 @@ const DineInMenuPage = () => {
         result.sort((a, b) => {
             if (sortBy === 'name') return a.name.localeCompare(b.name);
             if (sortBy === 'priceLow' || sortBy === 'priceHigh') {
-                const pA = parseFloat(a.price.replace(/[^0-9.]/g, ''));
-                const pB = parseFloat(b.price.replace(/[^0-9.]/g, ''));
+                const pA = parseFloat(String(a.price).replace(/[^0-9.]/g, ''));
+                const pB = parseFloat(String(b.price).replace(/[^0-9.]/g, ''));
                 return sortBy === 'priceLow' ? pA - pB : pB - pA;
             }
             if (sortBy === 'popular') return (a.popular === b.popular) ? 0 : a.popular ? -1 : 1;
@@ -76,6 +79,12 @@ const DineInMenuPage = () => {
         return result;
     }, [searchQuery, activeCategory, filters, sortBy, menuData]);
 
+    // Fast image failure recovery
+    const handleImageError = (e) => {
+        e.target.src = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2070&auto=format&fit=crop';
+        e.target.className = "w-full h-full object-cover opacity-60 grayscale-[0.5]";
+    };
+
     // Item Card Component
     const DishCard = ({ dish, onClick }) => {
         const cartItem = cartItems.find(i => i.id === dish.id);
@@ -84,60 +93,77 @@ const DineInMenuPage = () => {
         return (
             <motion.div
                 layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-gray-100 flex flex-col h-full"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-emerald-50 relative"
             >
-                <div className="relative h-48 cursor-pointer overflow-hidden" onClick={onClick}>
-                    <img src={dish.image} alt={dish.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
-                    <div className="absolute top-4 left-4 flex space-x-2">
+                <div className="relative h-60 cursor-pointer overflow-hidden" onClick={onClick}>
+                    <img
+                        src={dish.image}
+                        alt={dish.name}
+                        onError={handleImageError}
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <div className="absolute top-5 left-5 flex flex-col space-y-2">
                         {dish.type === 'veg' ? (
-                            <span className="bg-green-500 text-white p-1.5 rounded-md shadow-md" title="Vegetarian"><Leaf size={16} /></span>
+                            <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-lg flex items-center justify-center backdrop-blur-md" title="Vegetarian">
+                                <Leaf size={14} fill="white" />
+                            </div>
                         ) : (
-                            <span className="bg-red-500 text-white p-1.5 rounded-md shadow-md" title="Non-Vegetarian"><Drumstick size={16} /></span>
+                            <div className="bg-rose-600 text-white p-2 rounded-xl shadow-lg flex items-center justify-center backdrop-blur-md" title="Non-Vegetarian">
+                                <Drumstick size={14} fill="white" />
+                            </div>
                         )}
-                        {dish.popular && <span className="bg-accent text-secondary text-xs font-bold px-2 py-1 rounded-md shadow-md flex items-center">Popular</span>}
+                        {dish.popular && (
+                            <div className="bg-amber-400 text-emerald-900 p-2 rounded-xl shadow-lg flex items-center justify-center backdrop-blur-md">
+                                <Star size={14} fill="currentColor" />
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="p-6 flex flex-col flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-xl font-bold text-secondary cursor-pointer hover:text-primary transition-colors leading-tight" onClick={onClick}>
+                <div className="p-8">
+                    <div className="flex justify-between items-start mb-3">
+                        <h3 className="text-xl font-bold text-emerald-950 group-hover:text-emerald-700 transition-colors cursor-pointer" onClick={onClick}>
                             {dish.name}
                         </h3>
-                        <span className="text-lg font-bold text-primary ml-2">{dish.price}</span>
+                        <span className="text-lg font-black text-emerald-600">{dish.price}</span>
                     </div>
 
-                    <p className="text-sm text-gray-500 mb-4 flex-1 line-clamp-2">{dish.description}</p>
+                    <p className="text-sm text-gray-500 mb-6 line-clamp-2 font-medium leading-relaxed">
+                        {dish.description}
+                    </p>
 
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                        {dish.glutenFree && <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-lg">Gluten-free</span>}
-                        {dish.dairyFree && <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-lg">Dairy-free</span>}
+                    <div className="flex items-center space-x-3 mb-8">
+                        {dish.glutenFree && <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-tight">Gluten-free</span>}
+                        {dish.dairyFree && <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-tight">Dairy-free</span>}
                     </div>
 
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
                         {qty === 0 ? (
                             <button
                                 onClick={(e) => { e.stopPropagation(); addToCart(dish); }}
-                                className="w-full bg-secondary text-white py-3 rounded-xl font-semibold hover:bg-primary transition-colors flex items-center justify-center"
+                                className="w-full bg-emerald-900 text-white py-4 rounded-2xl font-bold hover:bg-emerald-800 transition-all shadow-lg hover:shadow-emerald-900/20 active:scale-95 flex items-center justify-center relative overflow-hidden group/btn"
                             >
+                                <span className="absolute inset-0 bg-amber-400/10 translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-500" />
                                 <Plus size={18} className="mr-2" />
                                 Add to Order
                             </button>
                         ) : (
-                            <div className="w-full flex items-center justify-between bg-brand-cream py-2 px-2 rounded-xl border border-primary/20">
+                            <div className="w-full flex items-center justify-between bg-emerald-50/50 py-2 px-2 rounded-2xl border border-emerald-100">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); updateQuantity(dish.id, -1); }}
-                                    className="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm text-secondary hover:text-primary transition-colors"
+                                    className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-emerald-900 hover:bg-emerald-900 hover:text-white transition-all active:scale-90"
                                 >
                                     <Minus size={18} />
                                 </button>
-                                <span className="text-lg font-bold text-secondary">{qty}</span>
+                                <span className="text-xl font-black text-emerald-900 px-4">{qty}</span>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); updateQuantity(dish.id, 1); }}
-                                    className="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm text-secondary hover:text-primary transition-colors"
+                                    className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-emerald-900 hover:bg-emerald-900 hover:text-white transition-all active:scale-90"
                                 >
                                     <Plus size={18} />
                                 </button>
@@ -150,161 +176,195 @@ const DineInMenuPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-brand-cream pt-10 pb-24">
-            {/* Hero Header */}
-            <div className="relative h-[250px] md:h-[350px] w-full mt-4">
-                <img src="/images/authentic-spread.png" alt="Dine-In Menu Header" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/60" />
+        <div className="min-h-screen bg-[#FDFCF7] pt-10 pb-24">
+            {/* Hero Header - Premium Style */}
+            <div className="relative h-[400px] md:h-[500px] w-full mt-4 overflow-hidden">
+                <img
+                    src="/images/authentic-spread.png"
+                    alt="Authentic Spread"
+                    onError={handleImageError}
+                    className="w-full h-full object-cover scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/90 via-emerald-950/60 to-transparent" />
 
-                <div className="absolute inset-0 flex items-center container mx-auto px-6 z-10">
-                    <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                            <span className="bg-primary text-white p-2 rounded-lg">
-                                <Utensils size={24} />
+                <div className="absolute inset-0 flex items-center container mx-auto px-8 z-10">
+                    <div className="max-w-2xl">
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center space-x-3 mb-6"
+                        >
+                            <span className="bg-amber-400 text-emerald-950 p-2.5 rounded-2xl shadow-xl">
+                                <Award size={28} />
                             </span>
-                            <span className="text-white/60 font-bold uppercase tracking-widest text-sm">Restaurant Experience</span>
-                        </div>
-                        <h1 className="text-4xl md:text-6xl font-playfair text-white mb-2">Dine-In <span className="text-accent italic">Menu</span></h1>
-                        <p className="text-white/80 text-lg md:text-xl font-light max-w-2xl">Enjoy our fresh, authentic South Indian cuisine in our vibrant restaurant atmosphere.</p>
-                    </div>
-                    <div className="hidden md:block">
-                        <Link to="/" className="inline-flex items-center space-x-2 text-white hover:text-accent transition-colors bg-black/30 px-6 py-3 rounded-full backdrop-blur-sm border border-white/20">
-                            <ArrowLeft size={18} />
-                            <span className="font-semibold uppercase tracking-widest text-sm">Back to Home</span>
-                        </Link>
+                            <span className="text-amber-400 font-black uppercase tracking-[0.3em] text-xs">Exquisite Dining</span>
+                        </motion.div>
+
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-5xl md:text-7xl font-playfair text-white mb-6 leading-tight"
+                        >
+                            Dine-In <span className="text-amber-400 italic">Experience</span>
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="text-emerald-50/80 text-lg md:text-xl font-medium max-w-lg leading-relaxed mb-10"
+                        >
+                            Immerse yourself in the vibrant flavors of South India, served in our refined restaurant setting.
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                        >
+                            <Link to="/" className="inline-flex items-center space-x-3 text-white hover:text-amber-400 transition-all font-bold group">
+                                <div className="p-3 rounded-full border border-white/20 group-hover:border-amber-400 transition-colors backdrop-blur-md">
+                                    <ArrowLeft size={20} />
+                                </div>
+                                <span className="uppercase tracking-widest text-sm">Return Home</span>
+                            </Link>
+                        </motion.div>
                     </div>
                 </div>
+
+                {/* Decorative border */}
+                <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#FDFCF7] to-transparent" />
             </div>
 
-            <div className="container mx-auto px-6 mt-12">
-                <div className="flex flex-col lg:flex-row gap-12">
+            <div className="container mx-auto px-6 -mt-10 relative z-20">
+                <div className="flex flex-col lg:flex-row gap-8">
 
-                    {/* Left Sidebar: Search, Categories & Filters */}
-                    <aside className="w-full lg:w-1/4 space-y-10">
-                        {/* Search Input */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-xl font-playfair font-bold text-secondary mb-6 border-b border-gray-100 pb-4 flex items-center">
-                                <Search size={20} className="mr-2 text-primary" /> Search
+                    {/* Left Sidebar - Refined Glassmorphism */}
+                    <aside className="w-full lg:w-1/4 space-y-8">
+                        {/* Search */}
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-emerald-50">
+                            <h3 className="text-sm font-black text-emerald-950 uppercase tracking-widest mb-6 flex items-center">
+                                <Search size={16} className="mr-3 text-amber-500" /> Search Dishes
                             </h3>
                             <div className="relative">
-                                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search dishes..."
+                                    placeholder="e.g. Dosa, Biriyani..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-700 placeholder-gray-400 text-sm"
+                                    className="w-full pl-5 pr-12 py-4 bg-emerald-50/30 border-2 border-emerald-50 rounded-2xl focus:outline-none focus:border-emerald-500/30 text-emerald-950 placeholder-emerald-950/30 font-bold transition-all"
                                 />
-                                {searchQuery && (
-                                    <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                        <X size={14} />
-                                    </button>
-                                )}
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-emerald-900 text-white p-2 rounded-xl">
+                                    <Search size={16} />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Categories List */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-xl font-playfair font-bold text-secondary mb-6 border-b border-gray-100 pb-4">Categories</h3>
-                            <ul className="space-y-2">
+                        {/* Categories */}
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-emerald-50">
+                            <h3 className="text-sm font-black text-emerald-950 uppercase tracking-widest mb-6 pb-4 border-b border-emerald-50">Curated Menu</h3>
+                            <div className="flex flex-col space-y-1.5">
                                 {categories.map(cat => (
-                                    <li key={cat}>
-                                        <button
-                                            onClick={() => setActiveCategory(cat)}
-                                            className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium capitalize text-sm ${activeCategory === cat ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-brand-cream hover:text-primary'}`}
-                                        >
-                                            {cat}
-                                        </button>
-                                    </li>
+                                    <button
+                                        key={cat}
+                                        onClick={() => setActiveCategory(cat)}
+                                        className={`group flex items-center justify-between px-5 py-3.5 rounded-2xl transition-all font-bold text-sm ${activeCategory.toLowerCase() === cat.toLowerCase()
+                                                ? 'bg-emerald-900 text-white shadow-lg shadow-emerald-900/20'
+                                                : 'text-emerald-900/60 hover:bg-emerald-50 hover:text-emerald-900'
+                                            }`}
+                                    >
+                                        <span className="capitalize">{cat}</span>
+                                        {activeCategory.toLowerCase() === cat.toLowerCase() && (
+                                            <motion.div layoutId="cat-indicator" className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                                        )}
+                                    </button>
                                 ))}
-                            </ul>
-                        </div>
-
-                        {/* Sort Filter */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-xl font-playfair font-bold text-secondary mb-6 border-b border-gray-100 pb-4 flex items-center">
-                                <Filter size={20} className="mr-2 text-primary" /> Sort By
-                            </h3>
-                            <div className="relative">
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-700 cursor-pointer appearance-none text-sm"
-                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25em 1.25em' }}
-                                >
-                                    <option value="popular">Most Popular</option>
-                                    <option value="name">Name (A-Z)</option>
-                                    <option value="priceLow">Price (Low to High)</option>
-                                    <option value="priceHigh">Price (High to Low)</option>
-                                </select>
                             </div>
                         </div>
 
-                        {/* Dietary Filters */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-xl font-playfair font-bold text-secondary mb-6 border-b border-gray-100 pb-4 flex items-center">
-                                <Filter size={20} className="mr-2 text-primary" /> Dietary
+                        {/* Filters */}
+                        <div className="bg-emerald-900 p-8 rounded-[2.5rem] shadow-2xl shadow-emerald-900/40 text-white">
+                            <h3 className="text-sm font-black uppercase tracking-widest mb-6 flex items-center text-amber-400">
+                                <Filter size={16} className="mr-3" /> Preferences
                             </h3>
-                            <div className="space-y-4">
-                                <label className="flex items-center space-x-3 cursor-pointer group">
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.vegetarian ? 'bg-primary border-primary text-white' : 'border-gray-300 group-hover:border-primary text-transparent'}`}>
-                                        <Check size={14} />
-                                    </div>
-                                    <span className="text-gray-700 font-medium text-sm">Vegetarian</span>
-                                    <input type="checkbox" className="hidden" checked={filters.vegetarian} onChange={() => toggleFilter('vegetarian')} />
-                                </label>
-                                <label className="flex items-center space-x-3 cursor-pointer group">
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.dairyFree ? 'bg-primary border-primary text-white' : 'border-gray-300 group-hover:border-primary text-transparent'}`}>
-                                        <Check size={14} />
-                                    </div>
-                                    <span className="text-gray-700 font-medium text-sm">Dairy-Free</span>
-                                    <input type="checkbox" className="hidden" checked={filters.dairyFree} onChange={() => toggleFilter('dairyFree')} />
-                                </label>
-                                <label className="flex items-center space-x-3 cursor-pointer group">
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.glutenFree ? 'bg-primary border-primary text-white' : 'border-gray-300 group-hover:border-primary text-transparent'}`}>
-                                        <Check size={14} />
-                                    </div>
-                                    <span className="text-gray-700 font-medium text-sm">Gluten-Free</span>
-                                    <input type="checkbox" className="hidden" checked={filters.glutenFree} onChange={() => toggleFilter('glutenFree')} />
-                                </label>
+
+                            <div className="space-y-5">
+                                <div className="mb-8">
+                                    <p className="text-[10px] uppercase tracking-tighter text-emerald-300 mb-4">Sort By</p>
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="w-full bg-emerald-800/50 border border-emerald-700 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none appearance-none cursor-pointer"
+                                    >
+                                        <option value="popular">Most Popular First</option>
+                                        <option value="name">Alphabetical (A-Z)</option>
+                                        <option value="priceLow">Price: Light to Heavy</option>
+                                        <option value="priceHigh">Price: Heavy to Light</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <p className="text-[10px] uppercase tracking-tighter text-emerald-300 mb-2">Dietary Needs</p>
+                                    {[
+                                        { id: 'vegetarian', label: 'Vegetarian Only' },
+                                        { id: 'dairyFree', label: 'Dairy-Free Options' },
+                                        { id: 'glutenFree', label: 'Gluten-Free Choice' }
+                                    ].map(f => (
+                                        <label key={f.id} className="flex items-center group cursor-pointer">
+                                            <div
+                                                onClick={() => toggleFilter(f.id)}
+                                                className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${filters[f.id] ? 'bg-amber-400 border-amber-400 text-emerald-900' : 'border-emerald-700'
+                                                    }`}
+                                            >
+                                                {filters[f.id] && <Check size={14} strokeWidth={4} />}
+                                            </div>
+                                            <span className={`ml-3 text-sm font-bold transition-colors ${filters[f.id] ? 'text-white' : 'text-emerald-400 group-hover:text-white'}`}>
+                                                {f.label}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </aside>
 
-                    {/* Main Content: Grid */}
+                    {/* Main Content */}
                     <main className="w-full lg:w-3/4">
-
-                        {/* Results Count & Mobile View Cart */}
-                        <div className="flex justify-between items-center mb-6 px-2">
-                            <p className="text-gray-500 font-medium">Showing <span className="text-secondary font-bold">{filteredDishes.length}</span> signature dishes</p>
+                        <div className="flex flex-col sm:flex-row justify-between items-sm-center mb-10 px-4 gap-4">
+                            <div>
+                                <h2 className="text-3xl font-playfair text-emerald-950 mb-1">Our <span className="text-emerald-600">Selection</span></h2>
+                                <p className="text-emerald-900/40 text-xs font-bold uppercase tracking-widest">{filteredDishes.length} refined preparations found</p>
+                            </div>
 
                             <button
-                                onClick={() => setIsCartOpen(true)}
-                                className="lg:hidden flex items-center text-primary font-bold hover:underline"
+                                onClick={() => setIsOrderTypeModalOpen(true)}
+                                className="inline-flex items-center h-12 px-6 bg-white border-2 border-emerald-900/10 text-emerald-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-900 hover:text-white transition-all shadow-lg shadow-emerald-900/5 active:scale-95"
                             >
-                                <ShoppingBag size={18} className="mr-2" /> View Order
+                                <Utensils size={16} className="mr-2" /> Change Order Type
                             </button>
                         </div>
 
-                        {/* Products Grid */}
                         {filteredDishes.length > 0 ? (
-                            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                <AnimatePresence>
+                            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                                <AnimatePresence mode='popLayout'>
                                     {filteredDishes.map(dish => (
                                         <DishCard key={dish.id} dish={dish} onClick={() => setSelectedItem(dish)} />
                                     ))}
                                 </AnimatePresence>
                             </motion.div>
                         ) : (
-                            <div className="bg-white rounded-3xl p-16 text-center border border-gray-100 flex flex-col items-center">
-                                <Search size={48} className="text-gray-300 mb-4" />
-                                <h3 className="text-2xl font-playfair text-secondary mb-2">No dishes found</h3>
-                                <p className="text-brand-text-light mb-6">Try adjusting your category, filters, or search terms.</p>
+                            <div className="bg-white rounded-[3rem] p-24 text-center shadow-xl shadow-emerald-900/5 border border-emerald-50 flex flex-col items-center">
+                                <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-200 mb-8">
+                                    <Search size={40} />
+                                </div>
+                                <h3 className="text-3xl font-playfair text-emerald-950 mb-4">No Matches Found</h3>
+                                <p className="text-emerald-900/40 font-bold max-w-xs mb-10">We couldn't find any dishes matching your current selection.</p>
                                 <button
                                     onClick={() => { setSearchQuery(''); setActiveCategory('All'); setFilters({ vegetarian: false, dairyFree: false, glutenFree: false }) }}
-                                    className="btn-outline"
+                                    className="bg-emerald-900 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all active:scale-95"
                                 >
-                                    Clear All Filters
+                                    Reset All Choices
                                 </button>
                             </div>
                         )}
@@ -312,73 +372,102 @@ const DineInMenuPage = () => {
                 </div>
             </div>
 
-            {/* Item Details Modal */}
+            {/* Premium Details Modal */}
             <AnimatePresence>
                 {selectedItem && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-emerald-950/80 backdrop-blur-xl"
                         onClick={() => setSelectedItem(null)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, y: 20 }}
+                            initial={{ scale: 0.9, y: 30 }}
                             animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            className="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-2xl relative"
+                            exit={{ scale: 0.9, y: 30 }}
+                            className="bg-white rounded-[3rem] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.5)] w-full max-w-4xl relative"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
                                 onClick={() => setSelectedItem(null)}
-                                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all shadow-md"
+                                className="absolute top-6 right-6 z-20 w-12 h-12 bg-white/20 hover:bg-rose-600 backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition-all shadow-xl group"
                             >
-                                <X size={20} />
+                                <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
                             </button>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-                                <div className="h-64 md:h-full relative bg-gray-100">
-                                    <img src={selectedItem.image} alt={selectedItem.name} className="w-full h-full object-cover" />
-                                    <div className="absolute top-4 left-4 flex space-x-2">
-                                        {selectedItem.type === 'veg' ? (
-                                            <span className="bg-green-500 text-white p-1.5 rounded-md shadow-md" title="Vegetarian"><Leaf size={16} /></span>
-                                        ) : (
-                                            <span className="bg-red-500 text-white p-1.5 rounded-md shadow-md" title="Non-Vegetarian"><Drumstick size={16} /></span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 min-h-[500px]">
+                                <div className="relative bg-emerald-50">
+                                    <img
+                                        src={selectedItem.image}
+                                        alt={selectedItem.name}
+                                        onError={handleImageError}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+
+                                    <div className="absolute bottom-8 left-8 flex space-x-3">
+                                        {selectedItem.popular && (
+                                            <div className="bg-amber-400 text-emerald-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center">
+                                                <Award size={14} className="mr-2" /> Signature
+                                            </div>
                                         )}
+                                        <div className="bg-white/90 backdrop-blur-md text-emerald-900 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center">
+                                            {selectedItem.type === 'veg' ? '100% Vegetarian' : 'Non-Vegetarian'}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="p-8 flex flex-col h-full bg-white">
-                                    <div className="flex-1">
-                                        <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">{selectedItem.category}</span>
-                                        <h2 className="text-3xl font-playfair text-secondary mb-2">{selectedItem.name}</h2>
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            {selectedItem.glutenFree && <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-lg">Gluten-free</span>}
-                                            {selectedItem.dairyFree && <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 rounded-lg">Dairy-free</span>}
+
+                                <div className="p-12 flex flex-col justify-center">
+                                    <div className="mb-10">
+                                        <div className="flex items-center text-emerald-600 font-black uppercase tracking-[0.2em] text-[10px] mb-4">
+                                            <div className="w-8 h-px bg-emerald-600 mr-3" />
+                                            {selectedItem.category}
                                         </div>
-                                        <p className="text-gray-600 leading-relaxed mb-6">{selectedItem.description}</p>
-                                        <p className="text-3xl font-bold text-primary">{selectedItem.price}</p>
+                                        <h2 className="text-4xl md:text-5xl font-playfair text-emerald-950 mb-6">{selectedItem.name}</h2>
+
+                                        <div className="flex flex-wrap gap-3 mb-8">
+                                            {selectedItem.glutenFree && <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-emerald-100 uppercase tracking-wider">Natural Gluten-Free</span>}
+                                            {selectedItem.dairyFree && <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-emerald-100 uppercase tracking-wider">Dairy-Free Choice</span>}
+                                        </div>
+
+                                        <p className="text-gray-500 font-medium leading-relaxed mb-10 text-lg">
+                                            {selectedItem.description}
+                                        </p>
+
+                                        <div className="text-4xl font-black text-emerald-900">
+                                            {selectedItem.price}
+                                        </div>
                                     </div>
 
-                                    <div className="mt-8 pt-6 border-t border-gray-100">
+                                    <div className="mt-auto space-y-4">
                                         {cartItems.find(i => i.id === selectedItem.id) ? (
-                                            <div className="w-full flex items-center justify-between bg-brand-cream p-3 rounded-xl border border-primary/20">
-                                                <button onClick={() => updateQuantity(selectedItem.id, -1)} className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-sm text-secondary hover:text-primary transition-colors">
-                                                    <Minus size={20} />
+                                            <div className="w-full flex items-center justify-between bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-100">
+                                                <button onClick={() => updateQuantity(selectedItem.id, -1)} className="w-14 h-14 flex items-center justify-center bg-white rounded-xl shadow-lg text-emerald-900 hover:bg-emerald-900 hover:text-white transition-all active:scale-90">
+                                                    <Minus size={24} />
                                                 </button>
-                                                <span className="text-xl font-bold text-secondary">{cartItems.find(i => i.id === selectedItem.id).quantity} in Order</span>
-                                                <button onClick={() => updateQuantity(selectedItem.id, 1)} className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-sm text-secondary hover:text-primary transition-colors">
-                                                    <Plus size={20} />
+                                                <div className="text-center">
+                                                    <span className="block text-[10px] font-black uppercase tracking-widest text-emerald-900/40 mb-1">In your order</span>
+                                                    <span className="text-2xl font-black text-emerald-900">{cartItems.find(i => i.id === selectedItem.id).quantity}</span>
+                                                </div>
+                                                <button onClick={() => updateQuantity(selectedItem.id, 1)} className="w-14 h-14 flex items-center justify-center bg-white rounded-xl shadow-lg text-emerald-900 hover:bg-emerald-900 hover:text-white transition-all active:scale-90">
+                                                    <Plus size={24} />
                                                 </button>
                                             </div>
                                         ) : (
                                             <button
                                                 onClick={() => { addToCart(selectedItem); setSelectedItem(null); }}
-                                                className="w-full btn-primary py-4 text-lg rounded-xl flex justify-center items-center"
+                                                className="w-full bg-emerald-900 text-white py-6 rounded-2xl font-black text-lg shadow-2xl hover:bg-emerald-800 transition-all flex items-center justify-center relative overflow-hidden group/btn"
                                             >
-                                                <ShoppingBag size={20} className="mr-3" />
-                                                Add to Order
+                                                <div className="absolute inset-0 bg-amber-400/20 translate-y-[100%] group-hover/btn:translate-y-0 transition-transform duration-500" />
+                                                <ShoppingBag size={24} className="mr-4 relative z-10" />
+                                                <span className="relative z-10 uppercase tracking-[0.2em]">Add to Order</span>
                                             </button>
                                         )}
+
+                                        <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                            Price inclusive of all taxes
+                                        </p>
                                     </div>
                                 </div>
                             </div>

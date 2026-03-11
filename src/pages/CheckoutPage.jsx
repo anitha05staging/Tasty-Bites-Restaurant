@@ -3,14 +3,14 @@ import { useCart } from '../context/CartContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, CheckCircle2, ArrowLeft, Lock, ShieldCheck, ChevronDown, Plus, Minus, Trash2, UtensilsCrossed, Clock, Info } from 'lucide-react';
+import { CreditCard, CheckCircle2, ArrowLeft, Lock, ShieldCheck, ChevronDown, Plus, Minus, Trash2, UtensilsCrossed, Clock, Info, User, Mail, Phone, MessageSquare } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 import StripePaymentModal from '../components/StripePaymentModal';
 import PhoneInput from '../components/PhoneInput';
 
 const CheckoutPage = () => {
-    const { cartItems, subtotal, clearCart, updateQuantity, removeFromCart, cartCount, orderType, tableNumber } = useCart();
+    const { cartItems, subtotal, clearCart, updateQuantity, removeFromCart, cartCount, orderType, tableNumber, setIsOrderTypeModalOpen } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -19,6 +19,8 @@ const CheckoutPage = () => {
     const [phone, setPhone] = useState('');
     const [selectedPayment, setSelectedPayment] = useState('card');
     const [localTableNumber, setLocalTableNumber] = useState(tableNumber || '');
+    const [collectionTime, setCollectionTime] = useState('');
+    const [noteToChef, setNoteToChef] = useState('');
     const [errors, setErrors] = useState({});
 
     const [customerData, setCustomerData] = useState({
@@ -68,20 +70,28 @@ const CheckoutPage = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!customerData.fullName.trim()) newErrors.fullName = 'Full name is required';
-        if (!customerData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(customerData.email)) {
-            newErrors.email = 'Invalid email format';
-        }
-        if (!phone.trim()) {
-            newErrors.phone = 'Phone number is required';
-        } else if (phone.length < 10) {
-            newErrors.phone = 'Please enter a valid phone number';
+
+        if (orderType === 'Collection' || orderType === 'Takeaway') {
+            if (!customerData.fullName.trim()) newErrors.fullName = 'Full name is required';
+            if (!customerData.email.trim()) {
+                newErrors.email = 'Email is required';
+            } else if (!/\S+@\S+\.\S+/.test(customerData.email)) {
+                newErrors.email = 'Invalid email format';
+            }
+            if (!phone.trim()) {
+                newErrors.phone = 'Phone number is required';
+            } else if (phone.length < 10) {
+                newErrors.phone = 'Please enter a valid phone number';
+            }
+            if (!collectionTime || collectionTime === 'Select a time') {
+                newErrors.collectionTime = 'Please select a collection time';
+            }
         }
 
-        if (orderType === 'Dine-In' && !localTableNumber.trim()) {
-            newErrors.tableNumber = 'Table number is required for Dine-In';
+        if (orderType === 'Dine-In') {
+            if (!localTableNumber.trim()) {
+                newErrors.tableNumber = 'Table number is required for Dine-In';
+            }
         }
 
         setErrors(newErrors);
@@ -94,7 +104,9 @@ const CheckoutPage = () => {
             return;
         }
 
-        if (selectedPayment === 'card' && !isPaymentSuccessful) {
+        // Only require payment for Collection/Takeaway orders in this refinement
+        // Dine-In is often paid later or can be submitted directly to kitchen
+        if ((orderType === 'Collection' || orderType === 'Takeaway') && selectedPayment === 'card' && !isPaymentSuccessful) {
             setIsPaymentModalOpen(true);
             return;
         }
@@ -102,8 +114,12 @@ const CheckoutPage = () => {
         setIsProcessing(true);
         try {
             const orderItems = cartItems.map(item => ({
-                name: item.name, qty: item.quantity, price: parseFloat(String(item.price).replace(/[^0-9.]/g, '')), image: item.image
+                name: item.name,
+                qty: item.quantity,
+                price: parseFloat(String(item.price).replace(/[^0-9.]/g, '')),
+                image: item.image
             }));
+
             const orderData = {
                 items: orderItems,
                 total,
@@ -111,26 +127,27 @@ const CheckoutPage = () => {
                 customerName: customerData.fullName,
                 customerEmail: customerData.email,
                 orderType,
-                tableNumber: orderType === 'Dine-In' ? localTableNumber : null
+                tableNumber: orderType === 'Dine-In' ? localTableNumber : null,
+                instructions: noteToChef,
+                collectionTime: (orderType === 'Collection' || orderType === 'Takeaway') ? collectionTime : null
             };
+
             const response = await api.createOrder(orderData);
             if (response.success) {
                 clearCart();
-                const successMsg = orderType === 'Dine-In'
-                    ? "Your order has been received and is being prepared. Please wait, your order will arrive shortly."
-                    : "Your order has been placed successfully!";
-
                 navigate('/order-confirmation', {
                     state: {
                         orderId: response.orderId,
-                        successChoice: successMsg
+                        orderType,
+                        tableNumber: orderType === 'Dine-In' ? localTableNumber : null,
+                        collectionTime: (orderType === 'Collection' || orderType === 'Takeaway') ? collectionTime : null
                     }
                 });
             } else {
                 toast.error(response.message || 'Order could not be placed. Please try again.');
             }
         } catch (err) {
-            console.error('Order simulation/creation error:', err);
+            console.error('Order creation error:', err);
             toast.error(err.message || 'Error processing your order. Please try again.');
         } finally {
             setIsProcessing(false);
@@ -140,7 +157,6 @@ const CheckoutPage = () => {
     return (
         <div className="bg-brand-cream min-h-screen pt-32 pb-24">
             <div className="container mx-auto px-6 max-w-7xl">
-                {/* ... (previous header code) */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                     <div>
                         <button
@@ -150,243 +166,276 @@ const CheckoutPage = () => {
                             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                             <span>Return to Menu</span>
                         </button>
-                        <h1 className="text-4xl md:text-5xl font-playfair text-secondary whitespace-nowrap">
+                        <h1 className="text-4xl md:text-5xl font-playfair text-secondary">
                             Secure Checkout
                         </h1>
-                        <p className="text-sm md:text-base text-primary font-medium mt-2 lowercase">
-                            {cartCount} {cartCount === 1 ? 'item' : 'items'} in the cart
-                        </p>
+                        <div className="flex items-center mt-3 space-x-4">
+                            <span className="text-sm text-primary font-bold uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">
+                                {orderType || 'Order'}
+                            </span>
+                            <button
+                                onClick={() => setIsOrderTypeModalOpen(true)}
+                                className="text-xs text-secondary hover:text-primary font-bold underline transition-colors"
+                            >
+                                Change order type
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    {/* Left side: Order Details & Customer Info (7 col) */}
-                    <div className="lg:col-span-7 space-y-8">
-                        {/* Order Summary */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
-                            <div className="flex justify-between items-center border-b border-gray-100 pb-4 mb-8">
-                                <h2 className="text-2xl font-playfair text-secondary">
-                                    Your Selection
-                                </h2>
-                                <Link to="/menu" className="inline-flex items-center space-x-2 text-primary font-bold hover:scale-105 transition-transform bg-white px-4 py-2 rounded-xl shadow-sm border border-brand-cream text-sm">
-                                    <Plus size={16} />
-                                    <span>Add more dishes</span>
-                                </Link>
-                            </div>
+                    {/* Items Summary (4 col) - Moved to side/bottom for cleaner flow or kept as summary */}
+                    <div className="lg:col-span-4 lg:order-2 space-y-8">
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream sticky top-32">
+                            <h2 className="text-2xl font-playfair text-secondary mb-6 border-b border-gray-100 pb-4">
+                                Order Summary
+                            </h2>
 
-                            <div className="space-y-6">
-                                {cartItems.map((item) => {
-                                    const priceString = String(item.price);
-                                    const priceVal = parseFloat(priceString.replace(/[^0-9.]/g, ''));
-                                    const itemTotal = priceVal * item.quantity;
-
-                                    return (
-                                        <div key={item.id} className="flex justify-between items-start gap-4 group pb-6 border-b border-gray-100 last:border-0 last:pb-0">
-                                            <div className="flex items-start gap-4 flex-1 min-w-0">
-                                                <div className="relative mt-1 shrink-0">
-                                                    <img src={item.image} alt={item.name} className="w-24 h-24 object-cover rounded-2xl shadow-sm" />
-                                                    <span className="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full shadow-md border-2 border-white">
-                                                        {item.quantity}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-col min-w-0 flex-1">
-                                                    <h4 className="font-bold text-secondary text-base sm:text-lg leading-tight mb-1 truncate whitespace-break-spaces">{item.name}</h4>
-                                                    <p className="text-sm text-gray-400 font-medium mb-3">£{priceVal.toFixed(2)} / unit</p>
-
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <div className="flex items-center space-x-3 bg-gray-50 rounded-full px-2 py-1 border border-gray-100">
-                                                            <button type="button" onClick={() => updateQuantity(item.id, -1)} className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center text-secondary hover:text-primary hover:shadow-md transition-all">
-                                                                <Minus size={14} strokeWidth={2.5} />
-                                                            </button>
-                                                            <span className="w-4 text-center font-bold text-secondary text-sm">{item.quantity}</span>
-                                                            <button type="button" onClick={() => updateQuantity(item.id, 1)} className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center text-secondary hover:text-primary hover:shadow-md transition-all">
-                                                                <Plus size={14} strokeWidth={2.5} />
-                                                            </button>
-                                                        </div>
-                                                        <button type="button" onClick={() => removeFromCart(item.id)} className="text-gray-400 hover:text-red-500 transition-colors p-2 sm:p-1">
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center mt-2 sm:mt-0 ml-auto shrink-0 pl-2">
-                                                <span className="font-bold text-secondary text-lg text-right">£{itemTotal.toFixed(2)}</span>
-                                            </div>
+                            <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 mb-8 custom-scrollbar">
+                                {cartItems.map((item) => (
+                                    <div key={item.id} className="flex gap-4">
+                                        <div className="relative shrink-0">
+                                            <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-xl shadow-sm" />
+                                            <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-white">
+                                                {item.quantity}
+                                            </span>
                                         </div>
-                                    );
-                                })}
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-secondary text-sm truncate">{item.name}</h4>
+                                            <p className="text-xs text-gray-400">£{parseFloat(String(item.price).replace(/[^0-9.]/g, '')).toFixed(2)} / unit</p>
+                                        </div>
+                                        <div className="font-bold text-secondary text-sm">
+                                            £{(parseFloat(String(item.price).replace(/[^0-9.]/g, '')) * item.quantity).toFixed(2)}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
-                            <div className="mt-10 pt-8 border-t border-dashed border-gray-200 space-y-4">
-                                <div className="flex justify-between text-gray-500 font-medium">
+                            <div className="space-y-3 pt-6 border-t border-dashed border-gray-200">
+                                <div className="flex justify-between text-gray-500 text-sm font-medium">
                                     <span>Subtotal</span>
                                     <span>£{subtotal.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-500 font-medium pb-2">
+                                <div className="flex justify-between text-gray-500 text-sm font-medium">
                                     <span>Delivery Fee</span>
-                                    <span className="text-green-600 font-bold uppercase text-xs tracking-widest">Free</span>
+                                    <span className="text-green-600 font-bold uppercase text-[10px] tracking-widest">Free</span>
                                 </div>
-                                <div className="flex justify-between text-2xl font-bold text-secondary pt-6 border-t border-gray-100">
-                                    <div className="flex flex-col">
-                                        <span>Total Amount</span>
-                                        <span className="text-xs text-gray-400 font-normal uppercase tracking-widest">inc. all taxes</span>
-                                    </div>
-                                    <span className="text-primary tracking-tight">£{total.toFixed(2)}</span>
+                                <div className="flex justify-between text-xl font-bold text-secondary pt-4 border-t border-gray-100">
+                                    <span>Total</span>
+                                    <span className="text-primary">£{total.toFixed(2)}</span>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Customer Form */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
-                            <h2 className="text-2xl font-playfair text-secondary mb-8">Personal Details</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="col-span-1 md:col-span-2">
-                                    <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Full Name *</label>
-                                    <input
-                                        type="text"
-                                        value={customerData.fullName}
-                                        onChange={(e) => setCustomerData({ ...customerData, fullName: e.target.value })}
-                                        className={`w-full px-5 py-4 rounded-2xl border ${errors.fullName ? 'border-red-500 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/20'} focus:outline-none focus:ring-2 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm`}
-                                        placeholder="Enter your full name"
-                                    />
-                                    {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Email Address *</label>
-                                    <input
-                                        type="email"
-                                        value={customerData.email}
-                                        onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
-                                        className={`w-full px-5 py-4 rounded-2xl border ${errors.email ? 'border-red-500 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/20'} focus:outline-none focus:ring-2 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm`}
-                                        placeholder="your@email.com"
-                                    />
-                                    {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
-                                </div>
-                                <div className="col-span-1">
-                                    <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Phone Number *</label>
-                                    <div className={errors.phone ? 'ring-1 ring-red-500 rounded-2xl' : ''}>
-                                        <PhoneInput
-                                            value={phone}
-                                            onChange={(val) => setPhone(val)}
-                                            placeholder="7123 456789"
-                                            className="shadow-sm rounded-2xl overflow-hidden border border-gray-100"
-                                        />
-                                    </div>
-                                    {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
-                                </div>
-                                {orderType === 'Dine-In' && (
-                                    <div className="col-span-1 md:col-span-2">
-                                        <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide flex items-center">
-                                            <UtensilsCrossed size={16} className="mr-2 text-primary" />
-                                            Table Number *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={localTableNumber}
-                                            onChange={(e) => setLocalTableNumber(e.target.value)}
-                                            className={`w-full px-5 py-4 rounded-2xl border ${errors.tableNumber ? 'border-red-500 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/20'} focus:outline-none focus:ring-2 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm font-bold`}
-                                            placeholder="e.g. Table 12"
-                                        />
-                                        {errors.tableNumber && <p className="text-red-500 text-xs mt-1 font-medium">{errors.tableNumber}</p>}
-                                    </div>
-                                )}
+                            <div className="mt-8">
+                                <button
+                                    onClick={handlePlaceOrder}
+                                    className={`w-full btn-primary py-4 rounded-2xl flex items-center justify-center space-x-3 text-lg shadow-premium group transition-all ${isProcessing ? 'opacity-70 cursor-wait' : 'hover:scale-[1.02]'}`}
+                                    disabled={isProcessing}
+                                >
+                                    {isProcessing ? (
+                                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Lock size={18} />
+                                            <span>Place Order</span>
+                                        </>
+                                    )}
+                                </button>
+                                <p className="text-[10px] text-gray-400 text-center mt-4 uppercase tracking-[0.1em] font-bold leading-tight flex items-center justify-center">
+                                    <ShieldCheck size={12} className="mr-1 text-green-500" />
+                                    Secure & encrypted checkout
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right side: Preferences & Payment (5 col) */}
-                    <div className="lg:col-span-5 space-y-8">
-                        {/* ... (rest of the preferences and payment code remains same) */}
-                        {/* Preferences */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
-                            <h2 className="text-2xl font-playfair text-secondary mb-8">Your Preferences</h2>
+                    {/* Forms (8 col) */}
+                    <div className="lg:col-span-8 lg:order-1 space-y-8">
+                        {/* Conditional Form Rendering */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="space-y-8"
+                        >
+                            {(orderType === 'Collection' || orderType === 'Takeaway') ? (
+                                <>
+                                    {/* Personal Details for Collection */}
+                                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
+                                        <div className="flex items-center space-x-3 mb-8">
+                                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                                <User size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-playfair text-secondary">Personal Details</h2>
+                                        </div>
 
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide flex items-center">
-                                        <Clock size={16} className="mr-2 text-primary" />
-                                        Preferred Collection Time (Today) *
-                                    </label>
-                                    <div className="relative">
-                                        <select className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-brand-cream/30 text-secondary appearance-none cursor-pointer transition-all shadow-sm">
-                                            <option>Select a time</option>
-                                            <option>ASAP (15-20 mins)</option>
-                                            <option>18:00 - 18:30</option>
-                                            <option>18:30 - 19:00</option>
-                                            <option>19:00 - 19:30</option>
-                                            <option>19:30 - 20:00</option>
-                                        </select>
-                                        <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
-                                    </div>
-                                    <p className="mt-3 text-xs text-primary/80 font-medium flex items-center">
-                                        <Info size={14} className="mr-1.5" />
-                                        Please allow us 20-30 mins at least to prepare your food.
-                                    </p>
-                                </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="col-span-1 md:col-span-2">
+                                                <label className="block text-xs font-bold text-secondary mb-2 uppercase tracking-widest">Full Name *</label>
+                                                <div className="relative">
+                                                    <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                                    <input
+                                                        type="text"
+                                                        value={customerData.fullName}
+                                                        onChange={(e) => setCustomerData({ ...customerData, fullName: e.target.value })}
+                                                        className={`w-full pl-12 pr-4 py-4 rounded-2xl border ${errors.fullName ? 'border-red-500 bg-red-50/10' : 'border-gray-100 bg-brand-cream/20'} focus:outline-none focus:ring-2 focus:ring-primary/20 text-secondary transition-all`}
+                                                        placeholder="e.g. John Doe"
+                                                    />
+                                                </div>
+                                                {errors.fullName && <p className="text-red-500 text-[10px] mt-1 font-bold uppercase tracking-tight">{errors.fullName}</p>}
+                                            </div>
 
-                                <div>
-                                    <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Note to Chef (Optional)</label>
-                                    <textarea rows="3" className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-brand-cream/30 text-secondary placeholder:text-gray-400 resize-none transition-all shadow-sm" placeholder="e.g. Less spicy, remove onions, allergies..."></textarea>
-                                </div>
-                            </div>
-                        </div>
+                                            <div className="col-span-1">
+                                                <label className="block text-xs font-bold text-secondary mb-2 uppercase tracking-widest">Email Address *</label>
+                                                <div className="relative">
+                                                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                                    <input
+                                                        type="email"
+                                                        value={customerData.email}
+                                                        onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
+                                                        className={`w-full pl-12 pr-4 py-4 rounded-2xl border ${errors.email ? 'border-red-500 bg-red-50/10' : 'border-gray-100 bg-brand-cream/20'} focus:outline-none focus:ring-2 focus:ring-primary/20 text-secondary transition-all`}
+                                                        placeholder="john@example.com"
+                                                    />
+                                                </div>
+                                                {errors.email && <p className="text-red-500 text-[10px] mt-1 font-bold uppercase tracking-tight">{errors.email}</p>}
+                                            </div>
 
-                        {/* Payment Method */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
-                            {/* ... (payment method code) */}
-                            <h2 className="text-2xl font-playfair text-secondary mb-8 flex items-center">
-                                <CreditCard size={24} className="mr-3 text-primary" />
-                                Payment Method
-                            </h2>
-
-                            <div className="grid grid-cols-1 gap-4 mb-8">
-                                <motion.div
-                                    whileHover={{ y: -2 }}
-                                    onClick={() => {
-                                        setSelectedPayment('card');
-                                        if (!isPaymentSuccessful) setIsPaymentModalOpen(true);
-                                    }}
-                                    className={`relative cursor-pointer p-6 rounded-2xl border-2 transition-all flex flex-col items-center justify-center space-y-2 ${isPaymentSuccessful ? 'border-green-600 bg-green-50/30 shadow-md' : 'border-gray-100 hover:border-primary/30 hover:shadow-md'}`}
-                                >
-                                    {isPaymentSuccessful && (
-                                        <div className="absolute top-4 right-4 text-green-600">
-                                            <div className="bg-white rounded-full">
-                                                <CheckCircle2 size={24} fill="currentColor" stroke="white" className="text-green-600" />
+                                            <div className="col-span-1">
+                                                <label className="block text-xs font-bold text-secondary mb-2 uppercase tracking-widest">Phone Number *</label>
+                                                <div className={errors.phone ? 'ring-1 ring-red-500 rounded-2xl' : ''}>
+                                                    <PhoneInput
+                                                        value={phone}
+                                                        onChange={(val) => setPhone(val)}
+                                                        placeholder="7123 456789"
+                                                        className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
+                                                    />
+                                                </div>
+                                                {errors.phone && <p className="text-red-500 text-[10px] mt-1 font-bold uppercase tracking-tight">{errors.phone}</p>}
                                             </div>
                                         </div>
-                                    )}
-                                    <CreditCard size={32} className={`${isPaymentSuccessful ? 'text-secondary' : 'text-gray-300'}`} />
-                                    <div className="text-center">
-                                        <p className="font-bold text-secondary">Card</p>
-                                        <p className={`text-xs font-medium ${isPaymentSuccessful ? 'text-green-600' : 'text-gray-400'}`}>
-                                            {isPaymentSuccessful ? 'Payment Secured' : 'Pay now'}
-                                        </p>
                                     </div>
-                                </motion.div>
-                            </div>
 
-                            <button
-                                type="button"
-                                onClick={handlePlaceOrder}
-                                className={`w-full btn-primary py-5 rounded-2xl flex items-center justify-center space-x-3 text-xl shadow-premium group transition-all ${isProcessing ? 'opacity-70 cursor-wait' : 'hover:scale-[1.02]'}`}
-                                disabled={isProcessing}
-                            >
-                                {isProcessing ? (
-                                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                ) : (
-                                    <>
-                                        <Lock size={20} className="group-hover:scale-110 transition-transform" />
-                                        <span>Complete Order</span>
-                                    </>
-                                )}
-                            </button>
+                                    {/* Collection Preferences */}
+                                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
+                                        <div className="flex items-center space-x-3 mb-8">
+                                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                                <Clock size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-playfair text-secondary">Collection Timing</h2>
+                                        </div>
 
-                            <div className="mt-6 flex items-center justify-center space-x-2 text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">
-                                <span>Powered by</span>
-                                <span className="text-secondary opacity-100">Stripe</span>
-                                <ShieldCheck size={14} className="text-green-500" />
-                            </div>
-                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div>
+                                                <label className="block text-xs font-bold text-secondary mb-2 uppercase tracking-widest">Preferred Time (Today) *</label>
+                                                <div className="relative">
+                                                    <Clock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                                    <select
+                                                        value={collectionTime}
+                                                        onChange={(e) => setCollectionTime(e.target.value)}
+                                                        className={`w-full pl-12 pr-10 py-4 rounded-2xl border ${errors.collectionTime ? 'border-red-500 bg-red-50/10' : 'border-gray-100 bg-brand-cream/20'} focus:outline-none focus:ring-2 focus:ring-primary/20 text-secondary appearance-none cursor-pointer transition-all`}
+                                                    >
+                                                        <option value="">Select a time</option>
+                                                        <option value="ASAP">ASAP (15-20 mins)</option>
+                                                        <option value="18:30">18:30 - 19:00</option>
+                                                        <option value="19:00">19:00 - 19:30</option>
+                                                        <option value="19:30">19:30 - 20:00</option>
+                                                        <option value="20:00">20:00 - 20:30</option>
+                                                    </select>
+                                                    <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                                                </div>
+                                                {errors.collectionTime && <p className="text-red-500 text-[10px] mt-1 font-bold uppercase tracking-tight">{errors.collectionTime}</p>}
+                                                <div className="mt-3 flex items-start space-x-2 text-primary/60">
+                                                    <Info size={14} className="shrink-0 mt-0.5" />
+                                                    <p className="text-[10px] font-bold uppercase tracking-wider">Preparation takes 20-30 mins on average.</p>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-bold text-secondary mb-2 uppercase tracking-widest">Note to Chef (Optional)</label>
+                                                <div className="relative">
+                                                    <MessageSquare size={18} className="absolute left-4 top-4 text-gray-300" />
+                                                    <textarea
+                                                        rows="3"
+                                                        value={noteToChef}
+                                                        onChange={(e) => setNoteToChef(e.target.value)}
+                                                        className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-100 bg-brand-cream/20 focus:outline-none focus:ring-2 focus:ring-primary/20 text-secondary placeholder:text-gray-300 resize-none transition-all"
+                                                        placeholder="e.g. Allergies, spice level..."
+                                                    ></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Payment selection for Collection */}
+                                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-brand-cream">
+                                        <div className="flex items-center space-x-3 mb-8">
+                                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                                <CreditCard size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-playfair text-secondary">Payment Method</h2>
+                                        </div>
+
+                                        <div
+                                            onClick={() => {
+                                                setSelectedPayment('card');
+                                                if (!isPaymentSuccessful) setIsPaymentModalOpen(true);
+                                            }}
+                                            className={`relative cursor-pointer p-6 rounded-2xl border-2 transition-all flex items-center space-x-6 ${isPaymentSuccessful ? 'border-green-600 bg-green-50/10' : 'border-gray-100 hover:border-primary/30'}`}
+                                        >
+                                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${isPaymentSuccessful ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                <CreditCard size={28} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-secondary text-lg">Secure Card Payment</h4>
+                                                <p className={`text-sm font-medium ${isPaymentSuccessful ? 'text-green-600' : 'text-gray-400'}`}>
+                                                    {isPaymentSuccessful ? 'Card verified successfully' : 'Safe payment via Stripe'}
+                                                </p>
+                                            </div>
+                                            {isPaymentSuccessful ? (
+                                                <CheckCircle2 size={24} className="text-green-600" />
+                                            ) : (
+                                                <div className="p-2 bg-primary/10 rounded-lg text-primary text-[10px] font-black uppercase tracking-widest">Select</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Dine-In Checkout Flow */}
+                                    <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-brand-cream text-center">
+                                        <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-3xl text-primary mb-8">
+                                            <UtensilsCrossed size={40} />
+                                        </div>
+                                        <h2 className="text-3xl font-playfair text-secondary mb-4">Dine-In Order</h2>
+                                        <p className="text-gray-500 mb-10 max-w-md mx-auto">Please provide your table number and any special requests. Your order will be sent straight to our kitchen.</p>
+
+                                        <div className="max-w-md mx-auto space-y-8 text-left">
+                                            <div>
+                                                <label className="block text-xs font-bold text-secondary mb-3 uppercase tracking-widest text-center">Your Table Number *</label>
+                                                <input
+                                                    type="text"
+                                                    value={localTableNumber}
+                                                    onChange={(e) => setLocalTableNumber(e.target.value)}
+                                                    className={`w-full px-6 py-5 rounded-2xl border text-center text-2xl font-black ${errors.tableNumber ? 'border-red-500 bg-red-50/10' : 'border-gray-100 bg-brand-cream/20'} focus:outline-none focus:ring-4 focus:ring-primary/10 text-secondary transition-all shadow-inner`}
+                                                    placeholder="e.g. 12"
+                                                />
+                                                {errors.tableNumber && <p className="text-red-500 text-[10px] mt-2 font-bold uppercase tracking-tight text-center">{errors.tableNumber}</p>}
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-bold text-secondary mb-3 uppercase tracking-widest">Any kitchen requests? (Optional)</label>
+                                                <textarea
+                                                    rows="3"
+                                                    value={noteToChef}
+                                                    onChange={(e) => setNoteToChef(e.target.value)}
+                                                    className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-brand-cream/20 focus:outline-none focus:ring-2 focus:ring-primary/20 text-secondary placeholder:text-gray-300 resize-none transition-all"
+                                                    placeholder="e.g. Extra napkins, no cilantro, etc..."
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </motion.div>
                     </div>
                 </div>
             </div>
