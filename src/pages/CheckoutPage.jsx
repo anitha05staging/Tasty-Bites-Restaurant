@@ -136,7 +136,7 @@ const CheckoutPage = () => {
                                     const itemTotal = priceVal * item.quantity;
 
                                     return (
-                                        <div key={item.id} className="flex justify-between items-start group">
+                                        <div className="flex justify-between items-start flex-wrap gap-4 group">
                                             <div className="flex items-start space-x-4">
                                                 <div className="relative mt-1">
                                                     <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-2xl" />
@@ -165,7 +165,7 @@ const CheckoutPage = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center space-x-4 mt-2">
+                                            <div className="flex items-center space-x-4 mt-2 sm:mt-0 ml-auto">
                                                 <span className="font-bold text-secondary text-lg text-right">£{itemTotal.toFixed(2)}</span>
                                             </div>
                                         </div>

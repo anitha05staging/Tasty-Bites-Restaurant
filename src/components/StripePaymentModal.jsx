@@ -56,9 +56,9 @@ const StripePaymentModal = ({ isOpen, onClose, onPaymentSuccess, total }) => {
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+                    className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden md:mx-4"
                 >
-                    <div className="p-6 sm:p-8">
+                    <div className="p-5 sm:p-8">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-playfair text-secondary">Pay with Card</h2>
                             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">

@@ -35,7 +35,7 @@ const ContactSection = () => {
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-brand-cream border border-primary/10 p-12 lg:p-16 rounded-[2.5rem] flex flex-col justify-between"
+                        className="bg-brand-cream border border-primary/10 p-8 sm:p-10 lg:p-16 rounded-[2.5rem] flex flex-col justify-between"
                     >
                         <div>
                             <span className="text-primary font-semibold tracking-widest uppercase text-sm block mb-4">Visit Us</span>
@@ -70,7 +70,7 @@ const ContactSection = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-secondary mb-1">Email Address</h3>
-                                        <p className="text-brand-text-light">tastybitesrestaurant7@gmail.com</p>
+                                        <p className="text-brand-text-light break-all">tastybitesrestaurant7@gmail.com</p>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@ const ContactSection = () => {
 
                         <div className="mt-16 pt-10 border-t border-primary/10">
                             <p className="text-brand-text-dark font-semibold mb-2">Social Hub</p>
-                            <div className="flex space-x-4">
+                            <div className="flex flex-wrap gap-3">
                                 {['Facebook', 'Instagram', 'WhatsApp'].map(social => (
                                     <span key={social} className="px-4 py-2 bg-white rounded-full text-xs font-bold text-primary cursor-pointer hover:bg-primary hover:text-white transition-all">
                                         {social}

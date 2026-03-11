@@ -81,7 +81,7 @@ const Contact = () => {
 
                         {/* Form Column */}
                         <div className="lg:col-span-7">
-                            <div className="bg-white p-2 sm:p-4 rounded-[2.5rem]">
+                            <div className="bg-white p-2 sm:p-4 md:p-8 rounded-[2.5rem]">
                                 <form onSubmit={handleSubmit} className="space-y-8">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                         <div className="space-y-2">
@@ -170,7 +170,7 @@ const Contact = () => {
 
                         {/* Sidebar Column */}
                         <div className="lg:col-span-5 space-y-8">
-                            <div className="bg-secondary p-12 rounded-[2.5rem] text-white">
+                            <div className="bg-secondary p-8 md:p-12 rounded-[2.5rem] text-white">
                                 <h3 className="text-3xl font-playfair mb-8 tracking-wide">Contact <span className="text-accent italic">Info</span></h3>
                                 <div className="space-y-8">
                                     <div className="flex items-start space-x-6">
@@ -189,12 +189,12 @@ const Contact = () => {
                                         <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-accent shrink-0">
                                             <Mail size={22} />
                                         </div>
-                                        <p className="text-white/70 leading-relaxed font-light mt-1">tastybitesrestaurant7@gmail.com</p>
+                                        <p className="text-white/70 leading-relaxed font-light mt-1 break-all">tastybitesrestaurant7@gmail.com</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-brand-cream border border-primary/10 p-12 rounded-[2.5rem]">
+                            <div className="bg-brand-cream border border-primary/10 p-8 md:p-12 rounded-[2.5rem]">
                                 <h3 className="text-2xl font-playfair text-secondary mb-6 italic">Opening Hours</h3>
                                 <div className="space-y-3 text-brand-text-light text-sm">
                                     <div className="flex justify-between border-b border-primary/5 pb-2">

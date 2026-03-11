@@ -128,7 +128,7 @@ const PhoneInput = ({ value, onChange, placeholder = "20 7946 0123", required = 
                 value={phoneNumber}
                 onChange={handlePhoneChange}
                 placeholder={placeholder}
-                className="flex-1 px-5 py-3 bg-transparent border-none focus:outline-none text-secondary placeholder:text-gray-400 text-lg tracking-wide"
+                className="flex-1 w-full min-w-0 px-5 py-3 bg-transparent border-none focus:outline-none text-secondary placeholder:text-gray-400 text-lg tracking-wide"
             />
         </div>
     );
