@@ -13,6 +13,7 @@ const Contact = () => {
         subject: 'General Inquiry',
         message: ''
     });
+    const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,8 +30,33 @@ const Contact = () => {
         setFormData({ ...formData, phone: value });
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.name.trim()) newErrors.name = 'Name is required';
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Invalid email format';
+        }
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (formData.phone.length < 10) {
+            newErrors.phone = 'Please enter a valid phone number';
+        }
+        if (!formData.message.trim()) newErrors.message = 'Message is required';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         setError(null);
         setIsLoading(true);
 
@@ -43,6 +69,7 @@ const Contact = () => {
                 subject: 'General Inquiry',
                 message: ''
             });
+            setErrors({});
             toast.success('Thank you! Your message has been sent successfully.');
         } catch (err) {
             toast.error(err.message || 'Failed to send message. Please try again.');
@@ -87,26 +114,26 @@ const Contact = () => {
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold uppercase tracking-widest text-secondary ml-1">Your Name</label>
                                             <input
-                                                required
                                                 name="name"
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={handleChange}
                                                 placeholder="e.g. Alex Perry"
-                                                className="w-full px-8 py-5 bg-brand-cream/30 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                                                className={`w-full px-8 py-5 bg-brand-cream/30 border-none rounded-2xl focus:ring-2 ${errors.name ? 'ring-2 ring-red-500/50' : 'focus:ring-primary/20'} transition-all outline-none`}
                                             />
+                                            {errors.name && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1">{errors.name}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold uppercase tracking-widest text-secondary ml-1">Email Address</label>
                                             <input
-                                                required
                                                 name="email"
                                                 type="email"
                                                 value={formData.email}
                                                 onChange={handleChange}
                                                 placeholder="alex@example.com"
-                                                className="w-full px-8 py-5 bg-brand-cream/30 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                                                className={`w-full px-8 py-5 bg-brand-cream/30 border-none rounded-2xl focus:ring-2 ${errors.email ? 'ring-2 ring-red-500/50' : 'focus:ring-primary/20'} transition-all outline-none`}
                                             />
+                                            {errors.email && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1">{errors.email}</p>}
                                         </div>
                                     </div>
 
@@ -116,8 +143,9 @@ const Contact = () => {
                                             <PhoneInput
                                                 value={formData.phone}
                                                 onChange={handlePhoneChange}
-                                                className="rounded-2xl overflow-hidden"
+                                                className={`rounded-2xl overflow-hidden ${errors.phone ? 'ring-2 ring-red-500/50' : ''}`}
                                             />
+                                            {errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1">{errors.phone}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold uppercase tracking-widest text-secondary ml-1">Subject</label>
@@ -140,14 +168,14 @@ const Contact = () => {
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold uppercase tracking-widest text-secondary ml-1">Your Message</label>
                                         <textarea
-                                            required
                                             name="message"
                                             rows="6"
                                             value={formData.message}
                                             onChange={handleChange}
                                             placeholder="Tell us more..."
-                                            className="w-full px-8 py-5 bg-brand-cream/30 border-none rounded-3xl focus:ring-2 focus:ring-primary/20 transition-all outline-none resize-none"
+                                            className={`w-full px-8 py-5 bg-brand-cream/30 border-none rounded-3xl focus:ring-2 ${errors.message ? 'ring-2 ring-red-500/50' : 'focus:ring-primary/20'} transition-all outline-none resize-none`}
                                         ></textarea>
+                                        {errors.message && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1">{errors.message}</p>}
                                     </div>
 
                                     <button

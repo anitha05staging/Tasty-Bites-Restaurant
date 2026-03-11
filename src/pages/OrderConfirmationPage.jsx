@@ -11,7 +11,8 @@ const OrderConfirmationPage = () => {
         return <Navigate to="/" replace />;
     }
 
-    const { orderId } = location.state;
+    const { orderId, successChoice } = location.state;
+    const defaultMsg = "Thank you for your order. We've received it and the kitchen is preparing your authentic South Indian meal.";
 
     return (
         <div className="min-h-screen bg-brand-cream pt-32 pb-24 flex items-center justify-center">
@@ -35,7 +36,7 @@ const OrderConfirmationPage = () => {
 
                     <h1 className="text-4xl md:text-5xl font-playfair text-secondary mb-4">Order Confirmed!</h1>
                     <p className="text-brand-text-light text-lg mb-8 max-w-md mx-auto">
-                        Thank you for your order. We've received it and the kitchen is preparing your authentic South Indian meal.
+                        {successChoice || defaultMsg}
                     </p>
 
                     <div className="bg-brand-cream/50 rounded-2xl p-6 mb-10 border border-brand-cream">

@@ -14,6 +14,7 @@ const BookTable = () => {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [bookingRef, setBookingRef] = useState('');
     const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -33,8 +34,33 @@ const BookTable = () => {
         setFormData({ ...formData, phone: value });
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Invalid email format';
+        }
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (formData.phone.length < 10) {
+            newErrors.phone = 'Please enter a valid phone number';
+        }
+        if (!formData.date.trim()) newErrors.date = 'Please select a date';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         setIsSubmitting(true);
         setError(null);
         try {
@@ -183,33 +209,35 @@ const BookTable = () => {
                                         <input
                                             type="text"
                                             name="fullName"
-                                            required
                                             value={formData.fullName}
                                             onChange={handleChange}
-                                            className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                            className={`w-full px-5 py-4 rounded-xl border ${errors.fullName ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                             placeholder="John Doe"
                                         />
+                                        {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Email Address <span className="text-red-500">*</span></label>
                                         <input
                                             type="email"
                                             name="email"
-                                            required
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                            className={`w-full px-5 py-4 rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                             placeholder="john@example.com"
                                         />
+                                        {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number <span className="text-red-500">*</span></label>
-                                        <PhoneInput
-                                            required
-                                            value={formData.phone}
-                                            onChange={handlePhoneChange}
-                                            className="rounded-xl overflow-hidden border border-gray-200 shadow-sm"
-                                        />
+                                        <div className={errors.phone ? 'ring-1 ring-red-500 rounded-xl' : ''}>
+                                            <PhoneInput
+                                                value={formData.phone}
+                                                onChange={handlePhoneChange}
+                                                className="rounded-xl overflow-hidden border border-gray-200 shadow-sm"
+                                            />
+                                        </div>
+                                        {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -222,23 +250,25 @@ const BookTable = () => {
                                         <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
                                             <Calendar size={16} className="mr-2 text-primary" /> Date <span className="text-red-500 ml-1">*</span>
                                         </label>
-                                        <Flatpickr
-                                            name="date"
-                                            required
-                                            value={formData.date}
-                                            onChange={([date]) => {
-                                                const d = new Date(date);
-                                                const formattedDate = d.toISOString().split('T')[0];
-                                                setFormData({ ...formData, date: formattedDate });
-                                            }}
-                                            options={{
-                                                minDate: 'today',
-                                                dateFormat: 'Y-m-d',
-                                                disableMobile: true
-                                            }}
-                                            className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 text-gray-700 shadow-sm"
-                                            placeholder="Select Date"
-                                        />
+                                        <div className={errors.date ? 'ring-1 ring-red-500 rounded-xl overflow-hidden' : ''}>
+                                            <Flatpickr
+                                                name="date"
+                                                value={formData.date}
+                                                onChange={([date]) => {
+                                                    const d = new Date(date);
+                                                    const formattedDate = d.toISOString().split('T')[0];
+                                                    setFormData({ ...formData, date: formattedDate });
+                                                }}
+                                                options={{
+                                                    minDate: 'today',
+                                                    dateFormat: 'Y-m-d',
+                                                    disableMobile: true
+                                                }}
+                                                className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 text-gray-700 shadow-sm"
+                                                placeholder="Select Date"
+                                            />
+                                        </div>
+                                        {errors.date && <p className="text-red-500 text-xs mt-1 font-medium">{errors.date}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <label className="flex items-center text-sm font-medium text-gray-700 mb-1">

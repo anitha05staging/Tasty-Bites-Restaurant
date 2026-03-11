@@ -10,7 +10,7 @@ import StripePaymentModal from '../components/StripePaymentModal';
 import PhoneInput from '../components/PhoneInput';
 
 const CheckoutPage = () => {
-    const { cartItems, subtotal, clearCart, updateQuantity, removeFromCart, cartCount } = useCart();
+    const { cartItems, subtotal, clearCart, updateQuantity, removeFromCart, cartCount, orderType, tableNumber } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -18,6 +18,8 @@ const CheckoutPage = () => {
     const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
     const [phone, setPhone] = useState('');
     const [selectedPayment, setSelectedPayment] = useState('card');
+    const [localTableNumber, setLocalTableNumber] = useState(tableNumber || '');
+    const [errors, setErrors] = useState({});
 
     const [customerData, setCustomerData] = useState({
         fullName: '',
@@ -35,6 +37,12 @@ const CheckoutPage = () => {
             }
         }
     }, [user]);
+
+    useEffect(() => {
+        if (tableNumber) {
+            setLocalTableNumber(tableNumber);
+        }
+    }, [tableNumber]);
 
     useEffect(() => {
         if (!user && !isProcessing) {
@@ -58,7 +66,34 @@ const CheckoutPage = () => {
 
     const total = subtotal + 0;
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!customerData.fullName.trim()) newErrors.fullName = 'Full name is required';
+        if (!customerData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(customerData.email)) {
+            newErrors.email = 'Invalid email format';
+        }
+        if (!phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (phone.length < 10) {
+            newErrors.phone = 'Please enter a valid phone number';
+        }
+
+        if (orderType === 'Dine-In' && !localTableNumber.trim()) {
+            newErrors.tableNumber = 'Table number is required for Dine-In';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handlePlaceOrder = async () => {
+        if (!validateForm()) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         if (selectedPayment === 'card' && !isPaymentSuccessful) {
             setIsPaymentModalOpen(true);
             return;
@@ -74,14 +109,24 @@ const CheckoutPage = () => {
                 total,
                 customerPhone: phone,
                 customerName: customerData.fullName,
-                customerEmail: customerData.email
+                customerEmail: customerData.email,
+                orderType,
+                tableNumber: orderType === 'Dine-In' ? localTableNumber : null
             };
             const response = await api.createOrder(orderData);
             if (response.success) {
                 clearCart();
-                navigate('/order-confirmation', { state: { orderId: response.orderId } });
+                const successMsg = orderType === 'Dine-In'
+                    ? "Your order has been received and is being prepared. Please wait, your order will arrive shortly."
+                    : "Your order has been placed successfully!";
+
+                navigate('/order-confirmation', {
+                    state: {
+                        orderId: response.orderId,
+                        successChoice: successMsg
+                    }
+                });
             } else {
-                // If API returns success: false, but doesn't throw an error
                 toast.error(response.message || 'Order could not be placed. Please try again.');
             }
         } catch (err) {
@@ -198,35 +243,53 @@ const CheckoutPage = () => {
                                 <div className="col-span-1 md:col-span-2">
                                     <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Full Name *</label>
                                     <input
-                                        required
                                         type="text"
                                         value={customerData.fullName}
                                         onChange={(e) => setCustomerData({ ...customerData, fullName: e.target.value })}
-                                        className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm"
+                                        className={`w-full px-5 py-4 rounded-2xl border ${errors.fullName ? 'border-red-500 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/20'} focus:outline-none focus:ring-2 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm`}
                                         placeholder="Enter your full name"
                                     />
+                                    {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
                                 </div>
-                                <div>
+                                <div className="col-span-1">
                                     <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Email Address *</label>
                                     <input
-                                        required
                                         type="email"
                                         value={customerData.email}
                                         onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
-                                        className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm"
+                                        className={`w-full px-5 py-4 rounded-2xl border ${errors.email ? 'border-red-500 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/20'} focus:outline-none focus:ring-2 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm`}
                                         placeholder="your@email.com"
                                     />
+                                    {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                                 </div>
-                                <div>
+                                <div className="col-span-1">
                                     <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide">Phone Number *</label>
-                                    <PhoneInput
-                                        required
-                                        value={phone}
-                                        onChange={(val) => setPhone(val)}
-                                        placeholder="7123 456789"
-                                        className="shadow-sm rounded-2xl overflow-hidden border border-gray-100"
-                                    />
+                                    <div className={errors.phone ? 'ring-1 ring-red-500 rounded-2xl' : ''}>
+                                        <PhoneInput
+                                            value={phone}
+                                            onChange={(val) => setPhone(val)}
+                                            placeholder="7123 456789"
+                                            className="shadow-sm rounded-2xl overflow-hidden border border-gray-100"
+                                        />
+                                    </div>
+                                    {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
                                 </div>
+                                {orderType === 'Dine-In' && (
+                                    <div className="col-span-1 md:col-span-2">
+                                        <label className="block text-sm font-bold text-secondary mb-2 uppercase tracking-wide flex items-center">
+                                            <UtensilsCrossed size={16} className="mr-2 text-primary" />
+                                            Table Number *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={localTableNumber}
+                                            onChange={(e) => setLocalTableNumber(e.target.value)}
+                                            className={`w-full px-5 py-4 rounded-2xl border ${errors.tableNumber ? 'border-red-500 focus:ring-red-100' : 'border-gray-100 focus:ring-primary/20'} focus:outline-none focus:ring-2 bg-brand-cream/30 text-secondary placeholder:text-gray-300 transition-all shadow-sm font-bold`}
+                                            placeholder="e.g. Table 12"
+                                        />
+                                        {errors.tableNumber && <p className="text-red-500 text-xs mt-1 font-medium">{errors.tableNumber}</p>}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

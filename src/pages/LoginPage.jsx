@@ -11,6 +11,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
     // If already authenticated, redirect to profile
@@ -19,9 +20,29 @@ const LoginPage = () => {
         return null;
     }
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Invalid email format';
+        }
+        if (!password) {
+            newErrors.password = 'Password is required';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!validateForm()) {
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -79,14 +100,14 @@ const LoginPage = () => {
                             <div className="relative">
                                 <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
-                                    required
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                    className={`w-full pl-12 pr-4 py-4 rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                     placeholder="Enter your email"
                                 />
                             </div>
+                            {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                         </div>
 
                         <div>
@@ -94,11 +115,10 @@ const LoginPage = () => {
                             <div className="relative">
                                 <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
-                                    required
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-12 pr-12 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                    className={`w-full pl-12 pr-12 py-4 rounded-xl border ${errors.password ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                     placeholder="••••••••"
                                 />
                                 <button
@@ -109,6 +129,7 @@ const LoginPage = () => {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            {errors.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password}</p>}
                         </div>
 
                         <button

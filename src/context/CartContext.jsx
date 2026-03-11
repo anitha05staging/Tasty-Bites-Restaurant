@@ -10,11 +10,28 @@ export const CartProvider = ({ children }) => {
         return localData ? JSON.parse(localData) : [];
     });
 
+    const [orderType, setOrderType] = useState(() => {
+        return localStorage.getItem('tastybites_orderType') || 'Collection';
+    });
+
+    const [tableNumber, setTableNumber] = useState(() => {
+        return localStorage.getItem('tastybites_tableNumber') || '';
+    });
+
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isOrderTypeModalOpen, setIsOrderTypeModalOpen] = useState(false);
 
     useEffect(() => {
         localStorage.setItem('tastybites_cart', JSON.stringify(cartItems));
     }, [cartItems]);
+
+    useEffect(() => {
+        localStorage.setItem('tastybites_orderType', orderType);
+    }, [orderType]);
+
+    useEffect(() => {
+        localStorage.setItem('tastybites_tableNumber', tableNumber);
+    }, [tableNumber]);
 
     const addToCart = (item, quantity = 1) => {
         setCartItems(prev => {
@@ -61,7 +78,13 @@ export const CartProvider = ({ children }) => {
             subtotal,
             isCartOpen,
             setIsCartOpen,
-            cartCount: cartItems.reduce((acc, item) => acc + item.quantity, 0)
+            cartCount: cartItems.reduce((acc, item) => acc + item.quantity, 0),
+            orderType,
+            setOrderType,
+            tableNumber,
+            setTableNumber,
+            isOrderTypeModalOpen,
+            setIsOrderTypeModalOpen
         }}>
             {children}
         </CartContext.Provider>

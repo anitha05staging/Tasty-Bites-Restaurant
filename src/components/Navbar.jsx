@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, User, Menu, X, LogOut, ChevronDown, Package, History, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
@@ -9,7 +9,8 @@ const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const location = useLocation();
-    const { setIsCartOpen, cartCount } = useCart();
+    const navigate = useNavigate();
+    const { setIsCartOpen, cartCount, setIsOrderTypeModalOpen } = useCart();
     const { isAuthenticated, user } = useAuth();
 
     useEffect(() => {
@@ -53,14 +54,21 @@ const Navbar = () => {
                 {/* Desktop Nav */}
                 <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                     {navLinks.map((link) => (
-                        <Link
+                        <button
                             key={link.name}
-                            to={link.path}
-                            className={`text-xs xl:text-sm font-medium uppercase tracking-wider hover:text-primary transition-colors ${isDark ? 'text-secondary' : 'text-white'
+                            onClick={() => {
+                                if (link.path === '/menu') {
+                                    setIsOrderTypeModalOpen(true);
+                                } else {
+                                    navigate(link.path);
+                                    setIsOrderTypeModalOpen(false);
+                                }
+                            }}
+                            className={`text-xs xl:text-sm font-medium uppercase tracking-wider hover:text-primary transition-colors text-left ${isDark ? 'text-secondary' : 'text-white'
                                 }`}
                         >
                             {link.name}
-                        </Link>
+                        </button>
                     ))}
                 </nav>
 
@@ -118,13 +126,22 @@ const Navbar = () => {
                     >
                         <div className="container mx-auto px-6 py-8 flex flex-col space-y-6">
                             {navLinks.map((link) => (
-                                <Link
+                                <button
                                     key={link.name}
-                                    to={link.path}
-                                    className="text-lg font-semibold text-secondary hover:text-primary transition-colors"
+                                    onClick={() => {
+                                        if (link.path === '/menu') {
+                                            setIsOrderTypeModalOpen(true);
+                                        } else {
+                                            // Normal links
+                                            navigate(link.path);
+                                            setIsOrderTypeModalOpen(false);
+                                        }
+                                        setIsOpen(false);
+                                    }}
+                                    className="text-lg font-semibold text-secondary hover:text-primary transition-colors text-left"
                                 >
                                     {link.name}
-                                </Link>
+                                </button>
                             ))}
                             <Link
                                 to={isAuthenticated ? '/profile' : '/login'}
@@ -143,6 +160,7 @@ const Navbar = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
         </header>
     );
 };

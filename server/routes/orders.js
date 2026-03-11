@@ -8,7 +8,7 @@ const router = express.Router();
 // POST /api/orders
 router.post('/', optionalAuth, async (req, res) => {
     try {
-        const { items, total, deliveryFee, customerName, customerEmail, customerPhone, collectionTime, instructions } = req.body;
+        const { items, total, deliveryFee, customerName, customerEmail, customerPhone, collectionTime, instructions, orderType, tableNumber } = req.body;
         if (!items || !total) {
             return res.status(400).json({ error: 'Items and total are required' });
         }
@@ -28,6 +28,8 @@ router.post('/', optionalAuth, async (req, res) => {
             customerPhone: customerPhone || '',
             collectionTime: collectionTime || '',
             instructions: instructions || '',
+            orderType: orderType || 'Collection',
+            tableNumber: tableNumber || null,
             status: 'Confirmed',
             paymentStatus: 'Paid'
         });

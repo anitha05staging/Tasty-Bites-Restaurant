@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 const CateringPage = () => {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState({});
 
 
     const [formData, setFormData] = useState({
@@ -31,8 +32,38 @@ const CateringPage = () => {
         setFormData({ ...formData, phone: value });
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Invalid email format';
+        }
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (formData.phone.length < 10) {
+            newErrors.phone = 'Please enter a valid phone number';
+        }
+        if (!formData.eventDate.trim()) newErrors.eventDate = 'Please select an event date';
+        if (!formData.guestCount) {
+            newErrors.guestCount = 'Guest count is required';
+        } else if (parseInt(formData.guestCount) < 10) {
+            newErrors.guestCount = 'Minimum 10 guests for catering';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             await api.submitCatering({
@@ -177,22 +208,26 @@ const CateringPage = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-secondary ml-1 mb-2">Full Name *</label>
-                                    <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full px-8 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 transition-all" placeholder="John Doe" />
+                                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={`w-full px-8 py-4 rounded-2xl border ${errors.fullName ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 transition-all`} placeholder="John Doe" />
+                                    {errors.fullName && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1 mt-1">{errors.fullName}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-secondary ml-1 mb-2">Phone *</label>
-                                    <PhoneInput
-                                        required
-                                        value={formData.phone}
-                                        onChange={handlePhoneChange}
-                                        className="rounded-2xl overflow-hidden border border-gray-200"
-                                    />
+                                    <div className={errors.phone ? 'ring-2 ring-red-500/50 rounded-2xl' : ''}>
+                                        <PhoneInput
+                                            value={formData.phone}
+                                            onChange={handlePhoneChange}
+                                            className="rounded-2xl overflow-hidden border border-gray-200"
+                                        />
+                                    </div>
+                                    {errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1 mt-1">{errors.phone}</p>}
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-secondary ml-1 mb-2">Email Address *</label>
-                                <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-8 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 transition-all" placeholder="john@example.com" />
+                                <input type="email" name="email" value={formData.email} onChange={handleChange} className={`w-full px-8 py-4 rounded-2xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 transition-all`} placeholder="john@example.com" />
+                                {errors.email && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1 mt-1">{errors.email}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -208,30 +243,33 @@ const CateringPage = () => {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-secondary ml-1 mb-2">Event Date *</label>
-                                    <Flatpickr
-                                        name="eventDate"
-                                        required
-                                        value={formData.eventDate}
-                                        onChange={([date]) => {
-                                            const d = new Date(date);
-                                            const formattedDate = d.toISOString().split('T')[0];
-                                            setFormData({ ...formData, eventDate: formattedDate });
-                                        }}
-                                        options={{
-                                            minDate: 'today',
-                                            dateFormat: 'Y-m-d',
-                                            disableMobile: true
-                                        }}
-                                        className="w-full px-8 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 text-gray-700"
-                                        placeholder="Select Event Date"
-                                        title="Event Date"
-                                    />
+                                    <div className={errors.eventDate ? 'ring-2 ring-red-500/50 rounded-2xl overflow-hidden' : ''}>
+                                        <Flatpickr
+                                            name="eventDate"
+                                            value={formData.eventDate}
+                                            onChange={([date]) => {
+                                                const d = new Date(date);
+                                                const formattedDate = d.toISOString().split('T')[0];
+                                                setFormData({ ...formData, eventDate: formattedDate });
+                                            }}
+                                            options={{
+                                                minDate: 'today',
+                                                dateFormat: 'Y-m-d',
+                                                disableMobile: true
+                                            }}
+                                            className="w-full px-8 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50 text-gray-700"
+                                            placeholder="Select Event Date"
+                                            title="Event Date"
+                                        />
+                                    </div>
+                                    {errors.eventDate && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1 mt-1">{errors.eventDate}</p>}
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-secondary ml-1 mb-2">Est. Guests *</label>
-                                <input required type="number" min="10" name="guestCount" value={formData.guestCount} onChange={handleChange} className="w-full px-8 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50" placeholder="e.g., 50" />
+                                <input type="number" min="10" name="guestCount" value={formData.guestCount} onChange={handleChange} className={`w-full px-8 py-4 rounded-2xl border ${errors.guestCount ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50`} placeholder="e.g., 50" />
+                                {errors.guestCount && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1 mt-1">{errors.guestCount}</p>}
                             </div>
 
                             <div>

@@ -14,6 +14,7 @@ const SignupPage = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
     // If already authenticated, redirect to profile
@@ -22,9 +23,37 @@ const SignupPage = () => {
         return null;
     }
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!name.trim()) newErrors.name = 'Full name is required';
+        if (!email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Invalid email format';
+        }
+        if (!phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (phone.length < 10) {
+            newErrors.phone = 'Please enter a valid phone number';
+        }
+        if (!password) {
+            newErrors.password = 'Password is required';
+        } else if (password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!validateForm()) {
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -85,14 +114,14 @@ const SignupPage = () => {
                             <div className="relative">
                                 <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
-                                    required
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                    className={`w-full pl-12 pr-4 py-4 rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                     placeholder="Enter your name"
                                 />
                             </div>
+                            {errors.name && <p className="text-red-500 text-xs mt-1 font-medium">{errors.name}</p>}
                         </div>
 
                         <div>
@@ -100,25 +129,28 @@ const SignupPage = () => {
                             <div className="relative">
                                 <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
-                                    required
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                    className={`w-full pl-12 pr-4 py-4 rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                     placeholder="Enter your email"
                                 />
                             </div>
+                            {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                            <PhoneInput
-                                value={phone}
-                                onChange={(val) => setPhone(val)}
-                                placeholder="Enter phone number"
-                                className="shadow-sm rounded-xl overflow-hidden border border-gray-200"
-                                dropdownDirection="top"
-                            />
+                            <div className={errors.phone ? 'ring-1 ring-red-500 rounded-xl overflow-hidden' : ''}>
+                                <PhoneInput
+                                    value={phone}
+                                    onChange={(val) => setPhone(val)}
+                                    placeholder="Enter phone number"
+                                    className="shadow-sm rounded-xl overflow-hidden border border-gray-200"
+                                    dropdownDirection="top"
+                                />
+                            </div>
+                            {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
                         </div>
 
                         <div>
@@ -126,11 +158,10 @@ const SignupPage = () => {
                             <div className="relative">
                                 <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
-                                    required
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-12 pr-12 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm"
+                                    className={`w-full pl-12 pr-12 py-4 rounded-xl border ${errors.password ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-all shadow-sm`}
                                     placeholder="Create a password"
                                 />
                                 <button
@@ -141,6 +172,7 @@ const SignupPage = () => {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            {errors.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password}</p>}
                         </div>
 
                         <button
