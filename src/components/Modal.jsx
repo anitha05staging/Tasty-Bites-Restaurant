@@ -21,7 +21,7 @@ const Modal = ({ item, onClose }) => {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content bg-white" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close text-gray-800 hover:text-red-500 transition-colors" onClick={onClose}>&times;</button>
+                <button className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-white hover:bg-red-50 text-gray-800 hover:text-red-500 rounded-full shadow-lg z-50 transition-colors text-3xl leading-none pb-1" onClick={onClose}>&times;</button>
                 <div className="modal-body text-gray-800">
                     <div className="modal-image">
                         <img src={item.image} alt={item.name} />
