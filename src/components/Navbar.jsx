@@ -46,8 +46,8 @@ const Navbar = () => {
         >
             <div className="container mx-auto px-6 flex justify-between items-center">
                 {/* Logo */}
-                <Link to="/" className="flex items-center group">
-                    <img src="/images/logo.png" alt="Tasty Bites" className="h-10 w-auto object-contain transition-all" />
+                <Link to="/" className="flex items-center group shrink-0 min-w-0 pr-2">
+                    <img src="/images/logo.png" alt="Tasty Bites" className="h-8 sm:h-10 w-auto object-contain transition-all" />
                 </Link>
 
                 {/* Desktop Nav */}
@@ -65,7 +65,7 @@ const Navbar = () => {
                 </nav>
 
                 {/* Icons & Mobile Toggle */}
-                <div className="flex items-center space-x-5">
+                <div className="flex items-center gap-3 sm:space-x-5 shrink-0">
                     {/* Cart Icon */}
                     <button
                         onClick={() => setIsCartOpen(true)}
