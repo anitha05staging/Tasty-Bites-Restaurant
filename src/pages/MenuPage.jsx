@@ -188,7 +188,7 @@ const MenuPage = () => {
                 <div className="absolute top-1/2 -translate-y-1/2 right-12 z-20 hidden lg:block">
                     <Link to="/" className="group flex items-center space-x-4 text-white hover:text-accent transition-all duration-500 bg-white/5 hover:bg-white/10 px-8 py-4 rounded-full backdrop-blur-xl border border-white/10 hover:border-accent/30 shadow-2xl">
                         <ArrowLeft size={20} className="group-hover:-translate-x-2 transition-transform" />
-                        <span className="font-bold uppercase tracking-[0.3em] text-[10px]">Portal Return</span>
+                        <span className="font-bold uppercase tracking-[0.3em] text-[10px]">Back to home</span>
                     </Link>
                 </div>
             </div>

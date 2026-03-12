@@ -20,7 +20,16 @@ const COUNTRIES = [
     { code: '+81', name: 'Japan', flag: '🇯🇵' },
 ];
 
-const PhoneInput = ({ value, onChange, placeholder = "20 7946 0123", required = false, className = "", dropdownDirection = "bottom" }) => {
+const PhoneInput = ({ 
+    value, 
+    onChange, 
+    placeholder = "20 7946 0123", 
+    required = false, 
+    className = "", 
+    containerClassName = "bg-gray-50 border border-gray-200 focus-within:ring-primary/20 focus-within:bg-white",
+    inputClassName = "text-lg",
+    dropdownDirection = "bottom" 
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -78,7 +87,7 @@ const PhoneInput = ({ value, onChange, placeholder = "20 7946 0123", required = 
     };
 
     return (
-        <div className={`relative flex items-center bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all overflow-visible ${className}`}>
+        <div className={`relative flex items-center rounded-xl transition-all overflow-visible ${containerClassName} ${className}`}>
             <div className="relative h-full" ref={dropdownRef}>
                 <button
                     type="button"
@@ -131,7 +140,7 @@ const PhoneInput = ({ value, onChange, placeholder = "20 7946 0123", required = 
                 value={phoneNumber}
                 onChange={handlePhoneChange}
                 placeholder={placeholder}
-                className="flex-1 w-full min-w-0 px-5 py-3 bg-transparent border-none focus:outline-none text-secondary placeholder:text-gray-400 text-lg tracking-wide"
+                className={`flex-1 w-full min-w-0 px-5 py-3 bg-transparent border-none focus:outline-none text-secondary placeholder:text-gray-400 tracking-wide ${inputClassName}`}
             />
         </div>
     );

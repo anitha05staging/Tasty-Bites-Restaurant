@@ -207,8 +207,8 @@ const CateringPage = () => {
                                 <div className="absolute inset-0 bg-secondary/10" />
                             </div>
                             <div className="absolute -bottom-12 -right-12 p-12 bg-primary text-white rounded-[3rem] shadow-2xl hidden md:block">
-                                <div className="text-5xl font-playfair mb-2 italic">Est.</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80">2009 Heritage Excellence</div>
+                                <div className="text-5xl font-playfair mb-2 italic">15+</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Years of Heritage</div>
                             </div>
                         </motion.div>
                         
@@ -394,10 +394,12 @@ const CateringPage = () => {
                                 <div className="grid grid-cols-1 gap-10">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/30 ml-3 text-center sm:text-left block">Secure Phone *</label>
-                                        <div className="shadow-sm rounded-2xl overflow-hidden bg-brand-cream/30">
+                                        <div className="shadow-sm rounded-2xl overflow-hidden">
                                             <PhoneInput 
                                                 value={formData.phone}
                                                 onChange={handlePhoneChange}
+                                                containerClassName="bg-brand-cream/30 border-none rounded-2xl focus-within:ring-0 focus-within:bg-white"
+                                                inputClassName="font-bold text-secondary placeholder:text-secondary/10 text-sm !py-5"
                                             />
                                         </div>
                                     </div>
