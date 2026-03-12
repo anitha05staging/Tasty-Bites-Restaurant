@@ -4,13 +4,15 @@ import { Mail, Phone, Calendar, User, MessageSquare, Star, Award, ShieldCheck, C
 import { toast } from 'react-toastify';
 import PhoneInput from '../components/PhoneInput';
 import api from '../services/api';
+import Flatpickr from 'react-flatpickr';
+import 'flatpickr/dist/themes/light.css';
 
 const CateringPage = () => {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
         phone: '',
-        eventType: 'Corporate Event',
+        eventType: 'Corporate Gala',
         eventDate: '',
         guestCount: '',
         budget: '',
@@ -60,7 +62,7 @@ const CateringPage = () => {
                 fullName: '',
                 email: '',
                 phone: '',
-                eventType: 'Corporate Event',
+                eventType: 'Corporate Gala',
                 eventDate: '',
                 guestCount: '',
                 budget: '',
@@ -132,7 +134,7 @@ const CateringPage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5 }}
-                            className="inline-flex items-center gap-3 px-6 py-2 bg-white/10 backdrop-blur-xl border border-white/20 text-accent rounded-full text-xs font-bold uppercase tracking-[0.4em] mb-10 mx-auto"
+                            className="inline-flex items-center gap-3 px-6 mt-5 py-2 bg-white/10 backdrop-blur-xl border border-white/20 text-accent rounded-full text-xs font-bold uppercase tracking-[0.4em] mb-10 mx-auto"
                         >
                             <Star size={14} className="animate-pulse" /> Crafted Celebrations
                         </motion.div>
@@ -204,9 +206,9 @@ const CateringPage = () => {
                                 />
                                 <div className="absolute inset-0 bg-secondary/10" />
                             </div>
-                            <div className="absolute -bottom-12 -right-12 p-12 bg-accent text-white rounded-[3rem] shadow-2xl hidden md:block">
-                                <div className="text-5xl font-playfair mb-2 italic">15+</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Years of Master Catering</div>
+                            <div className="absolute -bottom-12 -right-12 p-12 bg-primary text-white rounded-[3rem] shadow-2xl hidden md:block">
+                                <div className="text-5xl font-playfair mb-2 italic">Est.</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest opacity-80">2009 Heritage Excellence</div>
                             </div>
                         </motion.div>
                         
@@ -389,7 +391,7 @@ const CateringPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div className="grid grid-cols-1 gap-10">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/30 ml-3 text-center sm:text-left block">Secure Phone *</label>
                                         <div className="shadow-sm rounded-2xl overflow-hidden bg-brand-cream/30">
@@ -399,6 +401,9 @@ const CateringPage = () => {
                                             />
                                         </div>
                                     </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/30 ml-3 text-center sm:text-left block">Vision Category</label>
                                         <div className="relative group">
@@ -417,22 +422,28 @@ const CateringPage = () => {
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/30 ml-3 text-center sm:text-left block">Planned Date</label>
-                                        <div className="relative group">
-                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
-                                            <input 
-                                                name="eventDate"
-                                                type="date" 
+                                        <div className="relative group catering-datepicker">
+                                            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary z-10" size={18} />
+                                            <Flatpickr
                                                 value={formData.eventDate}
-                                                onChange={handleChange}
+                                                onChange={([date]) => {
+                                                    setFormData(prev => ({ ...prev, eventDate: date }));
+                                                }}
+                                                options={{
+                                                    minDate: "today",
+                                                    dateFormat: "d-m-Y",
+                                                    disableMobile: true
+                                                }}
+                                                placeholder="Select Date"
                                                 className="w-full pl-16 pr-8 py-5 bg-brand-cream/30 border-none rounded-2xl focus:ring-0 focus:bg-white transition-all font-bold text-secondary shadow-sm text-sm"
                                             />
                                         </div>
                                     </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/30 ml-3 text-center sm:text-left block">Elite Guests *</label>
                                         <div className="relative group">

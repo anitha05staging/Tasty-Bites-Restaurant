@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Search, Filter, ArrowLeft, Plus, Minus, X, Check, ShoppingBag, Leaf, Drumstick } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -29,6 +29,9 @@ const MenuPage = () => {
     const [sortBy, setSortBy] = useState('popular');
     const [selectedItem, setSelectedItem] = useState(null);
     const [menuData, setMenuData] = useState(fallbackMenuData);
+    const { scrollY } = useScroll();
+    const y1 = useTransform(scrollY, [0, 500], [0, 200]);
+    const opacityHero = useTransform(scrollY, [0, 300], [1, 0]);
 
     // Fetch menu from backend
     useEffect(() => {
@@ -83,11 +86,8 @@ const MenuPage = () => {
 
         return (
             <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-gray-100 flex flex-col h-full"
+                whileHover={{ y: -10 }}
+                className="bg-white rounded-[2.5rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-brand-cream/50 flex flex-col h-full group"
             >
                 <div className="relative h-48 cursor-pointer overflow-hidden" onClick={onClick}>
                     <img src={dish.image} alt={dish.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
@@ -152,21 +152,44 @@ const MenuPage = () => {
     return (
         <div className="min-h-screen bg-brand-cream pt-10 pb-24">
             {/* Hero Header */}
-            <div className="relative h-[250px] md:h-[350px] w-full mt-4">
-                <img src="/images/authentic.jpg" alt="Menu Header" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/60" />
+            <div className="relative h-[300px] md:h-[450px] w-full overflow-hidden">
+                <motion.div 
+                    style={{ y: y1 }}
+                    className="absolute inset-0 z-0"
+                >
+                    <img src="/images/menu-hero.png" alt="Menu Header" className="w-full h-full object-cover scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-brand-cream/10" />
+                </motion.div>
 
-                <div className="absolute inset-0 flex items-center container mx-auto px-6 z-10">
-                    <div className="flex-1">
-                        <h1 className="text-4xl md:text-6xl font-playfair text-white mb-2">Order <span className="text-accent italic">Online</span></h1>
-                        <p className="text-white/80 text-lg md:text-xl font-light">Fresh, authentic South Indian cuisine delivered or ready for collection.</p>
+                <motion.div 
+                    style={{ opacity: opacityHero }}
+                    className="absolute inset-0 flex items-center z-10"
+                >
+                    <div className="container mx-auto px-6">
+                        <div className="max-w-3xl">
+                            <motion.div
+                                initial={{ opacity: 0, x: -30 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="inline-flex items-center gap-3 px-4 py-2 bg-accent/20 backdrop-blur-md border border-accent/30 text-accent rounded-full text-xs font-bold uppercase tracking-[0.4em] mb-6"
+                            >
+                                <ShoppingBag size={14} /> The Culinary Collection
+                            </motion.div>
+                            <h1 className="text-5xl md:text-8xl font-playfair text-white mb-6 leading-tight">
+                                Order <span className="text-accent italic">Online</span>
+                            </h1>
+                            <p className="text-white/80 text-lg md:text-2xl font-light leading-relaxed max-w-xl">
+                                Explore our masterfully crafted South Indian menu, staged for your personal sanctuary or shared celebrations.
+                            </p>
+                        </div>
                     </div>
-                    <div className="hidden md:block">
-                        <Link to="/" className="inline-flex items-center space-x-2 text-white hover:text-accent transition-colors bg-black/30 px-6 py-3 rounded-full backdrop-blur-sm border border-white/20">
-                            <ArrowLeft size={18} />
-                            <span className="font-semibold uppercase tracking-widest text-sm">Back to Home</span>
-                        </Link>
-                    </div>
+                </motion.div>
+                
+                <div className="absolute top-1/2 -translate-y-1/2 right-12 z-20 hidden lg:block">
+                    <Link to="/" className="group flex items-center space-x-4 text-white hover:text-accent transition-all duration-500 bg-white/5 hover:bg-white/10 px-8 py-4 rounded-full backdrop-blur-xl border border-white/10 hover:border-accent/30 shadow-2xl">
+                        <ArrowLeft size={20} className="group-hover:-translate-x-2 transition-transform" />
+                        <span className="font-bold uppercase tracking-[0.3em] text-[10px]">Portal Return</span>
+                    </Link>
                 </div>
             </div>
 
@@ -282,10 +305,30 @@ const MenuPage = () => {
 
                         {/* Products Grid */}
                         {filteredDishes.length > 0 ? (
-                            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                <AnimatePresence>
+                            <motion.div 
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    show: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.1 }
+                                    }
+                                }}
+                                initial="hidden"
+                                animate="show"
+                                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+                            >
+                                <AnimatePresence mode="popLayout">
                                     {filteredDishes.map(dish => (
-                                        <DishCard key={dish.id} dish={dish} onClick={() => setSelectedItem(dish)} />
+                                        <motion.div
+                                            key={dish.id}
+                                            variants={{
+                                                hidden: { opacity: 0, y: 30 },
+                                                show: { opacity: 1, y: 0 }
+                                            }}
+                                            layout
+                                        >
+                                            <DishCard dish={dish} onClick={() => setSelectedItem(dish)} />
+                                        </motion.div>
                                     ))}
                                 </AnimatePresence>
                             </motion.div>
