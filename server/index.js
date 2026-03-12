@@ -13,6 +13,7 @@ import contactRoutes from './routes/contact.js';
 import cateringRoutes from './routes/catering.js';
 import testimonialsRoutes from './routes/testimonials.js';
 import faqsRoutes from './routes/faqs.js';
+import { verifyConnection } from './services/email.js';
 
 dotenv.config();
 
@@ -28,11 +29,20 @@ let isDbInitialized = false;
 let initializationPromise = null;
 
 // Health check (Bypass DB initialization for pure server check)
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+    const smtpCheck = req.query.smtp === 'true';
+    let smtpStatus = 'not checked';
+    
+    if (smtpCheck) {
+        const check = await verifyConnection();
+        smtpStatus = check.success ? 'ok' : `error: ${check.error}`;
+    }
+
     res.json({
         status: 'ok',
         environment: process.env.NODE_ENV || 'development',
         dbInitialized: isDbInitialized,
+        smtp: smtpStatus,
         timestamp: new Date().toISOString()
     });
 });

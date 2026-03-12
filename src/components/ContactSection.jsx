@@ -1,28 +1,55 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Send } from 'lucide-react';
 import api from '../services/api';
+import { toast } from 'react-toastify';
+import PhoneInput from './PhoneInput';
 
 const ContactSection = () => {
-    const [submitted, setSubmitted] = useState(false);
-    const [error, setError] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handlePhoneChange = (value) => {
+        setFormData({ ...formData, phone: value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
+        
+        if (!formData.name || !formData.email || !formData.message) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        setIsLoading(true);
         try {
-            const form = e.target;
             await api.submitContact({
-                name: form.name?.value || '',
-                email: form.email?.value || '',
-                phone: '',
-                subject: 'Homepage General Inquiry',
-                message: form.message?.value || ''
+                ...formData,
+                subject: 'Homepage General Inquiry'
             });
-            setSubmitted(true);
-            setTimeout(() => setSubmitted(false), 5000);
+            
+            toast.success('Thank you! Your message has been sent successfully.');
+            
+            // Clear form
+            setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                message: ''
+            });
         } catch (err) {
-            setError(err.message || 'Something went wrong. Please try again.');
+            toast.error(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -103,6 +130,8 @@ const ContactSection = () => {
                                         required
                                         name="name"
                                         type="text"
+                                        value={formData.name}
+                                        onChange={handleChange}
                                         placeholder="John Doe"
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                                     />
@@ -113,10 +142,20 @@ const ContactSection = () => {
                                         required
                                         name="email"
                                         type="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
                                         placeholder="john@example.com"
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                                     />
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2 ml-1">Phone Number</label>
+                                <PhoneInput
+                                    value={formData.phone}
+                                    onChange={handlePhoneChange}
+                                    required={true}
+                                />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-2 ml-1">Message</label>
@@ -124,34 +163,27 @@ const ContactSection = () => {
                                     required
                                     name="message"
                                     rows="6"
+                                    value={formData.message}
+                                    onChange={handleChange}
                                     placeholder="How can we help you?"
                                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-3xl focus:ring-2 focus:ring-primary/20 transition-all outline-none resize-none"
                                 ></textarea>
                             </div>
-                            {error && (
-                                <div className="bg-red-50 text-red-600 p-4 rounded-2xl flex items-center space-x-3 border border-red-100">
-                                    <AlertCircle size={24} />
-                                    <div>
-                                        <p className="font-bold text-sm">Failed to send</p>
-                                        <p className="text-xs">{error}</p>
-                                    </div>
-                                </div>
-                            )}
 
-                            {submitted ? (
-                                <div className="bg-green-50 text-green-700 p-4 rounded-2xl flex items-center space-x-3 border border-green-100">
-                                    <CheckCircle size={24} />
-                                    <div>
-                                        <p className="font-bold text-sm">Message Sent!</p>
-                                        <p className="text-xs">We'll get back to you soon.</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <button type="submit" className="btn-primary w-full flex items-center justify-center space-x-3 group">
-                                    <span>Send Message</span>
-                                    <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                </button>
-                            )}
+                            <button 
+                                type="submit" 
+                                disabled={isLoading}
+                                className={`btn-primary w-full flex items-center justify-center space-x-3 group ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            >
+                                {isLoading ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <span>Send Message</span>
+                                        <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                    </>
+                                )}
+                            </button>
                         </form>
                     </motion.div>
                 </div>
@@ -159,5 +191,4 @@ const ContactSection = () => {
         </section>
     );
 };
-
 export default ContactSection;

@@ -271,5 +271,19 @@ export const sendOrderConfirmation = async (orderData) => {
     }
 };
 
+/**
+ * Verify SMTP Connection
+ */
+export const verifyConnection = async () => {
+    try {
+        await transporter.verify();
+        console.log("✅ SMTP connection verified successfully.");
+        return { success: true };
+    } catch (error) {
+        console.error("❌ SMTP connection verification failed:", error);
+        return { success: false, error: error.message };
+    }
+};
+
 // Export transporter for health check verification if needed
 export default transporter;

@@ -26,24 +26,27 @@ const PhoneInput = ({ value, onChange, placeholder = "20 7946 0123", required = 
     const [phoneNumber, setPhoneNumber] = useState('');
     const dropdownRef = useRef(null);
 
-    // Value parsing
+    // Value parsing and syncing
     useEffect(() => {
-        if (value) {
-            const currentFullPhone = `${selectedCountry.code}${phoneNumber.replace(/\D/g, '')}`;
-            const newValueDigits = value.replace(/\D/g, '');
-            const currentFullDigits = currentFullPhone.replace(/\D/g, '');
+        if (!value) {
+            setPhoneNumber('');
+            return;
+        }
 
-            // Only update if the stripped values are actually different
-            if (newValueDigits !== currentFullDigits) {
-                // Sort by code length descending to match longest code first (e.g. +44 before +4)
-                const sortedCountries = [...COUNTRIES].sort((a, b) => b.code.length - a.code.length);
-                const countryMatch = sortedCountries.find(c => value.startsWith(c.code));
-                if (countryMatch) {
-                    setSelectedCountry(countryMatch);
-                    setPhoneNumber(value.replace(countryMatch.code, '').trim());
-                } else {
-                    setPhoneNumber(value);
-                }
+        const currentFullPhone = `${selectedCountry.code}${phoneNumber.replace(/\D/g, '')}`;
+        const newValueDigits = value.replace(/\D/g, '');
+        const currentFullDigits = currentFullPhone.replace(/\D/g, '');
+
+        // Only update if the stripped values are actually different
+        if (newValueDigits !== currentFullDigits) {
+            // Sort by code length descending to match longest code first (e.g. +44 before +4)
+            const sortedCountries = [...COUNTRIES].sort((a, b) => b.code.length - a.code.length);
+            const countryMatch = sortedCountries.find(c => value.startsWith(c.code));
+            if (countryMatch) {
+                setSelectedCountry(countryMatch);
+                setPhoneNumber(value.replace(countryMatch.code, '').trim());
+            } else {
+                setPhoneNumber(value);
             }
         }
     }, [value]);

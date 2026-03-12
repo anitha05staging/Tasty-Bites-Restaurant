@@ -81,6 +81,7 @@ const DineInMenuPage = () => {
 
     // Fast image failure recovery
     const handleImageError = (e) => {
+        console.error(`[Menu Image Error] Failed to load: ${e.target.src}`);
         e.target.src = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2070&auto=format&fit=crop';
         e.target.className = "w-full h-full object-cover opacity-60 grayscale-[0.5]";
     };
@@ -253,11 +254,8 @@ const DineInMenuPage = () => {
                                     placeholder="e.g. Dosa, Biriyani..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-5 pr-12 py-4 bg-emerald-50/30 border-2 border-emerald-50 rounded-2xl focus:outline-none focus:border-emerald-500/30 text-emerald-950 placeholder-emerald-950/30 font-bold transition-all"
+                                    className="w-full pl-5 pr-5 py-4 bg-emerald-50/30 border-2 border-emerald-50 rounded-2xl focus:outline-none focus:border-emerald-500/30 text-emerald-950 placeholder-emerald-950/30 font-bold transition-all"
                                 />
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-emerald-900 text-white p-2 rounded-xl">
-                                    <Search size={16} />
-                                </div>
                             </div>
                         </div>
 
@@ -331,18 +329,11 @@ const DineInMenuPage = () => {
 
                     {/* Main Content */}
                     <main className="w-full lg:w-3/4">
-                        <div className="flex flex-col sm:flex-row justify-between items-sm-center mb-10 px-4 gap-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start mb-10 px-4 gap-4">
                             <div>
                                 <h2 className="text-3xl font-playfair text-emerald-950 mb-1">Our <span className="text-emerald-600">Selection</span></h2>
                                 <p className="text-emerald-900/40 text-xs font-bold uppercase tracking-widest">{filteredDishes.length} refined preparations found</p>
                             </div>
-
-                            <button
-                                onClick={() => setIsOrderTypeModalOpen(true)}
-                                className="inline-flex items-center h-12 px-6 bg-white border-2 border-emerald-900/10 text-emerald-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-900 hover:text-white transition-all shadow-lg shadow-emerald-900/5 active:scale-95"
-                            >
-                                <Utensils size={16} className="mr-2" /> Change Order Type
-                            </button>
                         </div>
 
                         {filteredDishes.length > 0 ? (

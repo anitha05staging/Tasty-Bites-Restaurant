@@ -34,8 +34,8 @@ router.post('/', optionalAuth, async (req, res) => {
             paymentStatus: 'Paid'
         });
 
-        // Send order confirmation email asynchronously
-        sendOrderConfirmation({
+        // Send order confirmation email (Awaited for serverless reliability)
+        const emailSent = await sendOrderConfirmation({
             orderId: order.orderId,
             customerName: customerName || 'Valued Customer',
             customerEmail: customerEmail || '',
@@ -43,6 +43,10 @@ router.post('/', optionalAuth, async (req, res) => {
             status: 'Confirmed',
             items: typeof items === 'string' ? JSON.parse(items) : items
         });
+
+        if (!emailSent) {
+            console.error(`[Order #${order.orderId}] Background email notification failed.`);
+        }
 
         res.status(201).json({
             success: true,
