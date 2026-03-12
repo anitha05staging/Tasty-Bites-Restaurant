@@ -129,7 +129,7 @@ const About = () => {
                         <span className="text-accent font-bold tracking-[0.4em] uppercase text-sm block mb-6 px-4 py-2 border border-accent/30 rounded-full w-fit mx-auto backdrop-blur-sm">
                             Our Culinary Legacy
                         </span>
-                        <h1 className="text-white font-playfair text-6xl md:text-9xl font-bold mb-8 leading-tight">
+                        <h1 className="text-white font-playfair text-5xl md:text-7xl font-bold mb-8 leading-tight">
                             A Tale of <span className="text-accent italic">Soul</span> & Spice
                         </h1>
                         <motion.div 
