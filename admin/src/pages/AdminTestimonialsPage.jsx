@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import { adminTestimonialsApi } from '../services/adminApi';
+import { toast } from 'react-toastify';
 
 const TestimonialModal = ({ isOpen, onClose, testimonial, onSave }) => {
     const [formData, setFormData] = useState({
@@ -151,9 +152,10 @@ const AdminTestimonialsPage = () => {
     const handleAction = async (id, action) => {
         try {
             await adminTestimonialsApi.update(id, { status: action });
+            toast.success(`Testimonial ${action}`);
             fetchTestimonials();
         } catch (error) {
-            alert('Action failed');
+            toast.error('Action failed');
         }
     };
 
@@ -161,9 +163,10 @@ const AdminTestimonialsPage = () => {
         if (!itemToDelete) return;
         try {
             await adminTestimonialsApi.delete(itemToDelete.id);
+            toast.success('Testimonial deleted');
             fetchTestimonials();
         } catch (error) {
-            alert('Delete failed');
+            toast.error('Delete failed');
         }
     };
 
@@ -174,23 +177,23 @@ const AdminTestimonialsPage = () => {
 
     const handleSave = async (data) => {
         try {
+            const { id, createdAt, updatedAt, ...cleanData } = data;
+            const payload = {
+                ...cleanData,
+                text: cleanData.content || cleanData.text
+            };
+            delete payload.content;
+
             if (selectedTestimonial) {
-                await adminTestimonialsApi.update(selectedTestimonial.id, {
-                    ...data,
-                    text: data.content // Server uses 'text'
-                });
+                await adminTestimonialsApi.update(selectedTestimonial.id, payload);
+                toast.success('Testimonial updated');
             } else {
-                // Not implemented yet on backend to create from admin? 
-                // But let's assume it works or we use the POST /api/testimonials 
-                // Actually the backend model uses 'text'
-                await adminTestimonialsApi.create({
-                    ...data,
-                    text: data.content
-                });
+                await adminTestimonialsApi.create(payload);
+                toast.success('Testimonial created');
             }
             fetchTestimonials();
         } catch (error) {
-            alert('Save failed');
+            toast.error('Save failed');
         }
     };
 

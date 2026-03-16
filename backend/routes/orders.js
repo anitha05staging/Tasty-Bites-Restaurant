@@ -163,4 +163,22 @@ router.get('/:orderId', optionalAuth, async (req, res) => {
     }
 });
 
+// ADMIN: PATCH /api/orders/:orderId/status (Update order status)
+router.patch('/:orderId/status', authenticate, async (req, res) => {
+    try {
+        const user = await User.findByPk(req.userId);
+        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+
+        const { status } = req.body;
+        const order = await Order.findOne({ where: { id: req.params.orderId } }); // Frontend sends the internal ID
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+
+        await order.update({ status });
+        res.json({ success: true, status: order.status });
+    } catch (err) {
+        console.error('Update order status error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 export default router;

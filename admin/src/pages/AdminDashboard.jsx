@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { adminOrdersApi, adminReservationsApi } from '../services/adminApi';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const OperationWidget = ({ title, value, status, icon: Icon, colorClass }) => (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
@@ -55,23 +56,24 @@ const AdminDashboard = () => {
             setBookings(Array.isArray(bookingsData) ? bookingsData : []);
         } catch (error) {
             console.error('Dashboard load failed:', error);
+            toast.error('Failed to load dashboard data');
         } finally {
             setLoading(false);
         }
     };
 
-    const todayOrders = orders.filter(o => {
-        const orderDate = new Date(o.date).toLocaleDateString();
-        const today = new Date().toLocaleDateString();
-        return orderDate === today;
-    });
+    const isSameDay = (date1, date2) => {
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+        return d1.getFullYear() === d2.getFullYear() &&
+               d1.getMonth() === d2.getMonth() &&
+               d1.getDate() === d2.getDate();
+    };
 
-    const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'In Progress');
-    const todayBookings = bookings.filter(b => {
-        const bookingDate = new Date(b.date).toLocaleDateString();
-        const today = new Date().toLocaleDateString();
-        return bookingDate === today;
-    });
+    const today = new Date();
+    const todayOrders = orders.filter(o => isSameDay(o.createdAt || o.date, today));
+    const pendingOrders = orders.filter(o => ['Pending', 'Confirmed', 'In Progress', 'Ready', 'Placed'].includes(o.status));
+    const todayBookings = bookings.filter(b => isSameDay(b.date, today));
 
     return (
         <div className="max-w-7xl mx-auto space-y-10">

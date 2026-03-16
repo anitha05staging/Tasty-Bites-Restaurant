@@ -5,42 +5,37 @@ dotenv.config();
 
 let sequelize;
 
-// Force PostgreSQL for all environments to prevent sqlite3 native binding crashes on Vercel
 const dbUrl = process.env.DATABASE_URL;
 
 if (dbUrl) {
+    const isProduction = process.env.NODE_ENV === 'production' || dbUrl.includes('neon.tech');
+    
     sequelize = new Sequelize(dbUrl, {
         dialect: 'postgres',
         dialectModule: pg,
         logging: false,
-        dialectOptions: {
+        dialectOptions: isProduction ? {
             ssl: {
                 require: true,
                 rejectUnauthorized: false
             },
-            connectTimeout: 5000 // 5 seconds to prevent Vercel 10s silent kill
-        },
+            connectTimeout: 10000
+        } : {},
         pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
     });
 } else {
+    // Fallback to individual parameters if DATABASE_URL is not provided
     sequelize = new Sequelize(
         process.env.DB_NAME || 'tasty_bites',
         process.env.DB_USER || 'postgres',
-        process.env.DB_PASSWORD || '',
+        process.env.DB_PASSWORD || 'postgres123',
         {
             host: process.env.DB_HOST || 'localhost',
             port: process.env.DB_PORT || 5432,
             dialect: 'postgres',
             dialectModule: pg,
             logging: false,
-            dialectOptions: process.env.NODE_ENV === 'production' ? {
-                ssl: {
-                    require: true,
-                    rejectUnauthorized: false
-                },
-                connectTimeout: 5000 // 5 seconds to prevent Vercel 10s silent kill
-            } : {},
-            pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
+            pool: { max: 5, min: 0, acquire: 30000, idle: 10000 }
         }
     );
 }

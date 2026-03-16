@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { adminReservationsApi } from '../services/adminApi';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
+import { toast } from 'react-toastify';
 
 const AdminReservationsPage = () => {
     const [reservations, setReservations] = useState([]);
@@ -49,9 +50,10 @@ const AdminReservationsPage = () => {
     const handleUpdateStatus = async (id, newStatus) => {
         try {
             await adminReservationsApi.updateStatus(id, newStatus);
+            toast.success(`Reservation ${newStatus}`);
             fetchReservations();
         } catch (error) {
-            alert('Status update failed');
+            toast.error('Status update failed');
         }
     };
 

@@ -155,6 +155,7 @@ const ContactSection = () => {
                                     value={formData.phone}
                                     onChange={handlePhoneChange}
                                     required={true}
+                                    isDark={true}
                                 />
                             </div>
                             <div>

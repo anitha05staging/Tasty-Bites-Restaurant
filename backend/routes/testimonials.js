@@ -1,11 +1,15 @@
 import express from 'express';
-import { Testimonial } from '../models/index.js';
+import { Testimonial, User } from '../models/index.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // GET all testimonials (Admin)
-router.get('/admin/all', async (req, res) => {
+router.get('/admin/all', authenticate, async (req, res) => {
     try {
+        const user = await User.findByPk(req.userId);
+        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+
         const testimonials = await Testimonial.findAll({
             order: [['createdAt', 'DESC']]
         });
@@ -20,7 +24,7 @@ router.get('/admin/all', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const testimonials = await Testimonial.findAll({
-            where: { approved: true },
+            where: { status: ['Approved', 'Featured'] },
             order: [['createdAt', 'DESC']]
         });
         res.json(testimonials);
@@ -33,18 +37,18 @@ router.get('/', async (req, res) => {
 // POST a new testimonial
 router.post('/', async (req, res) => {
     try {
-        const { name, text, rating, type } = req.body;
+        const { name, text, content, rating, type } = req.body;
         const dateObj = new Date();
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const formattedDate = `${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
 
         const newTestimonial = await Testimonial.create({
             name,
-            text,
+            text: text || content,
             rating,
             type: type || 'General',
             date: formattedDate,
-            approved: true
+            status: 'Pending'
         });
 
         res.status(201).json({ success: true, testimonial: newTestimonial });
@@ -55,12 +59,18 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update testimonial (Admin)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
     try {
+        const user = await User.findByPk(req.userId);
+        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+
         const testimonial = await Testimonial.findByPk(req.params.id);
         if (!testimonial) return res.status(404).json({ error: 'Not found' });
         
-        await testimonial.update(req.body);
+        const updateData = { ...req.body };
+        if (updateData.content) updateData.text = updateData.content;
+        
+        await testimonial.update(updateData);
         res.json(testimonial);
     } catch (err) {
         res.status(500).json({ error: 'Update failed' });
@@ -68,8 +78,11 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE testimonial (Admin)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
     try {
+        const user = await User.findByPk(req.userId);
+        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+
         const testimonial = await Testimonial.findByPk(req.params.id);
         if (!testimonial) return res.status(404).json({ error: 'Not found' });
         

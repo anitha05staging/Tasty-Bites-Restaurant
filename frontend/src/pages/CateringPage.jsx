@@ -394,12 +394,13 @@ const CateringPage = () => {
                                 <div className="grid grid-cols-1 gap-10">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/30 ml-3 text-center sm:text-left block">Secure Phone *</label>
-                                        <div className="shadow-sm rounded-2xl overflow-hidden">
+                                        <div className="shadow-sm rounded-2xl">
                                             <PhoneInput 
                                                 value={formData.phone}
                                                 onChange={handlePhoneChange}
-                                                containerClassName="bg-brand-cream/30 border-none rounded-2xl focus-within:ring-0 focus-within:bg-white"
-                                                inputClassName="font-bold text-secondary placeholder:text-secondary/10 text-sm !py-5"
+                                                className="bg-brand-cream/30 border-none rounded-2xl focus-within:ring-0 focus-within:bg-white"
+                                                inputClassName="font-bold text-secondary placeholder:text-secondary/10 text-sm"
+                                                isDark={true}
                                             />
                                         </div>
                                     </div>

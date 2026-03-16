@@ -130,6 +130,7 @@ const ProfileTab = ({ user, updateProfile }) => {
                                 value={formData.phone}
                                 onChange={handlePhoneChange}
                                 className="rounded-xl overflow-hidden border border-gray-200"
+                                isDark={true}
                             />
                         </div>
                         <div className="pt-2">

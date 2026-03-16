@@ -9,9 +9,9 @@
     "admin"
   ],
   "scripts": {
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:admin": "npm run dev --workspace=admin",
-    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:admin": "cd admin && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:admin\"",
     "install:all": "npm install",
     "seed": "npm run seed --workspace=backend"

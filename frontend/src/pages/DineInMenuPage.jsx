@@ -19,7 +19,7 @@ const fallbackMenuData = [
     { id: 10, name: 'Mutton Chukka', category: 'non-veg', description: 'Succulent mutton slow-roasted with crushed peppercorns and dry spices.', price: '£15.50', image: '/images/gongura-mutton.jpg', popular: true, vegetarian: false, dairyFree: true, glutenFree: true, type: 'nonveg' }
 ];
 
-const categories = ['All', 'veg', 'non-veg', 'signatures', 'sea food', 'curries', 'Biriyani', 'rice and breads', 'Parotta and Idiyappam'];
+const defaultCategories = ['All', 'veg', 'non-veg', 'signatures', 'sea food', 'curries', 'Biriyani', 'rice and breads', 'Parotta and Idiyappam'];
 
 const DineInMenuPage = () => {
     const { addToCart, cartItems, updateQuantity, setIsCartOpen } = useCart();
@@ -29,6 +29,7 @@ const DineInMenuPage = () => {
     const [sortBy, setSortBy] = useState('popular');
     const [selectedItem, setSelectedItem] = useState(null);
     const [menuData, setMenuData] = useState(fallbackMenuData);
+    const [categories, setCategories] = useState(defaultCategories);
 
     // Fetch menu from backend
     useEffect(() => {
@@ -38,6 +39,12 @@ const DineInMenuPage = () => {
                 setMenuData(data);
             }
         }).catch(() => { /* use fallback */ });
+
+        api.getCategories().then(cats => {
+            if (cats && cats.length > 0) {
+                setCategories(['All', ...cats]);
+            }
+        }).catch(() => { /* use default */ });
     }, []);
 
     const toggleFilter = (filterName) => {

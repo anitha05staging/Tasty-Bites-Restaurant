@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -17,16 +17,36 @@ import {
     ChefHat
 } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { adminOrdersApi } from '../services/adminApi';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
     const { logout } = useAdminAuth();
+    const [orderCount, setOrderCount] = useState(0);
+
+    useEffect(() => {
+        const fetchOrderCount = async () => {
+            try {
+                const orders = await adminOrdersApi.getAll();
+                // We count orders that are not Completed/Cancelled for the badge, or just total pending
+                const pending = orders.filter(o => !['Completed', 'Cancelled', 'Delivered'].includes(o.status)).length;
+                setOrderCount(pending);
+            } catch (error) {
+                console.error('Failed to fetch sidebar order count:', error);
+            }
+        };
+
+        fetchOrderCount();
+        // Set up interval for refreshing count every 30 seconds
+        const interval = setInterval(fetchOrderCount, 30000);
+        return () => clearInterval(interval);
+    }, []);
     const menuItems = [
-        { path: '/admin', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
-        { path: '/admin/orders', icon: <ShoppingBag size={18} />, label: 'Orders' },
-        { path: '/admin/menu', icon: <Utensils size={18} />, label: 'Menu Items' },
-        { path: '/admin/categories', icon: <Layers size={18} />, label: 'Categories' },
-        { path: '/admin/bookings', icon: <Calendar size={18} />, label: 'Reservations' },
-        { path: '/admin/testimonials', icon: <MessageSquare size={18} />, label: 'Testimonials' },
+        { path: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
+        { path: '/orders', icon: <ShoppingBag size={18} />, label: 'Orders' },
+        { path: '/menu', icon: <Utensils size={18} />, label: 'Menu Items' },
+        { path: '/categories', icon: <Layers size={18} />, label: 'Categories' },
+        { path: '/bookings', icon: <Calendar size={18} />, label: 'Reservations' },
+        { path: '/testimonials', icon: <MessageSquare size={18} />, label: 'Testimonials' },
     ];
 
     return (
@@ -58,7 +78,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     <NavLink
                         key={item.path}
                         to={item.path}
-                        end={item.path === '/admin'}
+                        end={item.path === '/'}
                         onClick={() => setIsOpen(false)}
                         className={({ isActive }) => `
                             flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 group relative
@@ -73,8 +93,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                             </span>
                             <span className="text-[13px] font-bold tracking-tight">{item.label}</span>
                         </div>
-                        {item.path === '/admin/orders' && (
-                            <span className="px-2 py-0.5 bg-admin-primary text-white text-[9px] font-bold rounded-full relative z-10">3</span>
+                        {orderCount > 0 && item.path === '/orders' && (
+                            <span className="px-2 py-0.5 bg-admin-primary text-white text-[9px] font-bold rounded-full relative z-10">{orderCount}</span>
                         )}
                     </NavLink>
                 ))}

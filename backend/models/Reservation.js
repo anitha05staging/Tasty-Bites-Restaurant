@@ -11,7 +11,7 @@ const Reservation = sequelize.define('Reservation', {
     guests: { type: DataTypes.STRING, allowNull: false },
     occasion: { type: DataTypes.STRING, defaultValue: 'None' },
     specialRequests: { type: DataTypes.TEXT, defaultValue: '' },
-    status: { type: DataTypes.ENUM('Upcoming', 'Past', 'Cancelled'), defaultValue: 'Upcoming' },
+    status: { type: DataTypes.ENUM('Pending', 'Upcoming', 'Confirmed', 'Completed', 'Cancelled'), defaultValue: 'Pending' },
     bookingRef: { type: DataTypes.STRING, unique: true }
 }, { timestamps: true });
 

@@ -145,7 +145,8 @@ const SignupPage = () => {
                                 <PhoneInput
                                     value={phone}
                                     onChange={(val) => setPhone(val)}
-                                    placeholder="Enter phone number"
+                                    required={true}
+                                    isDark={true}
                                     className="shadow-sm rounded-xl overflow-hidden border border-gray-200"
                                     dropdownDirection="top"
                                 />

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { adminMenuApi } from '../services/adminApi';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
+import { toast } from 'react-toastify';
 
 const CategoryModal = ({ isOpen, onClose, category, onSave }) => {
     const [formData, setFormData] = useState({
@@ -143,11 +144,12 @@ const AdminCategoriesPage = () => {
         setLoading(true);
         try {
             const data = await adminMenuApi.getAll();
-            const uniqueCategories = [...new Set(data.map(item => item.category))].map((name, index) => ({
+            const items = Array.isArray(data) ? data : [];
+            const uniqueCategories = [...new Set(items.map(item => item.category))].map((name, index) => ({
                 id: index,
                 name: name,
                 description: `Managing items for ${name}`,
-                count: data.filter(i => i.category === name).length,
+                count: items.filter(i => i.category === name).length,
                 active: true
             }));
             setCategories(uniqueCategories);
@@ -163,11 +165,12 @@ const AdminCategoriesPage = () => {
             if (selectedCategory) {
                 // Rename operation
                 await adminMenuApi.updateCategory(selectedCategory.name, data.name);
+                toast.success('Category updated');
             } else {
                 // For a derived system, "Creating" just means it's available 
                 // but won't persist without items. 
                 // We'll just show it in the UI temporarily or suggest adding a dish.
-                alert('Category created. Add a dish to this category to persist it.');
+                toast.info('Category created. Add a dish to this category to persist it.');
             }
             fetchCategories();
         } catch (error) {
@@ -179,8 +182,10 @@ const AdminCategoriesPage = () => {
         if (!categoryToDelete) return;
         try {
             await adminMenuApi.deleteCategory(categoryToDelete.name);
+            toast.success('Category removed');
             fetchCategories();
         } catch (error) {
+            toast.error('Delete failed');
             console.error('Delete failed:', error);
         }
     };

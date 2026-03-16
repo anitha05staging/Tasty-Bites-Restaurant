@@ -307,6 +307,7 @@ const CheckoutPage = () => {
                                                         onChange={(val) => setPhone(val)}
                                                         placeholder="7123 456789"
                                                         className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
+                                                        isDark={true}
                                                     />
                                                 </div>
                                                 {errors.phone && <p className="text-red-500 text-[10px] mt-1 font-bold uppercase tracking-tight">{errors.phone}</p>}

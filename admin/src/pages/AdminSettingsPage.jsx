@@ -10,6 +10,7 @@ import {
     Save, 
     Loader2
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const SettingToggle = ({ title, description, active, onToggle }) => (
     <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all">
@@ -38,7 +39,10 @@ const AdminSettingsPage = () => {
 
     const handleSave = () => {
         setSaving(true);
-        setTimeout(() => setSaving(false), 1500);
+        setTimeout(() => {
+            setSaving(false);
+            toast.success('Security settings updated');
+        }, 1500);
     };
 
     return (

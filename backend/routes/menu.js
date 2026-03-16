@@ -1,5 +1,5 @@
 import express from 'express';
-import { MenuItem, User } from '../models/index.js';
+import { MenuItem, User, sequelize } from '../models/index.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -11,12 +11,27 @@ router.get('/', async (req, res) => {
         // Format price as string with £ sign for frontend compatibility
         const formatted = items.map(item => ({
             ...item.toJSON(),
-            price: `£${item.price.toFixed(2)}`
+            price: item.price ? `£${item.price.toFixed(2)}` : '£0.00'
         }));
         res.json(formatted);
     } catch (err) {
         console.error('Menu fetch error:', err);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + err.message });
+    }
+});
+
+// GET /api/menu/categories
+router.get('/categories', async (req, res) => {
+    try {
+        const categories = await MenuItem.findAll({
+            attributes: [[sequelize.fn('DISTINCT', sequelize.col('category')), 'category']],
+            raw: true
+        });
+        const list = categories.map(c => c.category).filter(Boolean);
+        res.json(list);
+    } catch (err) {
+        console.error('Categories fetch error:', err);
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
@@ -25,10 +40,10 @@ router.get('/:id', async (req, res) => {
     try {
         const item = await MenuItem.findByPk(req.params.id);
         if (!item) return res.status(404).json({ error: 'Item not found' });
-        res.json({ ...item.toJSON(), price: `£${item.price.toFixed(2)}` });
+        res.json({ ...item.toJSON(), price: item.price ? `£${item.price.toFixed(2)}` : '£0.00' });
     } catch (err) {
         console.error('Menu item fetch error:', err);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
@@ -42,7 +57,7 @@ router.post('/', authenticate, async (req, res) => {
         res.status(201).json(item);
     } catch (err) {
         console.error('Menu create error:', err);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
@@ -58,8 +73,8 @@ router.put('/:id', authenticate, async (req, res) => {
         await item.update(req.body);
         res.json(item);
     } catch (err) {
-        console.error('Menu update error:', err);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Menu update error details:', err);
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 

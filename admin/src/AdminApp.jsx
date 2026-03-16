@@ -13,6 +13,8 @@ import AdminInfoPage from './pages/AdminInfoPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminTestimonialsPage from './pages/AdminTestimonialsPage';
 import AdminErrorBoundary from './components/AdminErrorBoundary';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AdminApp() {
   return (
@@ -42,8 +44,20 @@ function AdminApp() {
           </Route>
 
           {/* Fallback within /admin */}
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <ToastContainer 
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+        />
       </AdminAuthProvider>
     </AdminErrorBoundary>
   );

@@ -7,7 +7,8 @@ const Testimonial = sequelize.define('Testimonial', {
     rating: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 1, max: 5 } },
     type: { type: DataTypes.STRING, defaultValue: 'General' },
     date: { type: DataTypes.STRING, allowNull: false }, // Store as formatted string like 'October 2025'
-    approved: { type: DataTypes.BOOLEAN, defaultValue: true } // Auto-approve for demo
+    approved: { type: DataTypes.BOOLEAN, defaultValue: true }, // Legacy field
+    status: { type: DataTypes.ENUM('Pending', 'Approved', 'Featured', 'Rejected'), defaultValue: 'Pending' }
 }, { timestamps: true });
 
 export default Testimonial;

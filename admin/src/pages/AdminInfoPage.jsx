@@ -16,6 +16,7 @@ import {
     Twitter,
     X
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const InfoField = ({ label, icon: Icon, value, onChange, placeholder, type = "text" }) => (
     <div className="space-y-2">
@@ -67,7 +68,10 @@ const AdminInfoPage = () => {
 
     const handleSave = () => {
         setSaving(true);
-        setTimeout(() => setSaving(false), 1000);
+        setTimeout(() => {
+            setSaving(false);
+            toast.success('Restaurant profile updated successfully');
+        }, 1000);
     };
 
     return (

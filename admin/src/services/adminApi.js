@@ -52,6 +52,10 @@ export const adminMenuApi = {
         const response = await adminApi.get('/menu');
         return response.data;
     },
+    getCategories: async () => {
+        const response = await adminApi.get('/menu/categories');
+        return response.data;
+    },
     create: async (itemData) => {
         const response = await adminApi.post('/menu', itemData);
         return response.data;

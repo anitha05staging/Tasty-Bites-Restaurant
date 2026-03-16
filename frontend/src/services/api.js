@@ -34,6 +34,7 @@ export const api = {
     // Menu
     getMenu: () => request('/menu'),
     getMenuItem: (id) => request(`/menu/${id}`),
+    getCategories: () => request('/menu/categories'),
 
     // Orders
     createOrder: (orderData) => request('/orders', { method: 'POST', body: JSON.stringify(orderData) }),

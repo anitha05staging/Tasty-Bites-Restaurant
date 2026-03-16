@@ -17,12 +17,16 @@ import {
     Download,
     Eye,
     ChevronRight,
-    Filter
+    Filter,
+    AlertCircle,
+    Edit,
+    Trash2
 } from 'lucide-react';
 import { adminOrdersApi } from '../services/adminApi';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
+import { toast } from 'react-toastify';
 
 const StatusBadge = ({ status }) => {
     const variants = {
@@ -42,165 +46,180 @@ const StatusBadge = ({ status }) => {
     );
 };
 
-const OrderRow = ({ order, onUpdateStatus, onPrint }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [updating, setUpdating] = useState(false);
+const DetailModal = ({ order, isOpen, onClose }) => {
+    if (!isOpen || !order) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+            >
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                            Order Detail <span className="text-slate-300 font-light">#{order.orderId}</span>
+                        </h2>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Transaction Summary & Customer Info</p>
+                    </div>
+                    <button onClick={onClose} className="p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-900">
+                        <XCircle size={24} />
+                    </button>
+                </div>
+
+                <div className="p-8 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-6">
+                        <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                                <ShoppingBag size={12} /> Purchased Items
+                            </h4>
+                            <div className="space-y-3">
+                                {order.items.map((item, idx) => {
+                                    const qty = item.qty || item.quantity || 1;
+                                    const price = parseFloat(String(item.price || 0).replace(/[^0-9.]/g, '')) || 0;
+                                    return (
+                                        <div key={idx} className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-8 h-8 bg-slate-900 text-white text-[10px] flex items-center justify-center rounded-lg font-black">
+                                                    {qty}
+                                                </div>
+                                                <span className="text-sm font-bold text-slate-800">{item.name}</span>
+                                            </div>
+                                            <span className="text-sm font-black text-slate-900">
+                                                £{(price * qty).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-between items-center">
+                                <span className="text-sm font-bold text-slate-400">Total Amount</span>
+                                <span className="text-3xl font-black text-slate-900 tracking-tight">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {order.instructions && (
+                            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 border-dashed">
+                                <p className="text-[10px] font-black uppercase text-amber-600 tracking-widest flex items-center gap-2 mb-3">
+                                    <AlertCircle size={14} /> Customer Instructions
+                                </p>
+                                <p className="text-sm text-slate-700 italic font-medium leading-relaxed">"{order.instructions}"</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-8">
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                                <User size={12} /> Contact Information
+                            </h4>
+                            <div className="space-y-5">
+                                <div className="flex items-center gap-4 group">
+                                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-md transition-all"><User className="text-slate-400" size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Customer Name</p>
+                                        <p className="text-base font-black text-slate-800 mt-1.5">{order.customerName}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 group">
+                                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-md transition-all"><Phone className="text-slate-400" size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Phone Number</p>
+                                        <p className="text-base font-black text-slate-800 mt-1.5">{order.customerPhone || 'Not Provided'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 group">
+                                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-md transition-all"><Clock className="text-slate-400" size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Order Time</p>
+                                        <p className="text-base font-black text-slate-800 mt-1.5">{new Date(order.date).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' })}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 group">
+                                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-md transition-all"><MapPin className="text-slate-400" size={18} /></div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Service Type</p>
+                                        <p className="text-base font-black text-slate-800 mt-1.5">{order.orderType} {order.tableNumber ? `• Table ${order.tableNumber}` : ''}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Payment Method</h4>
+                            <div className="bg-emerald-50 text-emerald-700 px-6 py-4 rounded-2xl border border-emerald-100 inline-flex items-center gap-3">
+                                <CreditCard size={18} />
+                                <span className="text-sm font-black uppercase tracking-widest">Paid Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+                    <button onClick={onClose} className="px-8 py-3.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20">
+                        Close Detail
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+const EditModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
+    const [status, setStatus] = useState(order?.status || 'Pending');
+    
+    if (!isOpen || !order) return null;
 
     const statuses = ['Pending', 'Confirmed', 'In Progress', 'Ready', 'Completed', 'Cancelled'];
 
-    const handleStatusUpdate = async (newStatus) => {
-        setUpdating(true);
-        try {
-            await onUpdateStatus(order.id, newStatus);
-        } finally {
-            setUpdating(false);
-        }
-    };
-
     return (
-        <div className={`bg-white border-b border-slate-100 transition-all duration-200 ${isExpanded ? 'bg-slate-50/30 ring-1 ring-inset ring-slate-100' : 'hover:bg-slate-50 shadow-sm hover:shadow-md'}`}>
-            <div className="px-6 py-5 flex items-center justify-between gap-4 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="flex items-center gap-6 min-w-[200px]">
-                    <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 font-bold border border-slate-200">
-                        #{order.orderId}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl p-8"
+            >
+                <div className="mb-8">
+                    <h2 className="text-2xl font-black text-slate-900">Edit Order <span className="text-slate-300 font-light">#{order.orderId}</span></h2>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Update order progress status</p>
+                </div>
+
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Status</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        {statuses.map(s => (
+                            <button
+                                key={s}
+                                onClick={() => setStatus(s)}
+                                className={`
+                                    px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all
+                                    ${status === s 
+                                        ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/10' 
+                                        : 'bg-slate-50 text-slate-400 border-transparent hover:border-slate-200 hover:text-slate-600'}
+                                `}
+                            >
+                                {s}
+                            </button>
+                        ))}
                     </div>
-                    <div>
-                        <p className="text-sm font-bold text-slate-900 leading-none">{order.customerName}</p>
-                        <p className="text-[11px] text-slate-500 mt-1.5">{new Date(order.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
-                    </div>
                 </div>
 
-                <div className="hidden lg:block flex-1 max-w-sm">
-                    <p className="text-xs text-slate-600 font-medium truncate">
-                        {order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
-                    </p>
-                </div>
-
-                <div className="w-24 text-right">
-                    <p className="text-sm font-black text-slate-900 tracking-tight">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</p>
-                    <p className="text-[10px] text-admin-primary font-bold uppercase tracking-widest mt-1">{order.orderType}</p>
-                </div>
-
-                <div className="w-32 flex justify-center">
-                    <StatusBadge status={order.status} />
-                </div>
-
-                <div className="flex items-center gap-2">
+                <div className="mt-10 flex gap-4">
                     <button 
-                        onClick={(e) => { e.stopPropagation(); onPrint(order); }}
-                        className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-200"
-                        title="Print Invoice"
+                        onClick={onClose}
+                        className="flex-1 px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                     >
-                        <Printer size={18} />
+                        Cancel
                     </button>
-                    <div className={`p-2 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-admin-primary' : 'text-slate-300'}`}>
-                        <ChevronDown size={18} />
-                    </div>
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {isExpanded && (
-                    <motion.div 
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden bg-slate-50/50 border-t border-slate-100"
+                    <button 
+                        onClick={() => { onUpdateStatus(order.id, status); onClose(); }}
+                        className="flex-1 px-6 py-4 bg-admin-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-admin-primary/90 transition-all shadow-lg shadow-admin-primary/20"
                     >
-                        <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
-                            {/* Order Summary */}
-                            <div className="space-y-4">
-                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                                    <ShoppingBag size={12} /> Items Summary
-                                </h4>
-                                <ul className="space-y-2">
-                                    {order.items.map((item, idx) => (
-                                        <li key={idx} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-slate-100">
-                                            <div className="flex items-center gap-3">
-                                                <span className="w-6 h-6 bg-slate-900 text-white text-[9px] flex items-center justify-center rounded-md font-bold">{item.quantity}</span>
-                                                <span className="text-xs font-bold text-slate-800">{item.name}</span>
-                                            </div>
-                                            <span className="text-xs font-bold text-slate-500">£{Number((parseFloat(String(item.price || 0).replace(/[^0-9.]/g, '')) || 0) * (item.quantity || 1)).toFixed(2)}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <div className="pt-4 flex justify-between items-center border-t border-slate-200">
-                                    <span className="text-xs font-bold text-slate-400">Grand Total</span>
-                                    <span className="text-xl font-black text-slate-900">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            {/* Contact Info */}
-                            <div className="space-y-4">
-                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                                    <User size={12} /> Customer Information
-                                </h4>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-400"><User size={14} /></div>
-                                        <div>
-                                            <p className="text-[9px] font-bold uppercase text-slate-400 tracking-wider leading-none">Name</p>
-                                            <p className="text-sm font-bold text-slate-800 mt-1">{order.customerName}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-400"><Phone size={14} /></div>
-                                        <div>
-                                            <p className="text-[9px] font-bold uppercase text-slate-400 tracking-wider leading-none">Phone</p>
-                                            <p className="text-sm font-bold text-slate-800 mt-1">{order.customerPhone || 'N/A'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-slate-400"><MapPin size={14} /></div>
-                                        <div>
-                                            <p className="text-[9px] font-bold uppercase text-slate-400 tracking-wider leading-none">Service Type</p>
-                                            <p className="text-sm font-bold text-slate-800 mt-1">{order.orderType} {order.tableNumber ? `• Table ${order.tableNumber}` : ''}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                {order.instructions && (
-                                    <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 mt-4">
-                                        <p className="text-[9px] font-bold uppercase text-amber-600 tracking-wider flex items-center gap-2 mb-1.5"><AlertCircle size={10} /> Chef's Note</p>
-                                        <p className="text-xs text-slate-700 italic font-medium leading-relaxed">"{order.instructions}"</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Update Status */}
-                            <div className="space-y-4">
-                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                                    <Clock size={12} /> Order Management
-                                </h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {statuses.map(s => (
-                                        <button 
-                                            key={s}
-                                            onClick={(e) => { e.stopPropagation(); handleStatusUpdate(s); }}
-                                            disabled={updating}
-                                            className={`
-                                                px-3 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border
-                                                ${order.status === s 
-                                                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/10' 
-                                                    : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300 hover:text-slate-700'}
-                                                flex items-center justify-center
-                                            `}
-                                        >
-                                            {updating && order.status === s ? <Loader2 size={12} className="animate-spin" /> : s}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); confirmCancel(order); }}
-                                    className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 bg-white text-rose-500 border border-slate-100 hover:bg-rose-50 hover:border-rose-100 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
-                                >
-                                    <XCircle size={14} />
-                                    Cancel Order
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        Save Changes
+                    </button>
+                </div>
+            </motion.div>
         </div>
     );
 };
@@ -214,6 +233,10 @@ const AdminOrdersPage = () => {
     const [dateFilter, setDateFilter] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToCancel, setItemToCancel] = useState(null);
+    
+    // Action Modal States
+    const [viewOrder, setViewOrder] = useState(null);
+    const [editOrder, setEditOrder] = useState(null);
 
     useEffect(() => {
         fetchOrders();
@@ -235,8 +258,9 @@ const AdminOrdersPage = () => {
         try {
             await adminOrdersApi.updateStatus(orderId, newStatus);
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            toast.success(`Order status updated to ${newStatus}`);
         } catch (error) {
-            alert('Failed to update status');
+            toast.error('Failed to update status');
         }
     };
 
@@ -252,51 +276,89 @@ const AdminOrdersPage = () => {
 
     const handlePrintInvoice = (order) => {
         const printWindow = window.open('', '_blank');
+        const itemsList = order.items.map(i => {
+            const qty = i.qty || i.quantity || 1;
+            const price = parseFloat(String(i.price || 0).replace(/[^0-9.]/g, '')) || 0;
+            return `
+                <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">${i.name}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${qty}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">£${price.toFixed(2)}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">£${(qty * price).toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+
         printWindow.document.write(`
             <html>
                 <head>
                     <title>Invoice #${order.orderId}</title>
                     <style>
-                        body { font-family: sans-serif; padding: 40px; color: #333; }
-                        .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
-                        .details { margin-bottom: 30px; }
+                        body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; line-height: 1.5; }
+                        .container { max-width: 800px; margin: 0 auto; }
+                        .header { text-align: center; margin-bottom: 50px; border-bottom: 4px solid #f1f5f9; padding-bottom: 30px; }
+                        .header h1 { margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -0.05em; color: #0f172a; }
+                        .header p { margin: 5px 0 0; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; }
+                        .details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-bottom: 40px; }
+                        .detail-item p { margin: 4px 0; font-size: 13px; }
+                        .detail-item span { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 10px; display: block; }
+                        .detail-item strong { font-weight: 800; color: #0f172a; font-size: 15px; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
-                        .total { text-align: right; margin-top: 30px; font-size: 20px; font-weight: bold; }
+                        th { background: #f8fafc; text-align: left; padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; tracking: 0.1em; }
+                        .total-section { margin-top: 40px; border-top: 4px solid #f1f5f9; padding-top: 25px; text-align: right; }
+                        .total-section p { margin: 0; color: #64748b; font-weight: 700; font-size: 14px; }
+                        .total-section h2 { margin: 5px 0 0; font-size: 32px; font-weight: 900; color: #0f172a; }
+                        .footer { margin-top: 60px; text-align: center; color: #94a3b8; font-size: 11px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
                     </style>
                 </head>
                 <body>
-                    <div class="header">
-                        <h1>TASTY BITES</h1>
-                        <p>Order Invoice</p>
-                    </div>
-                    <div class="details">
-                        <p><strong>Order ID:</strong> #${order.orderId}</p>
-                        <p><strong>Customer:</strong> ${order.customerName}</p>
-                        <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
-                        <p><strong>Type:</strong> ${order.orderType}</p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
-                        </thead>
-                        <tbody>
-                            ${order.items.map(i => `
+                    <div class="container">
+                        <div class="header">
+                            <h1>TASTY BITES</h1>
+                            <p>Official Order Invoice</p>
+                        </div>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span>Order Reference</span>
+                                <strong>#${order.orderId}</strong>
+                                <p>${new Date(order.date).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' })}</p>
+                            </div>
+                            <div class="detail-item" style="text-align: right;">
+                                <span>Customer Details</span>
+                                <strong>${order.customerName}</strong>
+                                <p>${order.customerPhone || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td>${i.name}</td>
-                                    <td>${i.quantity}</td>
-                                    <td>£{Number(String(i.price || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</td>
-                                    <td>£{(i.quantity * (parseFloat(String(i.price || 0).replace(/[^0-9.]/g, '')) || 0)).toFixed(2)}</td>
+                                    <th>Item Description</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: right;">Unit Price</th>
+                                    <th style="text-align: right;">Subtotal</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div class="total">Total: £{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</div>
+                            </thead>
+                            <tbody>
+                                ${itemsList}
+                            </tbody>
+                        </table>
+                        <div class="total-section">
+                            <p>Grand Total</p>
+                            <h2>£${Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</h2>
+                        </div>
+                        <div class="footer">
+                            <p>© ${new Date().getFullYear()} Tasty Bites Restaurant. All Rights Reserved.</p>
+                            <p>Thank you for dining with us!</p>
+                        </div>
+                    </div>
                 </body>
             </html>
         `);
         printWindow.document.close();
-        printWindow.print();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+        }, 500);
     };
 
     const filteredOrders = orders.filter(o => {
@@ -398,45 +460,117 @@ const AdminOrdersPage = () => {
             </div>
 
             {/* Orders Table Container */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
-                {(filterStatus !== 'All' || filterType !== 'All' || dateFilter !== '') && (
-                    <div className="bg-slate-50/50 px-8 py-5 flex items-center justify-between border-b border-slate-100">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{filteredOrders.length} Orders matching filters</span>
-                        <div className="flex items-center gap-2 grayscale opacity-50">
-                            <RefreshCw size={12} className="animate-spin text-slate-400" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Real-time Sync Active</span>
-                        </div>
-                    </div>
-                )}
-
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
                 {loading ? (
                     <div className="py-40 flex flex-col items-center">
                         <Loader2 className="animate-spin text-slate-300" size={48} />
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-6">Loading active orders...</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-6">Refreshing active orders...</p>
                     </div>
                 ) : filteredOrders.length > 0 ? (
-                    <div className="flex flex-col">
-                        {filteredOrders.map(order => (
-                            <OrderRow key={order.id} order={order} onUpdateStatus={updateStatus} onPrint={handlePrintInvoice} />
-                        ))}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-100 bg-slate-50/50">
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Info</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Grand Total</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredOrders.map(order => (
+                                    <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors group">
+                                        <td className="px-8 py-6">
+                                            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 font-black border border-slate-200 text-xs shadow-sm">
+                                                #{order.orderId}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <p className="text-sm font-black text-slate-900 leading-none">{order.customerName}</p>
+                                            <p className="text-[11px] text-slate-400 font-bold mt-1.5">{new Date(order.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{order.orderType}</span>
+                                                {order.tableNumber && <span className="text-[10px] font-bold text-admin-primary mt-1">Room/Table {order.tableNumber}</span>}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <p className="text-sm font-black text-slate-900 tracking-tight">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</p>
+                                            <p className="text-[10px] text-slate-400 font-bold mt-1">{order.items.length} Items</p>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <StatusBadge status={order.status} />
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button 
+                                                    onClick={() => setViewOrder(order)}
+                                                    className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-lg rounded-xl transition-all"
+                                                    title="View Details"
+                                                >
+                                                    <Eye size={18} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => setEditOrder(order)}
+                                                    className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-admin-primary hover:border-admin-primary/20 hover:shadow-lg rounded-xl transition-all"
+                                                    title="Edit Status"
+                                                >
+                                                    <Edit size={18} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handlePrintInvoice(order)}
+                                                    className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-lg rounded-xl transition-all"
+                                                    title="Print Invoice"
+                                                >
+                                                    <Printer size={18} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => confirmCancel(order)}
+                                                    className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:shadow-lg rounded-xl transition-all"
+                                                    title="Cancel Order"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 ) : (
                     <div className="py-40 flex flex-col items-center">
-                        <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 text-slate-200">
-                            <ShoppingBag size={40} />
+                        <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-8 text-slate-200">
+                            <ShoppingBag size={48} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">No Orders Found</h3>
-                        <p className="text-sm text-slate-500 mt-2 max-w-sm text-center">There are no orders that match your current filters. Adjust your search or filters to see more.</p>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">No matching orders</h3>
+                        <p className="text-sm text-slate-500 mt-2 max-w-sm text-center font-medium font-inter">Try adjusting your filters or search query to find who you're looking for.</p>
                     </div>
                 )}
             </div>
+
+            <DetailModal 
+                order={viewOrder} 
+                isOpen={!!viewOrder} 
+                onClose={() => setViewOrder(null)} 
+            />
+
+            <EditModal 
+                order={editOrder} 
+                isOpen={!!editOrder} 
+                onClose={() => setEditOrder(null)} 
+                onUpdateStatus={updateStatus}
+            />
 
             <DeleteConfirmModal 
                 isOpen={isDeleteModalOpen}
                 onClose={() => { setIsDeleteModalOpen(false); setItemToCancel(null); }}
                 onConfirm={handleConfirmCancel}
-                title="Cancel Order"
-                message="Are you sure you want to cancel this order? This will halt the preparation process."
+                title="Cancel & Remove Order"
+                message="Are you sure you want to cancel and archive this order? This action cannot be undone."
                 itemName={itemToCancel ? `Order #${itemToCancel.orderId} - ${itemToCancel.customerName}` : ''}
             />
         </div>

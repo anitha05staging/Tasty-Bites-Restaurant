@@ -25,15 +25,24 @@ const PhoneInput = ({
     onChange, 
     placeholder = "20 7946 0123", 
     required = false, 
-    className = "", 
-    containerClassName = "bg-gray-50 border border-gray-200 focus-within:ring-primary/20 focus-within:bg-white",
+    className = "",
     inputClassName = "text-lg",
-    dropdownDirection = "bottom" 
+    dropdownDirection = "bottom",
+    isDark = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [phoneNumber, setPhoneNumber] = useState('');
     const dropdownRef = useRef(null);
+
+    // Theme-based internal colors
+    const colors = {
+        text: isDark ? 'text-secondary' : 'text-white',
+        placeholder: isDark ? 'placeholder:text-secondary/40' : 'placeholder:text-white/30',
+        dropdownBtnBorder: isDark ? 'border-secondary/10' : 'border-white/10',
+        dropdownBtnHover: 'hover:bg-black/5',
+        dropdownIcon: isDark ? 'text-secondary/60' : 'text-primary'
+    };
 
     // Value parsing and syncing
     useEffect(() => {
@@ -46,9 +55,7 @@ const PhoneInput = ({
         const newValueDigits = value.replace(/\D/g, '');
         const currentFullDigits = currentFullPhone.replace(/\D/g, '');
 
-        // Only update if the stripped values are actually different
         if (newValueDigits !== currentFullDigits) {
-            // Sort by code length descending to match longest code first (e.g. +44 before +4)
             const sortedCountries = [...COUNTRIES].sort((a, b) => b.code.length - a.code.length);
             const countryMatch = sortedCountries.find(c => value.startsWith(c.code));
             if (countryMatch) {
@@ -71,10 +78,8 @@ const PhoneInput = ({
     }, []);
 
     const handlePhoneChange = (e) => {
-        // Allow spaces and digits
         const val = e.target.value.replace(/[^\d\s]/g, '');
         setPhoneNumber(val);
-        // Clean value for API (digits only)
         const cleanVal = val.replace(/\D/g, '');
         onChange(`${selectedCountry.code}${cleanVal}`);
     };
@@ -87,27 +92,27 @@ const PhoneInput = ({
     };
 
     return (
-        <div className={`relative flex items-center rounded-xl transition-all overflow-visible ${containerClassName} ${className}`}>
-            <div className="relative h-full" ref={dropdownRef}>
+        <div className={`relative flex items-stretch rounded-2xl transition-all duration-500 overflow-visible border shadow-sm ${isDark ? 'bg-gray-50 border-gray-200 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10' : 'bg-white/[0.03] border-white/10 focus-within:bg-white/[0.08] focus-within:ring-4 focus-within:ring-primary/20 focus-within:border-primary/40'} ${className}`}>
+            <div className="relative group/dropdown" ref={dropdownRef}>
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className="h-full flex items-center space-x-2 px-4 py-3 border-r border-gray-200 hover:bg-gray-100/50 transition-colors min-w-[110px]"
+                    className={`h-full flex items-center space-x-3 px-6 border-r ${colors.dropdownBtnBorder} ${colors.dropdownBtnHover} transition-all min-w-[130px] group-hover/dropdown:bg-black/5`}
                 >
-                    <span className="text-xl leading-none">{selectedCountry.flag}</span>
-                    <span className="font-medium text-secondary text-base">{selectedCountry.code}</span>
-                    <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                    <span className="text-2xl leading-none drop-shadow-sm">{selectedCountry.flag}</span>
+                    <span className={`font-bold ${colors.text} text-sm tracking-widest`}>{selectedCountry.code}</span>
+                    <ChevronDown size={14} className={`${colors.dropdownIcon} transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
-                            initial={{ opacity: 0, y: dropdownDirection === 'top' ? 10 : -10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: dropdownDirection === 'top' ? 10 : -10, scale: 0.95 }}
-                            className={`absolute ${dropdownDirection === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 w-[300px] bg-white rounded-2xl shadow-premium border border-gray-100 z-[100] py-2`}
+                            initial={{ opacity: 0, scale: 0.95, y: dropdownDirection === 'top' ? 10 : -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: dropdownDirection === 'top' ? 10 : -10 }}
+                            className={`absolute z-[1000] w-[320px] bg-white rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.3)] border border-gray-100 py-3 ${dropdownDirection === 'top' ? 'bottom-full mb-4' : 'top-full mt-4'} left-0 overflow-hidden backdrop-blur-xl`}
                         >
-                            <div className="max-h-[350px] overflow-y-auto custom-scrollbar">
+                            <div className="max-h-[380px] overflow-y-auto custom-scrollbar px-2">
                                 {COUNTRIES.map((c, idx) => {
                                     const isSelected = selectedCountry.name === c.name && selectedCountry.code === c.code;
                                     return (
@@ -115,16 +120,16 @@ const PhoneInput = ({
                                             key={`${c.code}-${idx}`}
                                             type="button"
                                             onClick={() => selectCountry(c)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${isSelected ? 'bg-primary text-white' : 'text-secondary hover:bg-gray-50'}`}
+                                            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl mb-1 transition-all ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-secondary hover:bg-gray-50'}`}
                                         >
-                                            <div className="flex items-center space-x-3">
+                                            <div className="flex items-center space-x-4">
                                                 <div className="w-5 flex justify-center">
-                                                    {isSelected && <Check size={16} className="text-white" />}
+                                                    {isSelected && <Check size={18} className="text-white" strokeWidth={3} />}
                                                 </div>
-                                                <span className="text-xl leading-none">{c.flag}</span>
-                                                <span className={`text-sm ${isSelected ? 'font-semibold' : 'font-medium'}`}>{c.name}</span>
+                                                <span className="text-2xl leading-none">{c.flag}</span>
+                                                <span className={`text-sm tracking-wide ${isSelected ? 'font-bold' : 'font-medium'}`}>{c.name}</span>
                                             </div>
-                                            <span className={`text-sm ${isSelected ? 'text-white/90' : 'text-[#64748b]'}`}>{c.code}</span>
+                                            <span className={`text-xs font-bold tracking-tighter ${isSelected ? 'text-white/90' : 'text-primary/60'}`}>{c.code}</span>
                                         </button>
                                     );
                                 })}
@@ -140,7 +145,7 @@ const PhoneInput = ({
                 value={phoneNumber}
                 onChange={handlePhoneChange}
                 placeholder={placeholder}
-                className={`flex-1 w-full min-w-0 px-5 py-3 bg-transparent border-none focus:outline-none text-secondary placeholder:text-gray-400 tracking-wide ${inputClassName}`}
+                className={`flex-1 w-full min-w-0 px-7 py-5 bg-transparent border-none focus:outline-none ${colors.text} ${colors.placeholder} tracking-[0.08em] font-semibold text-lg ${inputClassName} transition-all`}
             />
         </div>
     );

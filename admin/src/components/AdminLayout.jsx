@@ -7,12 +7,12 @@ const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-admin-bg flex overflow-x-hidden">
+        <div className="min-h-screen bg-admin-bg flex">
             <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-            
+
             {/* Overlay for mobile */}
             {isSidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
