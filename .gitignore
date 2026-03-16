@@ -36,4 +36,4 @@ vite_error.log
 Thumbs.db
 
 # Misc
-.env.example
+# .env.example (optionally track template by removing this line)
