@@ -125,9 +125,9 @@ app.get('/api/health', async (req, res) => {
         const user = process.env.SMTP_USER || 'NOT SET';
         console.log(`📧 SMTP User: ${user.substring(0, 3)}***${user.substring(user.indexOf('@'))}`);
 
-        // Add a 10s timeout to the SMTP check to prevent hanging
+        // Add a 20s timeout to the SMTP check to prevent hanging
         const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('SMTP Verification Timeout')), 10000)
+            setTimeout(() => reject(new Error('SMTP Verification Timeout (20s)')), 20000)
         );
         
         try {

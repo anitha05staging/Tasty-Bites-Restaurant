@@ -5,16 +5,16 @@ dotenv.config();
 // Standard SMTP transporter configuration
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'), // Defaulting to 587 for better cloud compatibility
-    secure: process.env.SMTP_SECURE === 'true', // Usually false for 587
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true', // false for 587
+    requireTLS: true,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
-    // Production timeouts
-    connectionTimeout: 10000, // 10s
-    greetingTimeout: 10000, 
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000, 
+    socketTimeout: 20000,
 });
 
 // The email address that should receive notifications (Admin/Restaurant)
