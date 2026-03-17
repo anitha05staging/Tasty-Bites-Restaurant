@@ -12,6 +12,8 @@ const transporter = nodemailer.createTransport({
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
+    // Force IPv4 to avoid ENETUNREACH issues on cloud providers like Render
+    family: 4,
     connectionTimeout: 15000,
     greetingTimeout: 15000, 
     socketTimeout: 20000,
