@@ -144,6 +144,12 @@ app.get('/api/health', async (req, res) => {
         environment: process.env.NODE_ENV || 'development',
         dbInitialized: isDbInitialized,
         smtp: smtpStatus,
+        smtpConfig: {
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: process.env.SMTP_PORT || '587',
+            userSet: !!process.env.SMTP_USER,
+            passSet: !!process.env.SMTP_PASS
+        },
         timestamp: new Date().toISOString()
     });
 });
