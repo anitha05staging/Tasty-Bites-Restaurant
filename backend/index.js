@@ -29,6 +29,11 @@ app.use(express.json());
 let isDbInitialized = false;
 let initializationPromise = null;
 
+// Root landing page
+app.get('/', (req, res) => {
+    res.send('<h1>Tasty Bites Backend is Running</h1><p>API endpoints are available at /api</p>');
+});
+
 // Health check (Bypass DB initialization for pure server check)
 app.get('/api/health', async (req, res) => {
     const smtpCheck = req.query.smtp === 'true';
