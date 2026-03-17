@@ -115,13 +115,28 @@ app.get('/', (req, res) => {
 
 // Health check (Bypass DB initialization for pure server check)
 app.get('/api/health', async (req, res) => {
-    // Robust check for smtp parameter (handles encoded '=' or boolean values)
-    const smtpCheck = req.query.smtp === 'true' || Object.keys(req.query).some(k => k.includes('smtp') && (k.includes('true') || req.query[k] === 'true'));
+    // Permissive check: if 'smtp' is anywhere in the query string
+    const queryStr = JSON.stringify(req.query).toLowerCase();
+    const smtpCheck = queryStr.includes('smtp');
     let smtpStatus = 'not checked';
     
     if (smtpCheck) {
-        const check = await verifyConnection();
-        smtpStatus = check.success ? 'ok' : `error: ${check.error}`;
+        console.log('🔍 Manual SMTP check requested...');
+        const user = process.env.SMTP_USER || 'NOT SET';
+        console.log(`📧 SMTP User: ${user.substring(0, 3)}***${user.substring(user.indexOf('@'))}`);
+
+        // Add a 10s timeout to the SMTP check to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('SMTP Verification Timeout')), 10000)
+        );
+        
+        try {
+            const checkResult = await Promise.race([verifyConnection(), timeoutPromise]);
+            smtpStatus = checkResult.success ? 'ok' : `error: ${checkResult.error}`;
+        } catch (error) {
+            console.error('❌ SMTP Check failed/timed out:', error.message);
+            smtpStatus = `timeout/error: ${error.message}`;
+        }
     }
 
     res.json({
