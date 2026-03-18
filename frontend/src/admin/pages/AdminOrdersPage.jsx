@@ -527,11 +527,11 @@ const AdminOrdersPage = () => {
             {/* Filters Bar */}
             <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                 <div className="flex flex-col xl:flex-row gap-6">
-                    <div className="relative flex-1 group">
+                    <div className="relative flex-1 min-w-[320px] group">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={20} />
                         <input 
                             type="text" 
-                            placeholder="Enter order # or customer details..."
+                            placeholder="Search by order # or guest name..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-16 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-slate-200 outline-none transition-all shadow-sm placeholder:text-slate-400 placeholder:font-bold"
