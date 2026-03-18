@@ -525,70 +525,75 @@ const AdminOrdersPage = () => {
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <div className="flex flex-col xl:flex-row gap-6 items-end">
-                    <div className="flex flex-col gap-2 flex-1 min-w-[320px]">
+            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <div className="flex flex-wrap lg:flex-nowrap items-end gap-6">
+                    {/* Search Field */}
+                    <div className="flex flex-col gap-2 flex-1 min-w-[280px]">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Search Database</label>
                         <div className="relative group">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={20} />
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={18} />
                             <input 
                                 type="text" 
                                 placeholder="Order # or guest name..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-16 pr-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-slate-200 outline-none transition-all shadow-sm placeholder:text-slate-400 placeholder:font-bold"
+                                className="w-full pl-14 pr-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:bg-white focus:border-slate-200 outline-none transition-all shadow-sm placeholder:text-slate-400 placeholder:font-bold h-[52px]"
                             />
                         </div>
                     </div>
-                    
-                    <div className="flex items-center gap-4 flex-wrap">
-                        <div className="h-10 w-px bg-slate-100 hidden xl:block mx-2" />
-                        
-                        <div className="flex flex-col gap-2 min-w-[180px]">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Order Status</label>
-                            <div className="relative">
-                                <select 
-                                    value={filterStatus} 
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-100 transition-all"
-                                >
-                                    <option value="All">All Statuses</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Confirmed">Confirmed</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                            </div>
-                        </div>
 
-                        <div className="flex flex-col gap-2 min-w-[160px]">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Service Type</label>
-                            <div className="relative">
-                                <select 
-                                    value={filterType} 
-                                    onChange={(e) => setFilterType(e.target.value)}
-                                    className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-100 transition-all"
-                                >
-                                    <option value="All">All Types</option>
-                                    <option value="Collection">Collection Only</option>
-                                    <option value="Dine-In">Dine-In</option>
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                            </div>
-                        </div>
+                    <div className="h-10 w-px bg-slate-100 hidden lg:block mb-1.5" />
 
-                        <div className="flex flex-col gap-2 min-w-[180px]">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Filter by Date</label>
-                            <div className="relative group">
-                                <Flatpickr
-                                    value={dateFilter}
-                                    onChange={([date]) => setDateFilter(date ? date.toISOString() : '')}
-                                    options={{ dateFormat: 'Y-m-d', placeholder: 'Select Date' }}
-                                    className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer hover:bg-slate-100 transition-all"
-                                    placeholder="SELECT DATE"
-                                />
+                    {/* Status Filter */}
+                    <div className="flex flex-col gap-2 min-w-[160px]">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Order Status</label>
+                        <div className="relative">
+                            <select 
+                                value={filterStatus} 
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                                className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-100 transition-all h-[52px]"
+                            >
+                                <option value="All">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+                        </div>
+                    </div>
+
+                    {/* Type Filter */}
+                    <div className="flex flex-col gap-2 min-w-[160px]">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Service Type</label>
+                        <div className="relative">
+                            <select 
+                                value={filterType} 
+                                onChange={(e) => setFilterType(e.target.value)}
+                                className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-100 transition-all h-[52px]"
+                            >
+                                <option value="All">All Types</option>
+                                <option value="Collection">Collection Only</option>
+                                <option value="Dine-In">Dine-In</option>
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+                        </div>
+                    </div>
+
+                    {/* Date Filter */}
+                    <div className="flex flex-col gap-2 min-w-[180px]">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Filter by Date</label>
+                        <div className="relative group">
+                            <Flatpickr
+                                value={dateFilter}
+                                onChange={([date]) => setDateFilter(date ? date.toISOString() : '')}
+                                options={{ dateFormat: 'Y-m-d', placeholder: 'Select Date' }}
+                                className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer hover:bg-slate-100 transition-all h-[52px]"
+                                placeholder="SELECT DATE"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                <ChevronDown size={16} />
                             </div>
                         </div>
                     </div>
