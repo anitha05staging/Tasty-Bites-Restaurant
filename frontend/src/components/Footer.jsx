@@ -9,7 +9,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-slate-950 pt-24 pb-12 relative overflow-hidden">
+        <footer className="bg-slate-950 pt-24 pb-12 relative overflow-hidden border-t border-white/5">
             {/* Scroll to Top */}
             <button
                 onClick={scrollToTop}

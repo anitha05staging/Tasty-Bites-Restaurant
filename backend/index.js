@@ -1,41 +1,29 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import dns from 'node:dns';
-
-// Force IPv4 priority globally to resolve ENETUNREACH errors on Render
-if (dns && dns.setDefaultResultOrder) {
-    dns.setDefaultResultOrder('ipv4first');
-}
-import { sequelize, MenuItem } from './models/index.js';
-import { seed } from './seed.js';
-
-import authRoutes from './routes/auth.js';
-import menuRoutes from './routes/menu.js';
-import orderRoutes from './routes/orders.js';
-import reservationRoutes from './routes/reservations.js';
-import addressRoutes from './routes/addresses.js';
+import { db, isDbInitialized } from './config/database.js';
+import bookingRoutes from './routes/bookings.js';
 import contactRoutes from './routes/contact.js';
 import cateringRoutes from './routes/catering.js';
-import testimonialsRoutes from './routes/testimonials.js';
-import faqsRoutes from './routes/faqs.js';
+import orderRoutes from './routes/orders.js';
 import categoryRoutes from './routes/categories.js';
 import { verifyConnection, sendTestEmail } from './services/email.js';
+import dns from 'node:dns';
+
+// Force IPv4 globally for older modules (like Axios/Nodemailer if they don't honor the family opt)
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Database initialization state
-let isDbInitialized = false;
-let initializationPromise = null;
-
-// Root landing page
+// Main Dashboard Landing Page
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -43,142 +31,134 @@ app.get('/', (req, res) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Tasty Bites | API Professional Dashboard</title>
-            <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+            <title>Tasty Bites | API Dashboard</title>
             <style>
                 :root {
+                    --bg: #0f1715;
+                    --text: #e0e6e4;
                     --accent: #d9774a;
-                    --bg: #0d1a18;
-                    --glass: rgba(255, 255, 255, 0.03);
+                    --card: rgba(255, 255, 255, 0.05);
+                    --success: #4ade80;
                 }
                 body {
                     margin: 0;
-                    padding: 20px;
-                    font-family: 'Poppins', sans-serif;
-                    background: linear-gradient(135deg, #1a2f2b 0%, var(--bg) 100%);
-                    color: #f0e6d2;
+                    padding: 0;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: var(--bg);
+                    color: var(--text);
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     min-height: 100vh;
+                    overflow: hidden;
                 }
-                .dashboard {
-                    background: var(--glass);
-                    backdrop-filter: blur(15px);
-                    border-radius: 32px;
-                    border: 1px solid rgba(217, 119, 74, 0.15);
-                    padding: 50px;
-                    width: 100%;
-                    max-width: 600px;
-                    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+                .container {
+                    width: 90%;
+                    max-width: 800px;
                     text-align: center;
+                    position: relative;
+                }
+                .glass {
+                    background: var(--card);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 24px;
+                    padding: 50px;
+                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
                 }
                 .logo {
-                    font-family: 'Playfair Display', serif;
-                    font-size: 3.5rem;
-                    color: var(--accent);
-                    margin-bottom: 5px;
+                    font-size: 48px;
+                    font-family: 'Times New Roman', serif;
                     font-style: italic;
+                    color: var(--accent);
+                    margin: 0 0 10px 0;
                     letter-spacing: -1px;
                 }
-                .subtitle {
-                    font-size: 0.85rem;
-                    text-transform: uppercase;
-                    letter-spacing: 4px;
-                    opacity: 0.6;
-                    margin-bottom: 40px;
-                }
-                .status-container {
-                    display: flex;
+                .status-badge {
+                    display: inline-flex;
                     align-items: center;
-                    justify-content: center;
-                    gap: 12px;
-                    margin-bottom: 40px;
+                    background: rgba(74, 222, 128, 0.1);
+                    color: var(--success);
+                    padding: 6px 16px;
+                    border-radius: 100px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-bottom: 30px;
+                    border: 1px solid rgba(74, 222, 128, 0.2);
                 }
-                .pulse {
-                    width: 10px;
-                    height: 10px;
-                    background: #1e8e3e;
+                .status-pulse {
+                    width: 8px;
+                    height: 8px;
+                    background: var(--success);
                     border-radius: 50%;
-                    box-shadow: 0 0 0 rgba(30, 142, 62, 0.4);
+                    margin-right: 10px;
+                    box-shadow: 0 0 10px var(--success);
                     animation: pulse 2s infinite;
                 }
                 @keyframes pulse {
-                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 142, 62, 0.7); }
-                    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(30, 142, 62, 0); }
-                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 142, 62, 0); }
+                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+                    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
                 }
-                .status-label {
-                    font-weight: 600;
-                    font-size: 0.9rem;
-                    color: #4cd964;
-                }
-                .endpoints {
+                .grid {
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 15px;
-                    margin-top: 30px;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 20px;
+                    margin-top: 40px;
                 }
                 .card {
-                    background: rgba(255, 255, 255, 0.05);
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.05);
                     border-radius: 16px;
                     padding: 20px;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
                     text-decoration: none;
                     color: inherit;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid transparent;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 8px;
                 }
                 .card:hover {
                     background: rgba(217, 119, 74, 0.1);
                     border-color: var(--accent);
                     transform: translateY(-5px);
                 }
-                .card i { font-size: 1.2rem; display: block; }
-                .card span { font-size: 0.8rem; font-weight: 600; }
-                .card small { font-size: 0.7rem; opacity: 0.5; }
-                
+                .card h3 { margin: 0 0 10px 0; font-size: 15px; color: var(--accent); }
+                .card p { margin: 0; font-size: 13px; color: #888; }
                 .footer {
                     margin-top: 40px;
-                    font-size: 0.75rem;
-                    opacity: 0.4;
+                    font-size: 12px;
+                    color: #555;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
                 }
             </style>
         </head>
         <body>
-            <div class="dashboard">
-                <div class="logo">Tasty Bites</div>
-                <div class="subtitle">API INFRASTRUCTURE</div>
-                
-                <div class="status-container">
-                    <div class="pulse"></div>
-                    <div class="status-label">FULLY OPERATIONAL</div>
+            <div class="container">
+                <div class="glass">
+                    <div class="logo">Tasty Bites</div>
+                    <div class="status-badge">
+                        <div class="status-pulse"></div>
+                        SYSTEM OPERATIONAL
+                    </div>
+                    <p style="color: #888; margin-bottom: 20px;">Innovative API Infrastructure for Premium Dining</p>
+                    
+                    <div class="grid">
+                        <a href="/api/health?smtp=true" class="card">
+                            <h3>Diagnostics</h3>
+                            <p>System & SMTP Health</p>
+                        </a>
+                        <a href="/api/health/test-email" class="card">
+                            <h3>Email Test</h3>
+                            <p>Verify SMTP Delivery</p>
+                        </a>
+                        <a href="/api/categories" class="card">
+                            <h3>Inventory</h3>
+                            <p>Digital Menu Data</p>
+                        </a>
+                    </div>
                 </div>
-
-                <div class="endpoints">
-                    <a href="/api/health" class="card">
-                        <span>🛰️ CORE HEALTH</span>
-                        <small>System diagnostics</small>
-                    </a>
-                    <a href="/api/health?smtp=true" class="card">
-                        <span>📧 SMTP SENSOR</span>
-                        <small>Email verify link</small>
-                    </a>
-                    <a href="https://tasty-bites-restaurant-ten.vercel.app/" target="_blank" class="card">
-                        <span>🌐 CLIENT UI</span>
-                        <small>Public Website</small>
-                    </a>
-                    <a href="https://tasty-bites-restaurant-ten.vercel.app/admin" target="_blank" class="card">
-                        <span>🛡️ ADMIN PANEL</span>
-                        <small>Management Suite</small>
-                    </a>
-                </div>
-
                 <div class="footer">
-                    PRODUCTION ENVIRONMENT • SSL SECURE • V2.1.0
+                    PRODUCTION ENVIRONMENT • SSL SECURE • V3.0.0
                 </div>
             </div>
         </body>
@@ -186,54 +166,47 @@ app.get('/', (req, res) => {
     `);
 });
 
-// Health check (Bypass DB initialization for pure server check)
+// Health check with 60s timeout
 app.get('/api/health', async (req, res) => {
-    // Permissive check: if 'smtp' is anywhere in the query string
     const queryStr = JSON.stringify(req.query).toLowerCase();
     const smtpCheck = queryStr.includes('smtp');
     let smtpStatus = 'not checked';
+    let smtpMeta = {};
     
     if (smtpCheck) {
-        // Add a 45s timeout to the health check wrapper
+        // Add a 60s timeout to the health check wrapper
         const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('SMTP Verification Timeout (45s)')), 45000)
+            setTimeout(() => reject(new Error('SMTP Verification Timeout (60s)')), 60000)
         );
         
         try {
             const checkResult = await Promise.race([verifyConnection(), timeoutPromise]);
             smtpStatus = checkResult.success ? 'ok' : `error: ${checkResult.error}`;
+            smtpMeta = {
+                resolvedHost: checkResult.resolvedHost,
+                latency: checkResult.latency
+            };
         } catch (error) {
-            console.error('❌ SMTP Check failed/timed out:', error.message);
             smtpStatus = `timeout/error: ${error.message}`;
         }
-
-        // Return diagnostics
-        return res.json({
-            status: 'ok',
-            environment: process.env.NODE_ENV || 'development',
-            dbInitialized: isDbInitialized,
-            smtp: smtpStatus,
-            smtpConfig: {
-                host: process.env.SMTP_HOST || 'smtp.gmail.com',
-                port: process.env.SMTP_PORT || '587',
-                secure: process.env.SMTP_SECURE || 'false',
-                userSet: !!process.env.SMTP_USER,
-                passSet: !!process.env.SMTP_PASS
-            },
-            timestamp: new Date().toISOString()
-        });
     }
 
     return res.json({
         status: 'ok',
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || 'production',
         dbInitialized: isDbInitialized,
-        smtp: 'not checked',
+        smtp: smtpStatus,
+        smtpDiagnostics: smtpMeta,
+        config: {
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: process.env.SMTP_PORT || '587',
+            secure: process.env.SMTP_SECURE || 'false',
+        },
         timestamp: new Date().toISOString()
     });
 });
 
-// Test Email Endpoint
+// Direct Test Email Endpoint
 app.get('/api/health/test-email', async (req, res) => {
     const target = req.query.to || process.env.SMTP_USER;
     if (!target) {
@@ -255,70 +228,17 @@ app.get('/api/health/test-email', async (req, res) => {
     }
 });
 
-// Middleware to ensure DB is initialized before handling requests
-app.use(async (req, res, next) => {
-    if (isDbInitialized) return next();
-
-    // Prevent multiple simultaneous initializations
-    if (!initializationPromise) {
-        initializationPromise = (async () => {
-            console.log('🔄 Starting database initialization...');
-            try {
-                await sequelize.authenticate();
-                console.log('✅ Database connection established successfully.');
-
-                await sequelize.sync({ alter: true });
-                const dialect = sequelize.getDialect();
-                console.log(`📦 Database synced (Dialect: ${dialect})`);
-
-                // Auto-seed in production or if requested
-                if (process.env.NODE_ENV === 'production' || process.env.AUTO_SEED === 'true') {
-                    const count = await MenuItem.count();
-                    if (count === 0) {
-                        console.log('⚠️ Production database empty. Running auto-seed...');
-                        await seed(false);
-                    } else {
-                        console.log(`ℹ️ Database contains ${count} menu items. Skipping seed.`);
-                    }
-                }
-                isDbInitialized = true;
-                console.log('✨ Database initialization complete.');
-            } catch (err) {
-                console.error('❌ Database initialization error:', err);
-                initializationPromise = null; // Allow retry on next request
-                throw err;
-            }
-        })();
-    }
-
-    try {
-        await initializationPromise;
-        next();
-    } catch (err) {
-        res.status(500).json({
-            error: 'Internal server error during database startup',
-            details: err.message || 'Unknown database error' // Temporarily exposed for production debugging
-        });
-    }
-});
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/reservations', reservationRoutes);
-app.use('/api/addresses', addressRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/catering', cateringRoutes);
-app.use('/api/testimonials', testimonialsRoutes);
-app.use('/api/faqs', faqsRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 
-// Start server
-if (!process.env.VITE_VERCEL_ENV) {
-    app.listen(PORT, '0.0.0.0', () => {
+db.sync({ alter: true }).then(() => {
+    console.log('✅ Database synced successfully');
+    app.listen(PORT, () => {
         console.log(`🚀 Tasty Bites API running on port ${PORT}`);
     });
-}
-
-export default app;
+}).catch(err => {
+    console.error('❌ Unable to connect to the database:', err);
+});
