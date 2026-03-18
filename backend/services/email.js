@@ -4,18 +4,18 @@ dotenv.config();
 
 // Standard SMTP transporter configuration
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, 
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
     auth: {
         user: (process.env.SMTP_USER || '').trim(),
         pass: (process.env.SMTP_PASS || '').trim(),
     },
     requireTLS: true,
-    pool: false, // Turn off pooling to isolate connection attempts
+    pool: false,
     logger: true,
     debug: true,
-    family: 4, // Explicitly force IPv4 in transporter too
+    family: 4,
     name: 'render.com',
     tls: {
         rejectUnauthorized: false,
@@ -294,6 +294,33 @@ export const verifyConnection = async () => {
         return { success: true };
     } catch (error) {
         console.error("❌ SMTP connection verification failed:", error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send a Test Email
+ */
+export const sendTestEmail = async (targetEmail) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `"Tasty Bites Test" <${process.env.SMTP_USER}>`,
+            to: targetEmail,
+            subject: "Tasty Bites - SMTP Functional Test",
+            html: `
+                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                    <h2 style="color: #1a2f2b;">Success!</h2>
+                    <p>This is a test email from your <strong>Tasty Bites</strong> backend.</p>
+                    <p>If you received this, your SMTP configuration is 100% functional in this environment.</p>
+                    <hr/>
+                    <small>Sent at: ${new Date().toLocaleString()}</small>
+                </div>
+            `
+        });
+        console.log("✅ Test email sent:", info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error("❌ Test email failed:", error);
         return { success: false, error: error.message };
     }
 };

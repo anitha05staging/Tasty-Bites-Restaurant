@@ -20,7 +20,7 @@ import cateringRoutes from './routes/catering.js';
 import testimonialsRoutes from './routes/testimonials.js';
 import faqsRoutes from './routes/faqs.js';
 import categoryRoutes from './routes/categories.js';
-import { verifyConnection } from './services/email.js';
+import { verifyConnection, sendTestEmail } from './services/email.js';
 
 dotenv.config();
 
