@@ -4,21 +4,26 @@ dotenv.config();
 
 // Standard SMTP transporter configuration
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use STARTTLS on 587
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: (process.env.SMTP_USER || '').trim(),
+        pass: (process.env.SMTP_PASS || '').trim(),
     },
-    pool: true, // Use pooling for better performance/reliability
-    logger: true, // Log to console
-    debug: true,  // Include debug output
+    requireTLS: true,
+    pool: true,
+    logger: true,
+    debug: true,
     family: 4,
+    name: 'render.com', // Identify explicitly for better delivery
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
     },
-    connectionTimeout: 20000,
-    greetingTimeout: 20000, 
-    socketTimeout: 30000,
+    connectionTimeout: 40000,
+    greetingTimeout: 40000, 
+    socketTimeout: 60000,
 });
 
 // The email address that should receive notifications (Admin/Restaurant)
