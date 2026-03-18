@@ -210,20 +210,54 @@ app.get('/api/health', async (req, res) => {
             console.error('❌ SMTP Check failed/timed out:', error.message);
             smtpStatus = `timeout/error: ${error.message}`;
         }
+
+        // Return diagnostics
+        return res.json({
+            status: 'ok',
+            environment: process.env.NODE_ENV || 'development',
+            dbInitialized: isDbInitialized,
+            smtp: smtpStatus,
+            smtpConfig: {
+                host: process.env.SMTP_HOST || 'smtp.gmail.com',
+                port: process.env.SMTP_PORT || '587',
+                secure: process.env.SMTP_SECURE || 'false',
+                userSet: !!process.env.SMTP_USER,
+                passSet: !!process.env.SMTP_PASS
+            },
+            timestamp: new Date().toISOString()
+        });
     }
 
-    res.json({
+    return res.json({
         status: 'ok',
         environment: process.env.NODE_ENV || 'development',
         dbInitialized: isDbInitialized,
-        smtp: smtpStatus,
-        smtpConfig: {
-            service: 'gmail',
-            userSet: !!process.env.SMTP_USER,
-            passSet: !!process.env.SMTP_PASS
-        },
+        smtp: 'not checked',
         timestamp: new Date().toISOString()
     });
+});
+
+// Test Email Endpoint
+app.get('/api/health/test-email', async (req, res) => {
+    const target = req.query.to || process.env.SMTP_USER;
+    if (!target) {
+        return res.status(400).json({ error: 'No target email provided and SMTP_USER not set' });
+    }
+
+    console.log(`📧 Sending test email to: ${target}`);
+    const result = await sendTestEmail(target);
+    if (result.success) {
+        return res.json({ 
+            status: 'success', 
+            message: `Test email sent successfully to ${target}`,
+            messageId: result.messageId
+        });
+    } else {
+        return res.status(500).json({ 
+            status: 'error', 
+            error: result.error 
+        });
+    }
 });
 
 // Middleware to ensure DB is initialized before handling requests
