@@ -194,10 +194,6 @@ app.get('/api/health', async (req, res) => {
     let smtpStatus = 'not checked';
     
     if (smtpCheck) {
-        console.log('🔍 Manual SMTP check requested...');
-        const user = process.env.SMTP_USER || 'NOT SET';
-        console.log(`📧 SMTP User: ${user.substring(0, 3)}***${user.substring(user.indexOf('@'))}`);
-
         // Add a 45s timeout to the health check wrapper
         const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error('SMTP Verification Timeout (45s)')), 45000)
@@ -244,7 +240,6 @@ app.get('/api/health/test-email', async (req, res) => {
         return res.status(400).json({ error: 'No target email provided and SMTP_USER not set' });
     }
 
-    console.log(`📧 Sending test email to: ${target}`);
     const result = await sendTestEmail(target);
     if (result.success) {
         return res.json({ 
