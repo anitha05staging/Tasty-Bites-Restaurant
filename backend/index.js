@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { db, isDbInitialized } from './config/database.js';
-import bookingRoutes from './routes/bookings.js';
+import reservationRoutes from './routes/reservations.js';
 import contactRoutes from './routes/contact.js';
 import cateringRoutes from './routes/catering.js';
 import orderRoutes from './routes/orders.js';
@@ -228,7 +228,7 @@ app.get('/api/health/test-email', async (req, res) => {
     }
 });
 
-app.use('/api/bookings', bookingRoutes);
+app.use('/api/bookings', reservationRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/catering', cateringRoutes);
 app.use('/api/orders', orderRoutes);
