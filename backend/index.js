@@ -1,6 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import dns from 'node:dns';
+
+// Force IPv4 priority globally to resolve ENETUNREACH errors on Render
+if (dns && dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
 import { sequelize, MenuItem } from './models/index.js';
 import { seed } from './seed.js';
 
