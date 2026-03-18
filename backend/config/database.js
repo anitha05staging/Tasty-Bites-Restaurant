@@ -24,7 +24,6 @@ if (dbUrl) {
         pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
     });
 } else {
-    // Fallback to individual parameters if DATABASE_URL is not provided
     sequelize = new Sequelize(
         process.env.DB_NAME || 'tasty_bites',
         process.env.DB_USER || 'postgres',
@@ -39,5 +38,16 @@ if (dbUrl) {
         }
     );
 }
+
+// Named exports to match index.js
+export const db = sequelize;
+export let isDbInitialized = false;
+
+// Monitor initialization
+sequelize.authenticate().then(() => {
+    isDbInitialized = true;
+}).catch(() => {
+    isDbInitialized = false;
+});
 
 export default sequelize;
