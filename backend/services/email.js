@@ -4,12 +4,14 @@ dotenv.config();
 
 // Standard SMTP transporter configuration
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Let nodemailer handle host/port/secure for Gmail
+    service: 'gmail',
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
-    // Force IPv4 and bypass strict TLS to avoid Render network delays/blocks
+    pool: true, // Use pooling for better performance/reliability
+    logger: true, // Log to console
+    debug: true,  // Include debug output
     family: 4,
     tls: {
         rejectUnauthorized: false
