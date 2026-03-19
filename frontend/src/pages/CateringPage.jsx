@@ -107,7 +107,7 @@ const CateringPage = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-brand-cream overflow-x-hidden">
+        <div className="min-h-screen bg-slate-50 overflow-x-hidden">
             {/* Immersive Hero Section */}
             <section className="relative h-screen flex items-center justify-center overflow-hidden">
                 <motion.div 
@@ -135,17 +135,17 @@ const CateringPage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5 }}
-                            className="inline-flex items-center gap-3 px-6 mt-5 py-2 bg-white/10 backdrop-blur-xl border border-white/20 text-accent rounded-full text-xs font-bold uppercase tracking-[0.4em] mb-10 mx-auto"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 text-accent rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-6 sm:mb-10 mx-auto whitespace-nowrap"
                         >
                             <Star size={14} className="animate-pulse" /> Crafted Celebrations
                         </motion.div>
                         
-                        <h1 className="text-5xl md:text-7xl font-playfair text-white mb-8 leading-[1.1] tracking-tight">
+                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-playfair text-white mb-6 sm:mb-8 leading-[1.1] tracking-tight px-2">
                             Memories Reimagined <br />
                             <span className="text-accent italic font-light drop-shadow-2xl">Through Flavor</span>
                         </h1>
                         
-                        <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-light leading-relaxed mb-12 px-4">
+                        <p className="text-sm sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-light leading-relaxed mb-10 sm:mb-12 px-6">
                             Bringing the authentic soul of South Indian spice to your grandest stages and intimate corners.
                         </p>
 
@@ -205,7 +205,7 @@ const CateringPage = () => {
                                     alt="Catering Hospitality" 
                                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
                                 />
-                                <div className="absolute inset-0 bg-secondary/10" />
+                                <div className="absolute inset-0 bg-slate-900/10" />
                             </div>
                             <div className="absolute -bottom-12 -right-12 p-12 bg-primary text-white rounded-[3rem] shadow-2xl hidden md:block">
                                 <div className="text-5xl font-playfair mb-2 italic">15+</div>
@@ -227,7 +227,7 @@ const CateringPage = () => {
                                 </h2>
                             </div>
                             
-                            <p className="text-base text-brand-text-light leading-relaxed font-medium">
+                            <p className="text-base text-slate-500 leading-relaxed font-medium">
                                 Every grain of spice is a choice. Every plate is a narrative. We transform ordinary venues into extraordinary canvases of aroma and color, ensuring your story is told through the lens of pure, unadulterated heritage.
                             </p>
 
@@ -269,7 +269,7 @@ const CateringPage = () => {
                                 className={`relative p-12 rounded-[3.5rem] border transition-all duration-500 cursor-pointer flex flex-col ${
                                     activePackage === tier.id 
                                     ? 'bg-slate-900 text-white shadow-2xl border-white/10' 
-                                    : 'bg-brand-cream/40 text-slate-900 border-slate-900/5 h-[95%] mt-auto'
+                                    : 'bg-white text-slate-900 border-slate-100 h-[95%] mt-auto'
                                 }`}
                             >
                                 {tier.popular && (
@@ -281,13 +281,13 @@ const CateringPage = () => {
                                 )}
                                 
                                 <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-10 shadow-sm transition-colors duration-500 ${
-                                    activePackage === tier.id ? 'bg-white/10 text-white' : 'bg-white text-secondary'
+                                    activePackage === tier.id ? 'bg-white/10 text-white' : 'bg-slate-50 text-slate-900'
                                 }`}>
                                     {tier.icon}
                                 </div>
                                 <h3 className="text-3xl font-playfair mb-6">{tier.name}</h3>
                                 <p className={`text-sm mb-10 font-medium leading-relaxed transition-colors duration-500 ${
-                                    activePackage === tier.id ? 'text-white/70' : 'text-brand-text-light'
+                                    activePackage === tier.id ? 'text-white/70' : 'text-slate-500'
                                 }`}>
                                     {tier.description}
                                 </p>
@@ -370,7 +370,7 @@ const CateringPage = () => {
                                                 value={formData.fullName}
                                                 onChange={handleChange}
                                                 placeholder="Arthur Pendragon" 
-                                                className="w-full pl-16 pr-8 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 shadow-sm text-sm"
+                                                className="w-full pl-12 sm:pl-16 pr-8 py-4 sm:py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all font-bold text-slate-900 placeholder:text-slate-300 shadow-sm text-xs sm:text-sm"
                                             />
                                         </div>
                                     </div>

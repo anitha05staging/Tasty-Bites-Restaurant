@@ -190,12 +190,12 @@ const BookTable = () => {
                                 <span className="text-sm font-bold uppercase tracking-widest">Fine Dining Experience</span>
                             </motion.div>
                             
-                            <motion.h1 variants={formVariants} className="text-5xl md:text-7xl font-playfair mb-6 leading-tight">
+                            <motion.h1 variants={formVariants} className="text-3xl sm:text-5xl md:text-7xl font-playfair mb-6 leading-tight">
                                 Reserve <br />
                                 <span className="text-primary italic">Your Table</span>
                             </motion.h1>
                             
-                            <motion.p variants={formVariants} className="text-slate-500 text-lg leading-relaxed mb-8 max-w-md font-medium">
+                            <motion.p variants={formVariants} className="text-slate-500 text-sm sm:text-lg leading-relaxed mb-8 max-w-md font-medium">
                                 Experience authentic South Indian flavors in an ambiance of elegance and warmth. Book now to ensure your spot at Tasty Bites.
                             </motion.p>
 
@@ -242,7 +242,7 @@ const BookTable = () => {
                                                     name="fullName"
                                                     value={formData.fullName}
                                                     onChange={handleChange}
-                                                    className={`w-full pl-16 pr-6 py-4 bg-slate-50 border-2 ${errors.fullName ? 'border-red-500/50' : 'border-slate-100 focus:border-primary/60'} rounded-2xl text-slate-900 placeholder:text-slate-200 focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-sm`}
+                                                    className={`w-full pl-12 sm:pl-16 pr-6 py-4 bg-slate-50 border-2 ${errors.fullName ? 'border-red-500/50' : 'border-slate-100 focus:border-primary/60'} rounded-2xl text-slate-900 placeholder:text-slate-200 focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-sm text-sm sm:text-base`}
                                                     placeholder="Enter your name"
                                                 />
                                             </div>
@@ -258,7 +258,7 @@ const BookTable = () => {
                                                     name="email"
                                                     value={formData.email}
                                                     onChange={handleChange}
-                                                    className={`w-full pl-16 pr-6 py-4 bg-slate-50 border-2 ${errors.email ? 'border-red-500/50' : 'border-slate-100 focus:border-primary/60'} rounded-2xl text-slate-900 placeholder:text-slate-200 focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-sm`}
+                                                    className={`w-full pl-12 sm:pl-16 pr-6 py-4 bg-slate-50 border-2 ${errors.email ? 'border-red-500/50' : 'border-slate-100 focus:border-primary/60'} rounded-2xl text-slate-900 placeholder:text-slate-200 focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-sm text-sm sm:text-base`}
                                                     placeholder="your@email.com"
                                                 />
                                             </div>
