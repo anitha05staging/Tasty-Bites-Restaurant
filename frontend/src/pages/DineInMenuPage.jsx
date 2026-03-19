@@ -184,9 +184,9 @@ const DineInMenuPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFCF7] pt-10 pb-24">
+        <div className="min-h-screen bg-[#FDFCF7] pt-20 pb-24">
             {/* Hero Header - Premium Style */}
-            <div className="relative h-[400px] md:h-[500px] w-full mt-4 overflow-hidden">
+            <div className="relative h-[400px] md:h-[500px] w-full mt-8 overflow-hidden">
                 <img
                     src="/images/authentic-spread.png"
                     alt="Authentic Spread"
