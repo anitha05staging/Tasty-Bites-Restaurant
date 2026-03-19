@@ -273,7 +273,7 @@ const CateringPage = () => {
                                 }`}
                             >
                                 {tier.popular && (
-                                    <span className={`absolute -top-5 left-1/2 -translate-x-1/2 px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl transition-colors duration-500 ${
+                                    <span className={`absolute -top-5 left-1/2 -translate-x-1/2 px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl transition-colors duration-500 whitespace-nowrap ${
                                         activePackage === tier.id ? 'bg-accent text-white' : 'bg-primary text-white'
                                     }`}>
                                         Signature Collection
