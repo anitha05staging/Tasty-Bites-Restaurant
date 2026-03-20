@@ -55,7 +55,7 @@ const CateringPage = () => {
                 details: formData.message
             });
             toast.success('Your catering inquiry has been sent! We will contact you shortly.', {
-                position: "top-center",
+                position: "top-right",
                 autoClose: 5000,
             });
             setFormData({
