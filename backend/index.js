@@ -38,7 +38,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Main Dashboard Landing Page
 app.get('/', (req, res) => {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://tasty-bites-restaurant-ten.vercel.app';
+    const frontendUrl = (process.env.FRONTEND_URL || 'https://tasty-bites-restaurant-ten.vercel.app').replace(/\/$/, "");
     const adminUrl = process.env.ADMIN_URL || `${frontendUrl}/admin`;
 
     res.send(`
