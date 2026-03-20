@@ -47,17 +47,25 @@ const DashboardCharts = ({ orders = [] }) => {
     // Process data for Order Type Distribution
     const getOrderStats = () => {
         const stats = {
-            'Dine-in': 0,
+            'Dine-In': 0,
             'Takeaway': 0,
             'Delivery': 0
         };
+        
         orders.forEach(o => {
-            if (o.orderType && stats[o.orderType] !== undefined) {
-                stats[o.orderType]++;
-            } else if (o.type && stats[o.type] !== undefined) {
-                stats[o.type]++;
+            const rawType = o.orderType || o.type || '';
+            const type = rawType.trim();
+            
+            // Normalize mapping
+            if (type === 'Dine-In' || type === 'Dine-in') {
+                stats['Dine-In']++;
+            } else if (type === 'Collection' || type === 'Takeaway' || type === 'Take-Away') {
+                stats['Takeaway']++;
+            } else if (type === 'Delivery' || type === 'delivery') {
+                stats['Delivery']++;
             }
         });
+        
         return Object.keys(stats).map(name => ({ name, value: stats[name] }));
     };
 
