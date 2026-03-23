@@ -75,10 +75,6 @@ export const adminMenuApi = {
     delete: async (id) => {
         const response = await adminApi.delete(`menu/${id}`);
         return response.data;
-    },
-    delete: async (id) => {
-        const response = await adminApi.delete(`menu/${id}`);
-        return response.data;
     }
 };
 

@@ -370,7 +370,7 @@ const AdminOrdersPage = () => {
 
     const handleConfirmCancel = () => {
         if (!itemToCancel) return;
-        updateStatus(itemToCancel.id, 'Cancelled');
+        updateOrder(itemToCancel.id, { status: 'Cancelled' });
     };
 
     const confirmCancel = (order) => {

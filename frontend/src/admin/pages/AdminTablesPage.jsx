@@ -15,7 +15,8 @@ import {
     Filter,
     X,
     MapPin,
-    ArrowRight
+    ArrowRight,
+    ChevronRight
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
@@ -84,6 +85,23 @@ const AdminTablesPage = () => {
             });
         }
         setIsModalOpen(true);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingTable) {
+                await api.updateTable(editingTable.id, formData);
+                toast.success(`Table ${formData.number} updated successfully!`);
+            } else {
+                await api.createTable(formData);
+                toast.success(`Table ${formData.number} created successfully!`);
+            }
+            setIsModalOpen(false);
+            fetchTables();
+        } catch (error) {
+            toast.error(error.message);
+        }
     };
 
     const handleAssignWaiter = async (waiterId) => {
