@@ -466,7 +466,7 @@ const AdminOrdersPage = () => {
     };
 
     const filteredOrders = orders.filter(o => {
-        const matchesSearch = o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || o.orderId.includes(searchQuery);
+        const matchesSearch = o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || String(o.orderId).includes(searchQuery);
         const matchesStatus = filterStatus === 'All' || o.status === filterStatus;
         const matchesType = filterType === 'All' || o.orderType === filterType;
         const matchesDate = !dateFilter || new Date(o.date).toLocaleDateString() === new Date(dateFilter).toLocaleDateString();

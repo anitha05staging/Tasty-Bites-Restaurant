@@ -68,7 +68,7 @@ const AdminChefPage = () => {
     const handleUpdateOrderStatus = async (id, status) => {
         try {
             await api.updateOrder(id, { status });
-            toast.success(`Order ${id.slice(-6)} is now ${status}!`);
+            toast.success(`Order ${String(id).slice(-6)} is now ${status}!`);
             fetchAllData();
         } catch (error) {
             toast.error("Failed to update order: " + error.message);
@@ -140,12 +140,10 @@ const AdminChefPage = () => {
             <div className={`absolute top-0 right-0 w-2 h-full ${order.priority === 'High' ? 'bg-rose-400' : 'bg-slate-200'}`} />
             
             <div className="flex justify-between items-start mb-4">
-                <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-admin-primary bg-admin-primary/5 px-2 py-0.5 rounded-md uppercase tracking-tighter">#{order.id.slice(-6)}</span>
+                        <span className="text-xs font-black text-admin-primary bg-admin-primary/5 px-2 py-0.5 rounded-md uppercase tracking-tighter">#{String(order.id).slice(-6)}</span>
                         <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Hash size={12} /> {order.Table?.number || 'T-?'}</span>
                     </div>
-                </div>
                 <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border ${
                     order.priority === 'High' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-slate-50 text-slate-500 border-slate-100'
                 }`}>
