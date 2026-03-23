@@ -41,6 +41,9 @@ const AdminWaitersPage = () => {
         password: ''
     });
 
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+
     useEffect(() => {
         fetchStaff();
     }, []);
@@ -169,12 +172,49 @@ const AdminWaitersPage = () => {
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full md:w-auto px-2">
-                    <button className="flex-1 md:flex-none flex items-center justify-center gap-3 px-6 py-4 bg-white border border-slate-100 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-admin-primary transition-all">
+                    <button 
+                        onClick={() => setIsScheduleModalOpen(true)}
+                        className="flex-1 md:flex-none flex items-center justify-center gap-3 px-6 py-4 bg-white border border-slate-100 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-admin-primary transition-all"
+                    >
                         <Calendar size={16} /> Schedule
                     </button>
-                    <button className="p-4 bg-white border border-slate-100 rounded-[1.5rem] text-slate-600 hover:border-admin-primary transition-all">
-                        <MoreVertical size={18} />
-                    </button>
+                    <div className="relative">
+                        <button 
+                            onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                            className="p-4 bg-white border border-slate-100 rounded-[1.5rem] text-slate-600 hover:border-admin-primary transition-all"
+                        >
+                            <MoreVertical size={18} />
+                        </button>
+                        
+                        <AnimatePresence>
+                            {isActionMenuOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsActionMenuOpen(false)} />
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute right-0 mt-4 w-56 bg-white rounded-3xl shadow-2xl border border-slate-100 p-3 z-50 origin-top-right"
+                                    >
+                                        <div className="space-y-1">
+                                            {['Export Staff List', 'Bulk Message', 'Work Shift Report'].map(action => (
+                                                <button 
+                                                    key={action}
+                                                    onClick={() => {
+                                                        toast.info(`${action} feature coming soon!`);
+                                                        setIsActionMenuOpen(false);
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all"
+                                                >
+                                                    {action}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
 
@@ -267,6 +307,60 @@ const AdminWaitersPage = () => {
                     <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">No waiters found</h3>
                 </div>
             )}
+
+            {/* Schedule Modal Placeholder */}
+            <AnimatePresence>
+                {isScheduleModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsScheduleModalOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-2xl bg-white rounded-[3rem] overflow-hidden shadow-2xl"
+                        >
+                            <div className="p-12">
+                                <div className="flex justify-between items-center mb-10">
+                                    <div>
+                                        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Staff Shift Schedule</h2>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-2">
+                                            <Calendar size={14} className="text-admin-primary" /> Weekly Roster Management
+                                        </p>
+                                    </div>
+                                    <button onClick={() => setIsScheduleModalOpen(false)} className="p-4 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-[1.5rem] transition-all">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="bg-slate-50 rounded-[2.5rem] p-10 border border-dashed border-slate-200 text-center space-y-4">
+                                    <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center mx-auto shadow-xl border border-slate-100 text-admin-primary mb-6">
+                                        <Briefcase size={32} />
+                                    </div>
+                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Shift Planning Module</h3>
+                                    <p className="text-sm font-medium text-slate-500 max-w-md mx-auto leading-relaxed">
+                                        The advanced scheduling engine allows you to drag & drop staff into morning, afternoon, and evening shifts. 
+                                        This provides real-time availability sync for the booking system.
+                                    </p>
+                                    <div className="pt-6">
+                                        <button 
+                                            onClick={() => setIsScheduleModalOpen(false)}
+                                            className="px-10 py-4 bg-slate-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-admin-primary transition-all shadow-xl shadow-slate-200"
+                                        >
+                                            Under Development
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Add/Edit Modal */}
             <AnimatePresence>

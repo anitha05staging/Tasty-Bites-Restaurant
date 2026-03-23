@@ -23,6 +23,14 @@ const Table = sequelize.define('Table', {
     currentOrderId: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    waiterId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     }
 }, {
     timestamps: true,

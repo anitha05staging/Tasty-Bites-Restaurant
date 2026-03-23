@@ -28,6 +28,9 @@ const AdminTablesPage = () => {
     
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+    const [selectedTable, setSelectedTable] = useState(null);
+    const [staff, setStaff] = useState([]);
     const [editingTable, setEditingTable] = useState(null);
     const [formData, setFormData] = useState({
         number: '',
@@ -38,7 +41,17 @@ const AdminTablesPage = () => {
 
     useEffect(() => {
         fetchTables();
+        fetchStaff();
     }, []);
+
+    const fetchStaff = async () => {
+        try {
+            const data = await api.getStaff();
+            setStaff(data.filter(s => s.role === 'waiter'));
+        } catch (error) {
+            console.error("Failed to load staff", error);
+        }
+    };
 
     const fetchTables = async () => {
         try {
@@ -73,17 +86,14 @@ const AdminTablesPage = () => {
         setIsModalOpen(true);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleAssignWaiter = async (waiterId) => {
         try {
-            if (editingTable) {
-                await api.updateTable(editingTable.id, formData);
-                toast.success(`Table ${formData.number} updated successfully!`);
-            } else {
-                await api.createTable(formData);
-                toast.success(`Table ${formData.number} added successfully!`);
-            }
-            setIsModalOpen(false);
+            await api.updateTable(selectedTable.id, { 
+                waiterId,
+                status: 'Occupied' // Auto-occupy when assigned for now
+            });
+            toast.success(`Table ${selectedTable.number} assigned successfully!`);
+            setIsAssignModalOpen(false);
             fetchTables();
         } catch (error) {
             toast.error(error.message);
@@ -253,13 +263,22 @@ const AdminTablesPage = () => {
                                     )}
 
                                     <button 
+                                        onClick={() => {
+                                            if (table.status === 'Available') {
+                                                setSelectedTable(table);
+                                                setIsAssignModalOpen(true);
+                                            }
+                                        }}
                                         className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all overflow-hidden relative group/btn ${
                                             table.status === 'Available' 
                                                 ? 'bg-slate-900 text-white hover:bg-black shadow-xl shadow-slate-200' 
                                                 : 'bg-white border border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600'
                                         }`}
                                     >
-                                        <span className="relative z-10">{table.status === 'Available' ? 'Assign Table' : 'Manage Table'}</span>
+                                        <span className="relative z-10">
+                                            {table.status === 'Available' ? 'Assign Table' : 
+                                             table.waiter ? `Served by ${table.waiter.name.split(' ')[0]}` : 'Manage Table'}
+                                        </span>
                                         {table.status === 'Available' && (
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
                                         )}
@@ -278,6 +297,63 @@ const AdminTablesPage = () => {
                     <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">No tables found</h3>
                 </div>
             )}
+
+            {/* Assignment Modal */}
+            <AnimatePresence>
+                {isAssignModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsAssignModalOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-md bg-white rounded-[3rem] overflow-hidden shadow-2xl"
+                        >
+                            <div className="p-10">
+                                <div className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Assign Table {selectedTable?.number}</h2>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Select a waiter for this table</p>
+                                    </div>
+                                    <button onClick={() => setIsAssignModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-all">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {staff.map(waiter => (
+                                        <button
+                                            key={waiter.id}
+                                            onClick={() => handleAssignWaiter(waiter.id)}
+                                            className="w-full flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-admin-primary hover:bg-admin-primary/5 transition-all text-left group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-bold group-hover:bg-admin-primary group-hover:text-white transition-colors">
+                                                    {waiter.name[0]}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black text-slate-900">{waiter.name}</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{waiter.email}</p>
+                                                </div>
+                                            </div>
+                                            <ChevronRight size={18} className="text-slate-300 group-hover:text-admin-primary transform group-hover:translate-x-1 transition-all" />
+                                        </button>
+                                    ))}
+                                    {staff.length === 0 && (
+                                        <p className="text-center text-slate-400 py-4 italic">No waiters available</p>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Add/Edit Modal */}
             <AnimatePresence>

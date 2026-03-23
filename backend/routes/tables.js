@@ -1,5 +1,5 @@
 import express from 'express';
-import { Table } from '../models/index.js';
+import { Table, User } from '../models/index.js';
 import { authenticate, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -8,6 +8,13 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const tables = await Table.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'waiter',
+                    attributes: ['id', 'name', 'role']
+                }
+            ],
             order: [['number', 'ASC']]
         });
         res.json(tables);
