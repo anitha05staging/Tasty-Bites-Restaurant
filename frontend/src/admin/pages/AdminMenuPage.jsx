@@ -349,110 +349,115 @@ const AdminMenuPage = () => {
     });
 
     return (
-        <div className="w-full max-w-7xl mx-auto space-y-8 pb-20 min-w-0">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-10 pb-20">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Menu Items</h1>
-                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Manage your restaurant offerings</p>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Food Menu</h1>
+                    <p className="text-sm font-medium text-slate-500 mt-2 uppercase tracking-widest flex items-center gap-2">
+                        <Utensils size={14} className="text-admin-primary" /> Manage your menu
+                    </p>
                 </div>
                 <button
                     onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
-                    className="flex inline-flex items-center justify-center gap-3 px-10 py-4 bg-slate-900 hover:bg-black text-white rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-slate-900/30 transition-all active:scale-95 group"
+                    className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-2xl shadow-slate-200 overflow-hidden"
                 >
-                    <Plus size={20} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
-                    Add New Dish
+                    <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+                    <span>Add Item</span>
+                    <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                 </button>
             </div>
 
-            {/* Header & Search */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1 w-full group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-admin-primary transition-colors" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search for a dish..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-6 py-3 bg-slate-50 border border-transparent rounded-xl text-sm font-medium focus:bg-white focus:border-slate-200 outline-none transition-all"
-                    />
-                </div>
-
-                <div className="flex flex-wrap gap-2 pb-2 md:pb-0">
+            {/* Toolbar */}
+            <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between bg-white/50 backdrop-blur-md p-6 rounded-[2.5rem] border border-slate-100/50">
+                <div className="flex flex-wrap items-center gap-2 py-1">
                     {categoriesList.map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-100'}`}
                         >
                             {cat}
                         </button>
                     ))}
                 </div>
+                <div className="relative w-full md:w-80 group px-2">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-admin-primary transition-colors" size={18} />
+                    <input 
+                        type="text"
+                        placeholder="Search menu..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.5rem] text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all placeholder:text-slate-300"
+                    />
+                </div>
             </div>
 
-            {/* Table Section */}
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
+            {/* Menu Items Table */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
                 {loading ? (
                     <div className="py-40 flex flex-col items-center">
-                        <Loader2 className="animate-spin text-slate-300" size={48} />
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-6">Refreshing catalog...</p>
+                        <Loader2 className="animate-spin text-admin-primary/40" size={48} />
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-6">Loading...</p>
                     </div>
                 ) : filteredItems.length > 0 ? (
-                    <div className="w-full min-w-0">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50/50 border-b border-slate-100">
-                                <tr>
-                                    <th className="w-[72px] text-center px-3 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preview</th>
-                                    <th className="px-3 md:px-5 py-3 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest min-w-[200px]">Item Name</th>
-                                    <th className="w-40 px-3 md:px-10 py-3 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Category</th>
-                                    <th className="w-24 text-right px-3 md:px-5 py-3 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Price</th>
-                                    <th className="w-24 text-center px-3 md:px-5 py-3 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Badges</th>
-                                    <th className="w-24 text-right px-3 md:px-5 py-3 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
+                    <div className="w-full overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr className="bg-slate-50/50 border-b border-slate-100">
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preview</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Item Details</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Price</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Badges</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredItems.map(item => (
-                                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-3 md:px-5 py-3">
-                                            <div className="w-16 h-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                    <tr key={item.id} className="group hover:bg-slate-50/30 transition-colors">
+                                        <td className="px-8 py-6">
+                                            <div className="w-20 h-16 rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 group-hover:scale-105 transition-transform duration-500">
                                                 {item.image ? (
                                                     <img src={item.image} alt="" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={18} /></div>
+                                                    <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={20} /></div>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-3 md:px-5 py-3 pr-10">
-                                            <p className="text-sm md:text-base font-bold text-slate-900 leading-none truncate" title={item.name}>{item.name}</p>
-                                            <p className="text-[10px] text-slate-400 mt-1 truncate max-w-[200px]">{item.description}</p>
+                                        <td className="px-8 py-6">
+                                            <div className="max-w-xs">
+                                                <p className="text-base font-black text-slate-900 tracking-tight mb-1">{item.name}</p>
+                                                <p className="text-[11px] font-medium text-slate-400 line-clamp-1">{item.description}</p>
+                                            </div>
                                         </td>
-                                        <td className="px-3 md:px-5 py-3">
-                                            <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                                        <td className="px-8 py-6">
+                                            <span className="px-4 py-1.5 bg-white border border-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
                                                 {item.category}
                                             </span>
                                         </td>
-                                        <td className="px-3 md:px-5 py-3">
-                                            <span className="text-sm font-black text-slate-900 tracking-tight">£{Number(String(item.price || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</span>
+                                        <td className="px-8 py-6 text-base font-black text-slate-900 tracking-tighter">
+                                            £{Number(String(item.price || 0).replace(/[^0-9.]/g, '')).toFixed(2)}
                                         </td>
-                                        <td className="px-3 md:px-5 py-3 text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                {item.vegetarian && <div className="w-6 h-6 bg-emerald-100 text-emerald-600 rounded-md flex items-center justify-center" title="Veg"><Leaf size={12} /></div>}
-                                                {item.popular && <div className="w-6 h-6 bg-amber-100 text-amber-600 rounded-md flex items-center justify-center" title="Special"><Flame size={12} /></div>}
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-2">
+                                                {item.vegetarian && <div className="w-8 h-8 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center border border-emerald-100" title="Veg"><Leaf size={14} /></div>}
+                                                {item.popular && <div className="w-8 h-8 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center border border-amber-100" title="Special"><Flame size={14} /></div>}
                                             </div>
                                         </td>
-                                        <td className="px-3 md:px-5 py-3 text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <td className="px-8 py-6 text-right">
+                                            <div className="flex items-center justify-end gap-2 transition-opacity duration-300">
                                                 <button
                                                     onClick={() => { setSelectedItem(item); setIsModalOpen(true); }}
-                                                    className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-200"
+                                                    className="p-3 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-2xl transition-all"
                                                 >
-                                                    <Edit2 size={16} />
+                                                    <Edit2 size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => confirmDelete(item)}
-                                                    className="p-2 text-slate-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-200"
+                                                    className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={18} />
                                                 </button>
                                             </div>
                                         </td>
@@ -463,16 +468,16 @@ const AdminMenuPage = () => {
                     </div>
                 ) : (
                     <div className="py-40 flex flex-col items-center">
-                        <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 text-slate-200">
-                            <Utensils size={40} />
+                        <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-8 text-slate-200">
+                            <Utensils size={48} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">No Items Found</h3>
-                        <p className="text-sm text-slate-500 mt-2 max-w-sm text-center">Your menu catalog is currently empty or filtered out.</p>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Catalog Empty</h3>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-3">No dishes found in your menu</p>
                         <button
                             onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
-                            className="mt-6 px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                            className="mt-8 px-10 py-4 bg-slate-900 text-white rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-900/10 hover:bg-black transition-all"
                         >
-                            Add Your First Item
+                            Add Your First Dish
                         </button>
                     </div>
                 )}

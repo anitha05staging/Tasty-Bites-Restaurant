@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { sequelize, User, MenuItem, Testimonial, FAQ, Category } from './models/index.js';
+import { sequelize, User, MenuItem, Testimonial, FAQ } from './models/index.js';
 import { fileURLToPath } from 'url';
 
 export const seed = async (exitOnComplete = false) => {
@@ -17,19 +17,6 @@ export const seed = async (exitOnComplete = false) => {
             role: 'admin'
         });
         console.log('✅ Admin user created (tastybitesrestaurant7@gmail.com / admin123)');
-
-        // Seed Categories
-        const categories = [
-            { name: 'NON-VEG' },
-            { name: 'VEG' },
-            { name: 'BIRIYANI' },
-            { name: 'SIGNATURES' },
-            { name: 'CURRIES' },
-            { name: 'SEA FOOD' },
-            { name: 'RICE AND BREADS' }
-        ];
-        await Category.bulkCreate(categories);
-        console.log(`✅ ${categories.length} categories seeded`);
 
         // Seed menu items
         const menuItems = [

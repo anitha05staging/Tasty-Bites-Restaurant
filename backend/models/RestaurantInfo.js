@@ -16,7 +16,7 @@ const RestaurantInfo = sequelize.define('RestaurantInfo', {
     },
     email: {
         type: DataTypes.STRING,
-        defaultValue: 'hello@tastybites.com'
+        defaultValue: 'tastybitesrestaurant7@gmail.com'
     },
     website: {
         type: DataTypes.STRING,

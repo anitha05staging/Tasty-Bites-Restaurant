@@ -128,7 +128,7 @@ const MenuPage = () => {
                         {qty === 0 ? (
                             <button
                                 onClick={(e) => { e.stopPropagation(); addToCart(dish); }}
-                                className="w-full bg-slate-900 text-white py-3 rounded-xl font-semibold hover:bg-primary transition-colors flex items-center justify-center whitespace-nowrap text-xs sm:text-sm"
+                                className="w-full bg-slate-900 text-white py-3 rounded-xl font-semibold hover:bg-primary transition-colors flex items-center justify-center text-xs sm:text-sm"
                             >
                                 <Plus size={16} className="mr-2 shrink-0" />
                                 Add to Cart
@@ -157,7 +157,7 @@ const MenuPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white pt-10 pb-24">
+        <div className="min-h-screen bg-white pt-10 pb-24 overflow-x-hidden">
             {/* Hero Header */}
             <div className="relative h-[300px] md:h-[450px] w-full overflow-hidden">
                 <motion.div 
@@ -167,10 +167,9 @@ const MenuPage = () => {
                     <img src="/images/menu-hero.png" alt="Menu Header" className="w-full h-full object-cover scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-white/10" />
                 </motion.div>
-
                 <motion.div 
                     style={{ opacity: opacityHero }}
-                    className="absolute inset-0 flex items-start sm:items-center justify-center z-10 pt-40 sm:pt-0"
+                    className="absolute inset-0 flex items-center justify-center z-10"
                 >
                     <div className="container mx-auto px-6 text-center">
                         <div className="max-w-3xl mx-auto flex flex-col items-center">
@@ -182,10 +181,10 @@ const MenuPage = () => {
                             >
                                 <ShoppingBag size={14} /> Our Menu
                             </motion.div>
-                            <h1 className="text-3xl sm:text-5xl md:text-8xl font-playfair text-white mb-4 sm:mb-6 leading-tight">
+                            <h1 className="text-2xl sm:text-3xl md:text-5xl font-playfair text-white mb-4 leading-tight">
                                 Order <span className="text-primary italic">Online</span>
                             </h1>
-                            <p className="text-white text-sm sm:text-lg md:text-2xl font-medium leading-relaxed max-w-xl mx-auto px-4 drop-shadow-md">
+                            <p className="text-xs sm:text-sm md:text-lg text-white font-medium leading-relaxed max-w-xl mx-auto px-4 drop-shadow-md">
                                 Explore our delicious South Indian menu, perfect for your home or events.
                             </p>
                         </div>

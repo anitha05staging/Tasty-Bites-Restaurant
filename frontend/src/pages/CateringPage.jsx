@@ -135,16 +135,16 @@ const CateringPage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 text-accent rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-6 sm:mb-10 mx-auto whitespace-nowrap"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-xl border border-primary/20 text-primary rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-6 sm:mb-10 mx-auto whitespace-nowrap shadow-sm"
                         >
                             <Star size={14} className="animate-pulse" /> Authentic Indian Catering
                         </motion.div>
                         
                         <h1 className="text-3xl sm:text-5xl md:text-7xl font-playfair text-white mb-6 sm:mb-8 leading-[1.1] tracking-tight px-2">
-                             Authentic <span className="text-accent italic font-light drop-shadow-2xl text-2xl sm:text-4xl md:text-6xl">Indian Catering</span>
+                             Authentic <span className="text-primary italic font-light drop-shadow-2xl text-2xl sm:text-4xl md:text-6xl">Indian Catering</span>
                         </h1>
                         
-                        <p className="text-sm sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-light leading-relaxed mb-10 sm:mb-12 px-6">
+                        <p className="text-sm sm:text-lg md:text-xl text-white max-w-2xl mx-auto font-light leading-relaxed mb-10 sm:mb-12 px-6">
                             Delicious South Indian food for weddings, parties, and office events.
                         </p>
 
@@ -158,7 +158,7 @@ const CateringPage = () => {
                                 Request a Quote
                             </motion.a>
                             <a href="#packages" className="text-white font-bold flex items-center gap-3 hover:text-accent transition-all group py-4">
-                                <span className="uppercase tracking-[0.2em] text-sm">View Packages</span> 
+                                <span className="uppercase tracking-[0.2em] text-sm text-white/90">View Packages</span> 
                                 <ChevronRight size={20} className="group-hover:translate-x-2 transition-transform" />
                             </a>
                         </div>
@@ -166,7 +166,7 @@ const CateringPage = () => {
                 </div>
 
                 {/* Floating Micro-Features */}
-                <div className="absolute bottom-16 w-full hidden lg:flex justify-center gap-24 text-white/70">
+                <div className="absolute bottom-16 w-full hidden lg:flex justify-center gap-24 text-white/95">
                     {[
                         { icon: <Award size={20} />, text: "Expert Chefs" },
                         { icon: <ShieldCheck size={20} />, text: "Authentic Spices" },
@@ -226,7 +226,7 @@ const CateringPage = () => {
                                 </h2>
                             </div>
                             
-                            <p className="text-base text-slate-500 leading-relaxed font-medium">
+                            <p className="text-base text-slate-700 leading-relaxed font-medium">
                                 We bring authentic South Indian flavors to your special events. Our team works hard to make sure your guests enjoy every meal.
                             </p>
 
@@ -240,7 +240,7 @@ const CateringPage = () => {
                                             {item.icon}
                                         </div>
                                         <h4 className="text-xl font-playfair text-slate-900">{item.title}</h4>
-                                        <p className="text-sm text-slate-600 font-medium leading-relaxed">{item.desc}</p>
+                                        <p className="text-sm text-slate-700 font-medium leading-relaxed">{item.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -286,7 +286,7 @@ const CateringPage = () => {
                                 </div>
                                 <h3 className="text-3xl font-playfair mb-6">{tier.name}</h3>
                                 <p className={`text-sm mb-10 font-medium leading-relaxed transition-colors duration-500 ${
-                                    activePackage === tier.id ? 'text-white/70' : 'text-slate-500'
+                                    activePackage === tier.id ? 'text-white/95' : 'text-slate-700'
                                 }`}>
                                     {tier.description}
                                 </p>
@@ -332,7 +332,7 @@ const CateringPage = () => {
                                     Request a <br />
                                     <span className="text-primary italic font-light font-playfair text-3xl sm:text-4xl md:text-5xl">Quote</span>
                                 </h2>
-                                <p className="text-slate-600 mt-8 text-lg font-medium leading-relaxed">
+                                <p className="text-slate-700 mt-8 text-lg font-medium leading-relaxed">
                                     Our catering team is ready to help you plan your perfect event. Fill in the details and we'll reach out within 24 hours.
                                 </p>
                             </div>
@@ -347,7 +347,7 @@ const CateringPage = () => {
                                             {item.icon}
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{item.label}</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{item.label}</p>
                                             <p className="text-lg font-bold text-slate-900">{item.value}</p>
                                         </div>
                                     </div>
@@ -359,7 +359,7 @@ const CateringPage = () => {
                             <form onSubmit={handleSubmit} className="space-y-10">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Full Name *</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Full Name *</label>
                                         <div className="relative group">
                                             <User className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
                                             <input 
@@ -374,7 +374,7 @@ const CateringPage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Email Address *</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Email Address *</label>
                                         <div className="relative group">
                                             <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
                                             <input 
@@ -392,7 +392,7 @@ const CateringPage = () => {
 
                                 <div className="grid grid-cols-1 gap-10">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Phone Number *</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Phone Number *</label>
                                         <div className="shadow-sm rounded-2xl">
                                             <PhoneInput 
                                                 value={formData.phone}
@@ -407,7 +407,7 @@ const CateringPage = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Event Type</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Event Type</label>
                                         <div className="relative group">
                                             <Award className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
                                             <select 
@@ -425,7 +425,7 @@ const CateringPage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Event Date</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Event Date</label>
                                         <div className="relative group catering-datepicker">
                                             <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary z-10" size={18} />
                                             <Flatpickr
@@ -447,7 +447,7 @@ const CateringPage = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Number of Guests *</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Number of Guests *</label>
                                         <div className="relative group">
                                             <Users className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
                                             <input 
@@ -462,7 +462,7 @@ const CateringPage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Estimated Budget</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Estimated Budget</label>
                                         <div className="relative group">
                                             <Wallet className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
                                             <input 
@@ -478,7 +478,7 @@ const CateringPage = () => {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-3 text-center sm:text-left block">Message</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-3 text-center sm:text-left block">Message</label>
                                     <div className="relative group">
                                         <MessageSquare className="absolute left-6 top-8 text-primary/40 transition-colors group-focus-within:text-primary" size={18} />
                                         <textarea 

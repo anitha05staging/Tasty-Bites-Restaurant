@@ -7,7 +7,7 @@ const Order = sequelize.define('Order', {
     items: { type: DataTypes.TEXT, allowNull: false }, // JSON stringified
     total: { type: DataTypes.FLOAT, allowNull: false },
     deliveryFee: { type: DataTypes.FLOAT, defaultValue: 0 },
-    status: { type: DataTypes.ENUM('Pending', 'Confirmed', 'In Progress', 'Ready', 'Completed', 'Cancelled', 'Delivered', 'Served'), defaultValue: 'Pending' },
+    status: { type: DataTypes.ENUM('Pending', 'Order Received', 'Confirmed', 'Preparing', 'In Progress', 'Ready', 'Completed', 'Cancelled', 'Delivered', 'Served'), defaultValue: 'Order Received' },
     paymentStatus: { type: DataTypes.ENUM('Pending', 'Paid', 'Failed'), defaultValue: 'Paid' },
     customerName: { type: DataTypes.STRING, defaultValue: '' },
     customerEmail: { type: DataTypes.STRING, defaultValue: '' },

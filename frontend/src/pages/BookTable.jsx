@@ -136,12 +136,12 @@ const BookTable = () => {
                             <h2 className="text-3xl md:text-4xl font-playfair text-slate-900 mb-3">
                                 Booking <span className="text-primary italic">Confirmed!</span>
                             </h2>
-                            <p className="text-gray-500 mb-8">
+                            <p className="text-slate-600 mb-8">
                                 Your table for <span className="font-semibold text-slate-900">{formData.guests}</span> has been successfully reserved.
                             </p>
 
                             <div className="bg-slate-50 rounded-2xl p-6 mb-8 border border-primary/10 backdrop-blur-sm">
-                                <p className="text-xs text-gray-400 uppercase tracking-[0.2em] font-bold mb-2 text-center">Reference Number</p>
+                                <p className="text-xs text-slate-600 uppercase tracking-[0.2em] font-bold mb-2 text-center">Reference Number</p>
                                 <p className="text-3xl font-mono font-bold text-primary tracking-widest text-center">{bookingRef}</p>
                             </div>
 
@@ -184,7 +184,7 @@ const BookTable = () => {
                         className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center"
                     >
                         {/* Title Section */}
-                        <div className="lg:col-span-5 text-slate-900">
+                        <div className="lg:col-span-5 text-white">
                             <motion.div variants={formVariants} className="mb-6 inline-flex items-center space-x-2 text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20 backdrop-blur-md">
                                 <GlassWater size={18} />
                                 <span className="text-sm font-bold uppercase tracking-widest">Book a Table</span>
@@ -195,27 +195,27 @@ const BookTable = () => {
                                 <span className="text-primary italic">Your Table</span>
                             </motion.h1>
                             
-                            <motion.p variants={formVariants} className="text-slate-500 text-sm sm:text-lg leading-relaxed mb-8 max-w-md font-medium">
+                            <motion.p variants={formVariants} className="text-white/90 text-sm sm:text-lg leading-relaxed mb-8 max-w-md font-semibold">
                                 Experience authentic South Indian flavors in an ambiance of elegance and warmth. Book now to ensure your spot at Tasty Bites.
                             </motion.p>
 
                             <motion.div variants={formVariants} className="space-y-6">
                                 <div className="flex items-center space-x-4 group">
-                                    <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center group-hover:bg-primary/20 group-hover:border-primary/30 transition-all">
+                                    <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-primary/20 group-hover:border-primary/30 transition-all backdrop-blur-md">
                                         <AlertCircle className="text-primary" size={20} />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-900">Easy Booking</h4>
-                                        <p className="text-slate-400 text-sm">Takes less than 2 minutes to book.</p>
+                                        <h4 className="font-bold text-white">Easy Booking</h4>
+                                        <p className="text-white/80 text-sm">Takes less than 2 minutes to book.</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-4 group">
-                                    <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center group-hover:bg-primary/20 group-hover:border-primary/30 transition-all">
+                                    <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-primary/20 group-hover:border-primary/30 transition-all backdrop-blur-md">
                                         <CheckCircle2 className="text-primary" size={20} />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-900">Instant Confirmation</h4>
-                                        <p className="text-slate-400 text-sm">Get instant confirmation.</p>
+                                        <h4 className="font-bold text-white">Instant Confirmation</h4>
+                                        <p className="text-white/80 text-sm">Get instant confirmation.</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -234,7 +234,7 @@ const BookTable = () => {
                                 <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
                                     <div className="space-y-8">
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 ml-1">Full Name</label>
+                                            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 ml-1">Full Name</label>
                                             <div className="relative group/input">
                                                 <Users className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/80 group-focus-within/input:text-primary transition-colors" size={18} />
                                                 <input
@@ -250,7 +250,7 @@ const BookTable = () => {
                                         </div>
 
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/80 ml-1">Email Address</label>
+                                            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 ml-1">Email Address</label>
                                             <div className="relative group/input">
                                                 <MessageSquare className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/80 group-focus-within/input:text-primary transition-colors" size={18} />
                                                 <input
@@ -267,7 +267,7 @@ const BookTable = () => {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 ml-1">Phone Number</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 ml-1">Phone Number</label>
                                         <PhoneInput
                                             value={formData.phone}
                                             onChange={handlePhoneChange}
@@ -281,7 +281,7 @@ const BookTable = () => {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/80 ml-1">Booking Date</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 ml-1">Booking Date</label>
                                             <div className="relative group/input">
                                                 <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/80 group-focus-within/input:text-primary z-10 pointer-events-none transition-colors" size={18} />
                                                 <Flatpickr
@@ -305,7 +305,7 @@ const BookTable = () => {
                                         </div>
 
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/80 ml-1">Number of Guests</label>
+                                            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 ml-1">Number of Guests</label>
                                             <div className="relative group/input">
                                                 <Users className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/80 group-focus-within/input:text-primary pointer-events-none transition-colors" size={18} />
                                                 <select
@@ -324,7 +324,7 @@ const BookTable = () => {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/80 ml-1">Special Requests</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 ml-1">Special Requests</label>
                                         <textarea
                                             name="specialRequests"
                                             value={formData.specialRequests}

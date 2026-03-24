@@ -8,7 +8,6 @@ import ContactMessage from './ContactMessage.js';
 import CateringEnquiry from './CateringEnquiry.js';
 import Testimonial from './Testimonial.js';
 import FAQ from './FAQ.js';
-import Category from './Category.js';
 import RestaurantInfo from './RestaurantInfo.js';
 import Table from './Table.js';
 
@@ -25,4 +24,4 @@ Address.belongsTo(User, { foreignKey: 'userId' });
 Table.belongsTo(User, { as: 'waiter', foreignKey: 'waiterId' });
 User.hasMany(Table, { foreignKey: 'waiterId' });
 
-export { sequelize, User, MenuItem, Order, Reservation, Address, ContactMessage, CateringEnquiry, Testimonial, FAQ, Category, RestaurantInfo, Table };
+export { sequelize, User, MenuItem, Order, Reservation, Address, ContactMessage, CateringEnquiry, Testimonial, FAQ, RestaurantInfo, Table };

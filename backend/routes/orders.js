@@ -1,6 +1,6 @@
 import express from 'express';
 import { Order, User } from '../models/index.js';
-import { authenticate, optionalAuth } from '../middleware/auth.js';
+import { authenticate, optionalAuth, isAdmin } from '../middleware/auth.js';
 import { sendOrderConfirmation } from '../services/email.js';
 import path from 'path';
 import fs from 'fs';
@@ -32,7 +32,7 @@ router.post('/', optionalAuth, async (req, res) => {
             instructions: instructions || '',
             orderType: orderType || 'Collection',
             tableNumber: tableNumber || null,
-            status: 'Confirmed',
+            status: 'Order Received',
             paymentStatus: 'Paid'
         });
 
@@ -42,7 +42,7 @@ router.post('/', optionalAuth, async (req, res) => {
             customerName: customerName || 'Valued Customer',
             customerEmail: customerEmail || '',
             totalAmount: total,
-            status: 'Confirmed',
+            status: 'Order Received',
             items: typeof items === 'string' ? JSON.parse(items) : items
         });
 
@@ -96,10 +96,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // ADMIN: GET /api/orders/all (List all orders)
-router.get('/admin/all', authenticate, async (req, res) => {
+router.get('/admin/all', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const orders = await Order.findAll({
             order: [['createdAt', 'DESC']]
@@ -120,14 +118,12 @@ router.get('/admin/all', authenticate, async (req, res) => {
 });
 
 // ADMIN: GET /api/orders/stats/summary (Dashboard stats)
-router.get('/admin/stats/summary', authenticate, async (req, res) => {
+router.get('/admin/stats/summary', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const totalRevenue = await Order.sum('total') || 0;
         const totalOrders = await Order.count();
-        const activeOrders = await Order.count({ where: { status: ['Placed', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery'] } });
+        const activeOrders = await Order.count({ where: { status: ['Placed', 'Order Received', 'Preparing', 'Ready', 'Out for Delivery'] } });
         
         // Simple mock growth - in reality compare with previous period
         res.json({
@@ -166,10 +162,8 @@ router.get('/:orderId', optionalAuth, async (req, res) => {
 });
 
 // ADMIN: PATCH /api/orders/:orderId/status (Update order status)
-router.patch('/:orderId/status', authenticate, async (req, res) => {
+router.patch('/:orderId/status', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const { status } = req.body;
         const order = await Order.findOne({ where: { id: req.params.orderId } }); // Frontend sends the internal ID
@@ -184,10 +178,8 @@ router.patch('/:orderId/status', authenticate, async (req, res) => {
 });
 
 // ADMIN: PUT /api/orders/:orderId (Full order update)
-router.put('/:orderId', authenticate, async (req, res) => {
+router.put('/:orderId', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const order = await Order.findOne({ where: { id: req.params.orderId } });
         if (!order) return res.status(404).json({ error: 'Order not found' });

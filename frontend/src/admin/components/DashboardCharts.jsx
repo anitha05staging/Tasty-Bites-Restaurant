@@ -48,8 +48,7 @@ const DashboardCharts = ({ orders = [] }) => {
     const getOrderStats = () => {
         const stats = {
             'Dine-In': 0,
-            'Takeaway': 0,
-            'Delivery': 0
+            'Takeaway': 0
         };
         
         orders.forEach(o => {
@@ -61,8 +60,6 @@ const DashboardCharts = ({ orders = [] }) => {
                 stats['Dine-In']++;
             } else if (type === 'Collection' || type === 'Takeaway' || type === 'Take-Away') {
                 stats['Takeaway']++;
-            } else if (type === 'Delivery' || type === 'delivery') {
-                stats['Delivery']++;
             }
         });
         
@@ -136,7 +133,7 @@ const DashboardCharts = ({ orders = [] }) => {
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
                 <div>
                     <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Order Channels</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Dine-in vs Delivery breakdown</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Dine-in vs takeaway breakdown</p>
                 </div>
                 <div className="h-[300px] w-full flex flex-col md:flex-row items-center justify-center">
                     <div className="w-full h-full">

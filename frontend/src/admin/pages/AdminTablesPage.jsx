@@ -19,13 +19,17 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../services/api';
+import { adminTablesApi, adminStaffApi } from '../services/adminApi';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 const AdminTablesPage = () => {
     const [tables, setTables] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
+    const [locationFilter, setLocationFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [tableToDelete, setTableToDelete] = useState(null);
     
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,7 +51,7 @@ const AdminTablesPage = () => {
 
     const fetchStaff = async () => {
         try {
-            const data = await api.getStaff();
+            const data = await adminStaffApi.getAll();
             setStaff(data.filter(s => s.role === 'waiter'));
         } catch (error) {
             console.error("Failed to load staff", error);
@@ -57,7 +61,7 @@ const AdminTablesPage = () => {
     const fetchTables = async () => {
         try {
             setLoading(true);
-            const data = await api.getTables();
+            const data = await adminTablesApi.getAll();
             setTables(data);
         } catch (error) {
             toast.error("Failed to load tables: " + error.message);
@@ -81,7 +85,7 @@ const AdminTablesPage = () => {
                 number: '',
                 capacity: 2,
                 location: 'Indoor',
-                status: 'Available'
+                status: 'Free'
             });
         }
         setIsModalOpen(true);
@@ -91,10 +95,10 @@ const AdminTablesPage = () => {
         e.preventDefault();
         try {
             if (editingTable) {
-                await api.updateTable(editingTable.id, formData);
+                await adminTablesApi.update(editingTable.id, formData);
                 toast.success(`Table ${formData.number} updated successfully!`);
             } else {
-                await api.createTable(formData);
+                await adminTablesApi.create(formData);
                 toast.success(`Table ${formData.number} created successfully!`);
             }
             setIsModalOpen(false);
@@ -106,7 +110,7 @@ const AdminTablesPage = () => {
 
     const handleAssignWaiter = async (waiterId) => {
         try {
-            await api.updateTable(selectedTable.id, { 
+            await adminTablesApi.update(selectedTable.id, { 
                 waiterId,
                 status: 'Occupied' // Auto-occupy when assigned for now
             });
@@ -118,11 +122,16 @@ const AdminTablesPage = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this table?")) return;
+    const handleDelete = (table) => {
+        setTableToDelete(table);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!tableToDelete) return;
         try {
-            await api.deleteTable(id);
-            toast.success("Table deleted successfully");
+            await adminTablesApi.delete(tableToDelete.id);
+            toast.success(`Table ${tableToDelete.number} deleted successfully`);
             fetchTables();
         } catch (error) {
             toast.error(error.message);
@@ -140,8 +149,9 @@ const AdminTablesPage = () => {
 
     const filteredTables = tables.filter(t => {
         const matchesFilter = filter === 'All' || t.status === filter;
+        const matchesLocation = locationFilter === 'All' || t.location === locationFilter;
         const matchesSearch = t.number.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesFilter && matchesSearch;
+        return matchesFilter && matchesLocation && matchesSearch;
     });
 
     if (loading) return (
@@ -155,9 +165,9 @@ const AdminTablesPage = () => {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Table Management</h1>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Tables</h1>
                     <p className="text-sm font-medium text-slate-500 mt-2 uppercase tracking-widest flex items-center gap-2">
-                        <MapPin size={14} className="text-admin-primary" /> Dine-in Floor View & Assignment
+                        <MapPin size={14} className="text-admin-primary" /> Manage tables and staff
                     </p>
                 </div>
                 <button 
@@ -165,36 +175,50 @@ const AdminTablesPage = () => {
                     className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-2xl shadow-slate-200 overflow-hidden"
                 >
                     <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" /> 
-                    <span>Add New Table</span>
+                    <span>Add Table</span>
                     <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                 </button>
             </div>
 
             {/* Controls */}
-            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between bg-white/50 backdrop-blur-md p-2 rounded-[2.5rem] border border-slate-100/50">
-                <div className="flex gap-2 overflow-x-auto p-1 w-full lg:w-auto no-scrollbar">
-                    {['All', 'Available', 'Occupied', 'Reserved'].map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={`px-6 py-3 rounded-2xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap ${
-                                filter === f 
-                                    ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' 
-                                    : 'bg-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                            }`}
+            <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white/50 backdrop-blur-md p-3 rounded-[2rem] border border-slate-100/50">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                    <div className="relative w-full sm:w-48 group">
+                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-admin-primary transition-colors" size={14} />
+                        <select 
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="w-full pl-10 pr-10 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-50 transition-all shadow-sm h-[48px]"
                         >
-                            {f}
-                        </button>
-                    ))}
+                            {['All', 'Available', 'Occupied', 'Reserved'].map(f => (
+                                <option key={f} value={f}>{f}</option>
+                            ))}
+                        </select>
+                        <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none rotate-90" size={14} />
+                    </div>
+
+                    <div className="relative w-full sm:w-48 group">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-admin-primary transition-colors" size={14} />
+                        <select 
+                            value={locationFilter}
+                            onChange={(e) => setLocationFilter(e.target.value)}
+                            className="w-full pl-10 pr-10 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-50 transition-all shadow-sm h-[48px]"
+                        >
+                            {['All', 'Indoor', 'Outdoor', 'Balcony'].map(loc => (
+                                <option key={loc} value={loc}>{loc}</option>
+                            ))}
+                        </select>
+                        <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none rotate-90" size={14} />
+                    </div>
                 </div>
-                <div className="relative w-full lg:w-96 group px-2">
+                <div className="relative w-full lg:w-80 group px-2">
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-admin-primary transition-colors" size={18} />
                     <input 
                         type="text"
-                        placeholder="Search table number..."
+                        placeholder="Search number..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.5rem] text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all placeholder:text-slate-300"
+                        className="w-full pl-14 pr-6 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all placeholder:text-slate-300 h-[48px]"
                     />
                 </div>
             </div>
@@ -205,78 +229,75 @@ const AdminTablesPage = () => {
                     {filteredTables.map((table) => (
                         <motion.div
                             layout
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                             key={table.id}
-                            className="group bg-white rounded-[3rem] border border-slate-100 p-8 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all relative overflow-hidden"
+                            className="group bg-white rounded-[3.5rem] border border-slate-100 p-8 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all relative overflow-hidden"
                         >
-                            {/* Card Status Indicator Line */}
-                            <div className={`absolute top-0 left-0 right-0 h-1.5 ${
-                                table.status === 'Available' ? 'bg-emerald-400' : 
-                                table.status === 'Occupied' ? 'bg-rose-400' : 'bg-amber-400'
+                            {/* Card Decorative Elements */}
+                            <div className={`absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.03] group-hover:opacity-[0.08] transition-opacity ${
+                                table.status === 'Available' ? 'bg-emerald-500' : 
+                                table.status === 'Occupied' ? 'bg-rose-500' : 'bg-amber-500'
                             }`} />
 
-                            <div className="flex justify-between items-start mb-8">
-                                <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-500 ${
-                                    table.status === 'Occupied' ? 'bg-rose-50 text-rose-500 shadow-rose-100' : 
-                                    table.status === 'Reserved' ? 'bg-amber-50 text-amber-500 shadow-amber-100' : 'bg-emerald-50 text-emerald-500 shadow-emerald-100'
+                            <div className="flex justify-between items-start mb-8 relative z-10">
+                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-inner transform group-hover:rotate-12 transition-transform duration-500 ${
+                                    table.status === 'Occupied' ? 'bg-rose-50 text-rose-500' : 
+                                    table.status === 'Reserved' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
                                 }`}>
                                     <Grid2X2 size={28} />
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div className="flex gap-1 transition-opacity duration-300">
                                     <button 
                                         onClick={() => handleOpenModal(table)}
-                                        className="p-2.5 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all"
+                                        className="p-3 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all"
                                     >
                                         <Edit size={16} />
                                     </button>
                                     <button 
-                                        onClick={() => handleDelete(table.id)}
-                                        className="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                                        onClick={() => handleDelete(table)}
+                                        className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
                                     >
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-6 relative z-10">
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Table {table.number}</h3>
-                                        <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(table.status)}`}>
+                                        <h3 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{table.number}</h3>
+                                        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${getStatusColor(table.status)}`}>
                                             {table.status}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 text-slate-400 font-bold text-xs uppercase tracking-tighter">
-                                        <div className="flex items-center gap-1.5">
-                                            <Users size={14} className="text-slate-300" /> {table.capacity} Seats
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <MapPin size={14} className="text-slate-300" /> {table.location}
-                                        </div>
+                                    <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                                        <span className="flex items-center gap-1"><Users size={12}/> {table.capacity}</span>
+                                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                        <span className="flex items-center gap-1"><MapPin size={12}/> {table.location}</span>
                                     </div>
                                 </div>
 
                                 <div className="pt-6 border-t border-slate-50">
                                     {table.status === 'Occupied' ? (
-                                        <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100/50 mb-4">
-                                            <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Active Order</p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-black text-rose-600">#{table.currentOrderId || 'ORD-NEW'}</span>
-                                                <ArrowRight size={14} className="text-rose-400" />
+                                        <div className="p-5 bg-rose-50/50 rounded-3xl border border-rose-100/30 mb-5 group/order cursor-pointer hover:bg-rose-50 transition-colors">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em]">Active Order</p>
+                                                <ArrowRight size={12} className="text-rose-300 group-hover/order:translate-x-1 transition-transform" />
                                             </div>
+                                            <span className="text-sm font-black text-rose-600">Occupied</span>
                                         </div>
                                     ) : table.status === 'Reserved' ? (
-                                        <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50 mb-4">
-                                            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Upcoming Reservation</p>
+                                        <div className="p-5 bg-amber-50/50 rounded-3xl border border-amber-100/30 mb-5">
+                                            <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Reservation</p>
                                             <div className="flex items-center gap-2 text-amber-600 font-black text-sm">
-                                                <Clock size={16} /> 7:30 PM
+                                                <Clock size={14} /> 7:30 PM
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="py-4 text-center">
-                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Ready for guests</span>
+                                        <div className="py-6 text-center group-hover:scale-105 transition-transform duration-500">
+                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Clean</span>
                                         </div>
                                     )}
 
@@ -287,18 +308,18 @@ const AdminTablesPage = () => {
                                                 setIsAssignModalOpen(true);
                                             }
                                         }}
-                                        className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all overflow-hidden relative group/btn ${
+                                        className={`w-full py-5 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden shadow-sm group/btn ${
                                             table.status === 'Available' 
-                                                ? 'bg-slate-900 text-white hover:bg-black shadow-xl shadow-slate-200' 
-                                                : 'bg-white border border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                                                ? 'bg-slate-900 text-white hover:bg-black hover:shadow-xl hover:shadow-slate-200' 
+                                                : 'bg-slate-50 text-slate-400 border border-slate-100'
                                         }`}
                                     >
                                         <span className="relative z-10">
-                                            {table.status === 'Available' ? 'Assign Table' : 
-                                             table.waiter ? `Served by ${table.waiter.name.split(' ')[0]}` : 'Manage Table'}
+                                            {table.status === 'Available' ? 'Assign' : 
+                                             table.waiter ? `${table.waiter.name.split(' ')[0]}` : 'Manage'}
                                         </span>
                                         {table.status === 'Available' && (
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
                                         )}
                                     </button>
                                 </div>
@@ -336,8 +357,8 @@ const AdminTablesPage = () => {
                             <div className="p-10">
                                 <div className="flex justify-between items-center mb-8">
                                     <div>
-                                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Assign Table {selectedTable?.number}</h2>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Select a waiter for this table</p>
+                                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Assign Table</h2>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Select staff</p>
                                     </div>
                                     <button onClick={() => setIsAssignModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-all">
                                         <X size={20} />
@@ -364,7 +385,7 @@ const AdminTablesPage = () => {
                                         </button>
                                     ))}
                                     {staff.length === 0 && (
-                                        <p className="text-center text-slate-400 py-4 italic">No waiters available</p>
+                                        <p className="text-center text-slate-400 py-4 italic">None available</p>
                                     )}
                                 </div>
                             </div>
@@ -394,9 +415,9 @@ const AdminTablesPage = () => {
                                 <div className="flex justify-between items-center mb-8">
                                     <div>
                                         <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                                            {editingTable ? 'Edit Table' : 'Add New Table'}
+                                            {editingTable ? 'Edit Table' : 'New Table'}
                                         </h2>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Configure floor arrangement</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Setup</p>
                                     </div>
                                     <button onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-all">
                                         <X size={20} />
@@ -417,7 +438,7 @@ const AdminTablesPage = () => {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Seating Capacity</label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Seats</label>
                                             <input 
                                                 required
                                                 type="number"
@@ -450,7 +471,7 @@ const AdminTablesPage = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Initial Status</label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
                                         <select 
                                             value={formData.status}
                                             onChange={(e) => setFormData({...formData, status: e.target.value})}
@@ -466,7 +487,7 @@ const AdminTablesPage = () => {
                                         type="submit"
                                         className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200 mt-4"
                                     >
-                                        {editingTable ? 'Save Changes' : 'Create Table'}
+                                        {editingTable ? 'Save' : 'Create'}
                                     </button>
                                 </form>
                             </div>
@@ -474,6 +495,15 @@ const AdminTablesPage = () => {
                     </div>
                 )}
             </AnimatePresence>
+
+            <DeleteConfirmModal 
+                isOpen={isDeleteModalOpen}
+                onClose={() => { setIsDeleteModalOpen(false); setTableToDelete(null); }}
+                onConfirm={confirmDelete}
+                title="Delete Table"
+                message="Are you sure you want to delete this table? This will remove it from all layouts."
+                itemName={tableToDelete ? `Table ${tableToDelete.number} (${tableToDelete.location})` : ''}
+            />
         </div>
     );
 };

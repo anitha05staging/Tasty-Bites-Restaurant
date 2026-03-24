@@ -33,7 +33,7 @@ const StatCounter = ({ value, label, icon: Icon }) => {
             <h3 className="text-4xl font-bold text-slate-900 mb-2">
                 {count}{value.includes('+') ? '+' : ''}
             </h3>
-            <p className="text-slate-500 font-medium uppercase tracking-widest text-xs">{label}</p>
+            <p className="text-slate-700 font-medium uppercase tracking-widest text-xs">{label}</p>
         </div>
     );
 };
@@ -64,7 +64,7 @@ const TimelineItem = ({ year, title, description, side, index }) => {
             >
                 <span className="text-primary font-bold text-lg mb-2 block font-playfair italic">{year}</span>
                 <h4 className="text-xl font-playfair font-bold text-slate-900 mb-3">{title}</h4>
-                <p className="text-slate-500 leading-relaxed">{description}</p>
+                <p className="text-slate-700 leading-relaxed">{description}</p>
             </motion.div>
         </div>
     );
@@ -127,11 +127,11 @@ const About = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="max-w-4xl mx-auto"
                     >
-                        <span className="text-accent font-bold tracking-[0.4em] uppercase text-sm block mb-6 px-4 py-2 border border-accent/30 rounded-full w-fit mx-auto backdrop-blur-sm">
+                        <span className="text-primary font-bold tracking-[0.4em] uppercase text-sm block mb-6 px-4 py-2 bg-white/90 border border-primary/30 rounded-full w-fit mx-auto backdrop-blur-sm shadow-sm">
                             Our Culinary Legacy
                         </span>
                         <h1 className="text-white font-playfair text-4xl md:text-6xl font-bold mb-8 leading-tight">
-                            A Tale of <span className="text-accent italic">Soul</span> & Spice
+                            A Tale of <span className="text-primary italic">Soul</span> & Spice
                         </h1>
                         <motion.div 
                             initial={{ opacity: 0 }}
@@ -139,7 +139,7 @@ const About = () => {
                             transition={{ delay: 1 }}
                             className="flex flex-col items-center mt-12"
                         >
-                            <span className="text-white/60 text-sm uppercase tracking-widest mb-4">Scroll to discover</span>
+                            <span className="text-white/95 text-sm uppercase tracking-widest mb-4">Scroll to discover</span>
                             <div className="w-px h-24 bg-gradient-to-b from-accent to-transparent" />
                         </motion.div>
                     </motion.div>
@@ -165,7 +165,7 @@ const About = () => {
                             <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
                         </motion.div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 text-left text-slate-500 text-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 text-left text-slate-700 text-lg">
                             <motion.div
                                 initial={{ opacity: 0, x: -30 }}
                                 whileInView={{ opacity: 1, x: 0 }}
@@ -173,7 +173,7 @@ const About = () => {
                                 className="relative p-10 bg-white rounded-[3rem] border border-slate-100 shadow-sm"
                             >
                                 <Heart className="text-primary mb-6" size={40} />
-                                <p className="leading-relaxed font-medium">
+                                <p className="leading-relaxed font-semibold">
                                    Each dish is made with love, patience, and our own hand-ground spices.
                                 </p>
                             </motion.div>
@@ -184,7 +184,7 @@ const About = () => {
                                 className="relative p-10 bg-white rounded-[3rem] border border-slate-100 shadow-sm mt-8 md:mt-12"
                             >
                                 <Award className="text-primary mb-6" size={40} />
-                                <p className="leading-relaxed font-medium">
+                                <p className="leading-relaxed font-semibold">
                                     From the coastal serenity of Kerala to the vibrant spirit of Bangalore, we've curated a menu that captures the true soul of the South. We invite you to sit at our table, not just as a guest, but as a part of our continuing story. Experience authentic South Indian flavours.
                                 </p>
                             </motion.div>
@@ -227,7 +227,7 @@ const About = () => {
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
                         <div className="max-w-xl">
                             <h2 className="text-4xl font-playfair font-bold text-slate-900 mb-4">Captured Moments</h2>
-                            <p className="text-slate-500 text-lg">A glimpse into our world where every corner tells a story and every dish is a masterpiece.</p>
+                            <p className="text-slate-700 text-lg">A glimpse into our world where every corner tells a story and every dish is a masterpiece.</p>
                         </div>
                         <div className="hidden md:block h-px flex-1 bg-slate-200 mx-12 mb-6" />
                     </div>

@@ -39,7 +39,8 @@ router.post('/', authenticate, isAdmin, async (req, res) => {
             email,
             password: hashedPassword,
             role,
-            phone
+            phone,
+            status: req.body.status || 'Active'
         });
 
         const staffData = staff.toJSON();
@@ -59,8 +60,8 @@ router.put('/:id', authenticate, isAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Staff member not found' });
         }
 
-        const { name, email, role, phone, password } = req.body;
-        const updates = { name, email, role, phone };
+        const { name, email, role, phone, password, status } = req.body;
+        const updates = { name, email, role, phone, status };
         
         if (password) {
             updates.password = await bcrypt.hash(password, 10);

@@ -14,7 +14,7 @@ import {
     EyeOff
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../services/api';
+import { adminAuthApi } from '../services/adminApi';
 
 const SettingToggle = ({ title, description, active, onToggle }) => (
     <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all">
@@ -70,7 +70,7 @@ const AdminSettingsPage = () => {
 
         setSaving(true);
         try {
-            await api.changePassword({ currentPassword, newPassword });
+            await adminAuthApi.changePassword({ currentPassword, newPassword });
             toast.success('Password updated successfully');
             setCurrentPassword('');
             setNewPassword('');
@@ -85,8 +85,8 @@ const AdminSettingsPage = () => {
     return (
         <div className="max-w-4xl mx-auto space-y-12 pb-20">
             <div>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">System Settings</h1>
-                <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Manage your account and preferences</p>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Settings</h1>
+                <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Account & Security</p>
             </div>
 
         <div className="grid grid-cols-1 gap-12">
@@ -97,7 +97,7 @@ const AdminSettingsPage = () => {
                             <div className="p-3 bg-slate-900 rounded-xl text-white">
                                 <User size={20} />
                             </div>
-                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Personal Information</h3>
+                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Profile</h3>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -137,7 +137,7 @@ const AdminSettingsPage = () => {
                             <div className="p-3 bg-slate-900 rounded-xl text-white">
                                 <Shield size={20} />
                             </div>
-                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Security & Access</h3>
+                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Security</h3>
                         </div>
 
                         <div className="space-y-6">
@@ -181,7 +181,7 @@ const AdminSettingsPage = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Confirm New Password</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Retype Password</label>
                                     <div className="relative">
                                         <input 
                                             type={showConfirm ? "text" : "password"} 
@@ -205,7 +205,7 @@ const AdminSettingsPage = () => {
                                     disabled={saving}
                                     className="w-full md:w-auto px-10 py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-slate-900/20"
                                 >
-                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <><Save size={16} /> Save New Password</>}
+                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <><Save size={16} /> Save</>}
                                 </button>
                             </div>
                         </div>

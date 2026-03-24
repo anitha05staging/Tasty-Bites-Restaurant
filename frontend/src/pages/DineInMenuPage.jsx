@@ -154,7 +154,7 @@ const DineInMenuPage = () => {
                         {qty === 0 ? (
                             <button
                                 onClick={(e) => { e.stopPropagation(); addToCart(dish); }}
-                                className="w-full bg-emerald-900 text-white py-4 rounded-2xl font-bold hover:bg-emerald-800 transition-all shadow-lg hover:shadow-emerald-900/20 active:scale-95 flex items-center justify-center relative overflow-hidden group/btn whitespace-nowrap text-xs sm:text-base"
+                                className="w-full bg-emerald-900 text-white py-4 rounded-2xl font-bold hover:bg-emerald-800 transition-all shadow-lg hover:shadow-emerald-900/20 active:scale-95 flex items-center justify-center relative overflow-hidden group/btn text-xs sm:text-base"
                             >
                                 <span className="absolute inset-0 bg-amber-400/10 translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-500" />
                                 <Plus size={18} className="mr-2 shrink-0" />
@@ -184,7 +184,7 @@ const DineInMenuPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFCF7] pb-24">
+        <div className="min-h-screen bg-[#FDFCF7] pb-24 overflow-x-hidden">
             {/* Hero Header - Premium Style */}
             <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
                 <img
@@ -195,7 +195,7 @@ const DineInMenuPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/90 via-emerald-950/60 to-transparent" />
 
-                <div className="absolute inset-0 flex items-start sm:items-center justify-center container mx-auto px-6 z-10 text-center pt-40 sm:pt-0">
+                <div className="absolute inset-0 flex items-center justify-center container mx-auto px-6 z-10 text-center">
                     <div className="max-w-2xl mx-auto flex flex-col items-center">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -209,7 +209,7 @@ const DineInMenuPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="text-3xl sm:text-5xl md:text-8xl font-playfair text-white mb-4 sm:mb-6 leading-tight"
+                            className="text-3xl sm:text-4xl md:text-6xl font-playfair text-white mb-4 leading-tight"
                         >
                             Dine-In <span className="text-amber-400 italic">Experience</span>
                         </motion.h1>
@@ -218,7 +218,7 @@ const DineInMenuPage = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
-                            className="text-emerald-50 text-sm sm:text-lg md:text-xl font-semibold max-w-lg leading-relaxed mb-8 sm:mb-10 px-4 drop-shadow-md"
+                            className="text-emerald-50 text-xs sm:text-base md:text-lg font-semibold max-w-lg leading-relaxed mb-8 px-4 drop-shadow-md"
                         >
                             Immerse yourself in the vibrant flavors of South India, served in our refined restaurant setting.
                         </motion.p>

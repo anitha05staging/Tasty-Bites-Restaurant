@@ -95,38 +95,4 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
 });
 
-// ADMIN: PATCH /api/menu/categories/update (Batch rename category)
-router.patch('/categories/update', authenticate, async (req, res) => {
-    try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
-
-        const { oldName, newName } = req.body;
-        if (!oldName || !newName) return res.status(400).json({ error: 'Missing names' });
-
-        await MenuItem.update({ category: newName }, { where: { category: oldName } });
-        res.json({ success: true });
-    } catch (err) {
-        console.error('Category update error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ADMIN: PATCH /api/menu/categories/delete (Batch clear category)
-router.patch('/categories/delete', authenticate, async (req, res) => {
-    try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
-
-        const { categoryName } = req.body;
-        if (!categoryName) return res.status(400).json({ error: 'Missing category name' });
-
-        await MenuItem.update({ category: 'Uncategorized' }, { where: { category: categoryName } });
-        res.json({ success: true });
-    } catch (err) {
-        console.error('Category delete error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
 export default router;

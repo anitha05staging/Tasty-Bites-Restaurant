@@ -58,7 +58,7 @@ const getTransporter = async () => {
 };
 
 const FROM_EMAIL = process.env.FROM_EMAIL || process.env.SMTP_USER || 'no-reply@tastybites.com';
-const RESTAURANT_EMAIL = process.env.RESTAURANT_EMAIL || 'anitha05staging@gmail.com';
+const RESTAURANT_EMAIL = process.env.RESTAURANT_EMAIL || 'tastybitesrestaurant7@gmail.com';
 
 /**
  * Premium Email Template Wrapper
@@ -122,7 +122,15 @@ const sendEmail = async (options) => {
                 subject,
                 html,
                 cc,
-                replyTo
+                replyTo,
+                mailSettings: {
+                    sandbox_mode: { enable: false },
+                    spam_check: { enable: true }
+                },
+                trackingSettings: {
+                    click_tracking: { enable: false },
+                    open_tracking: { enable: false }
+                }
             };
             const [response] = await sgMail.send(msg);
             console.log(`🚀 Email delivered via SendGrid API to ${to}`);
@@ -148,6 +156,11 @@ const sendEmail = async (options) => {
             replyTo,
             subject,
             html,
+            headers: {
+                'Precedence': 'bulk',
+                'X-Auto-Response-Suppress': 'OOF, AutoReply',
+                'List-Unsubscribe': `<mailto:${FROM_EMAIL}?subject=unsubscribe>`
+            }
         });
         console.log(`📧 Email delivered via SMTP to ${to}`);
         return { success: true, method: 'smtp', messageId: info.messageId };
@@ -225,7 +238,11 @@ export const sendOrderConfirmation = async (orderData) => {
     console.log(`[Diagnostic] Preparing order email for: ${customerEmail}`, { orderId, customerName, totalAmount });
 
     const itemsList = Array.isArray(items) 
-        ? items.map(item => `<div class="detail-row"><span>${item.name} x${item.quantity}</span><span>£${(item.price * item.quantity).toFixed(2)}</span></div>`).join('')
+        ? items.map(item => {
+            const qty = item.quantity || item.qty || 1;
+            const price = parseFloat(String(item.price || 0).replace(/[^0-9.]/g, ''));
+            return `<div class="detail-row"><span>${item.name} x${qty}</span><span>£${(price * qty).toFixed(2)}</span></div>`;
+        }).join('')
         : `<p>Check order details in the admin dashboard.</p>`;
 
     const content = `

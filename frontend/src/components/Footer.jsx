@@ -53,7 +53,7 @@ const Footer = () => {
                         <div className="space-y-4 mb-8">
                             <div className="flex items-center justify-center md:justify-start gap-3 text-white/50 hover:text-white transition-colors">
                                 <Mail size={16} className="text-primary" />
-                                <span className="text-xs font-bold uppercase tracking-widest">{info?.email || "hello@tastybites.com"}</span>
+                                <span className="text-xs font-bold tracking-widest">{info?.email || "tastybitesrestaurant7@gmail.com"}</span>
                             </div>
                             <div className="flex items-center justify-center md:justify-start gap-3 text-white/50 hover:text-white transition-colors">
                                 <Phone size={16} className="text-primary" />

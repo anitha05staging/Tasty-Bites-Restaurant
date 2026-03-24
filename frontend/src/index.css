@@ -24,6 +24,14 @@
   .glass-nav {
     @apply bg-white/85 backdrop-blur-md border-b border-white/30;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Custom Scrollbar */

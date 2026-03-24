@@ -33,6 +33,10 @@ export const adminAuthApi = {
     verify: async () => {
         const response = await adminApi.get('auth/me');
         return response.data;
+    },
+    changePassword: async (data) => {
+        const response = await adminApi.post('auth/change-password', data);
+        return response.data;
     }
 };
 
@@ -134,6 +138,63 @@ export const adminCateringApi = {
     },
     updateStatus: async (id, status) => {
         const response = await adminApi.patch(`catering/${id}/status`, { status });
+        return response.data;
+    }
+};
+
+export const adminStaffApi = {
+    getAll: async () => {
+        const response = await adminApi.get('staff');
+        return response.data;
+    },
+    create: async (data) => {
+        const response = await adminApi.post('staff', data);
+        return response.data;
+    },
+    update: async (id, data) => {
+        const response = await adminApi.put(`staff/${id}`, data);
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await adminApi.delete(`staff/${id}`);
+        return response.data;
+    }
+};
+
+export const adminTablesApi = {
+    getAll: async () => {
+        const response = await adminApi.get('tables');
+        return response.data;
+    },
+    create: async (data) => {
+        const response = await adminApi.post('tables', data);
+        return response.data;
+    },
+    update: async (id, data) => {
+        const response = await adminApi.put(`tables/${id}`, data);
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await adminApi.delete(`tables/${id}`);
+        return response.data;
+    }
+};
+
+export const adminInfoApi = {
+    get: async () => {
+        const response = await adminApi.get('restaurant');
+        return response.data;
+    },
+    update: async (data) => {
+        const response = await adminApi.put('restaurant', data);
+        return response.data;
+    },
+    uploadLogo: async (formData) => {
+        const response = await adminApi.post('restaurant/logo', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data;
     }
 };

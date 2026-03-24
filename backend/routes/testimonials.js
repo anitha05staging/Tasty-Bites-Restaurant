@@ -1,14 +1,12 @@
 import express from 'express';
 import { Testimonial, User } from '../models/index.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // GET all testimonials (Admin)
-router.get('/admin/all', authenticate, async (req, res) => {
+router.get('/admin/all', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const testimonials = await Testimonial.findAll({
             order: [['createdAt', 'DESC']]
@@ -59,10 +57,8 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update testimonial (Admin)
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const testimonial = await Testimonial.findByPk(req.params.id);
         if (!testimonial) return res.status(404).json({ error: 'Not found' });
@@ -78,10 +74,8 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // DELETE testimonial (Admin)
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, isAdmin, async (req, res) => {
     try {
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const testimonial = await Testimonial.findByPk(req.params.id);
         if (!testimonial) return res.status(404).json({ error: 'Not found' });

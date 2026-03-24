@@ -142,7 +142,7 @@ const Contact = () => {
                             {[
                                 { icon: MapPin, label: "Visit Us", value: restaurantInfo?.address || "123 Curry Lane, London, SE1 7PB" },
                                 { icon: Phone, label: "Call Us", value: restaurantInfo?.phone || "+44 20 7946 0123" },
-                                { icon: Mail, label: "Email Us", value: restaurantInfo?.email || "hello@tastybites.com" }
+                                { icon: Mail, label: "Email Us", value: restaurantInfo?.email || "tastybitesrestaurant7@gmail.com" }
                             ].map((info, idx) => (
                                 <div key={idx} className="bg-slate-900/40 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 group hover:border-primary/40 transition-all duration-500 shadow-2xl flex items-start space-x-5">
                                     <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">

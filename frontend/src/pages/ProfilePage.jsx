@@ -66,16 +66,30 @@ const ORDER_STATUSES = ['All', 'Delivered', 'Preparing', 'Confirmed', 'Cancelled
 const ORDER_TIMELINE = ['Order Placed', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered'];
 
 const statusColor = (s) => {
-    if (s === 'Delivered') return 'bg-green-100 text-green-700';
-    if (s === 'Preparing') return 'bg-yellow-100 text-yellow-700';
-    if (s === 'Confirmed') return 'bg-blue-100 text-blue-700';
-    if (s === 'Cancelled') return 'bg-red-100 text-red-700';
+    const status = (s || '').toLowerCase();
+    if (status === 'delivered') return 'bg-green-100 text-green-700';
+    if (status === 'ready' || status === 'served') return 'bg-emerald-100 text-emerald-700';
+    if (status === 'preparing' || status === 'in progress') return 'bg-yellow-100 text-yellow-700';
+    if (status === 'confirmed' || status === 'placed') return 'bg-blue-100 text-blue-700';
+    if (status === 'cancelled') return 'bg-red-100 text-red-700';
     return 'bg-gray-100 text-gray-700';
 };
 
-const getTimelineIndex = (status) => {
-    const map = { 'Order Placed': 0, 'Confirmed': 1, 'Preparing': 2, 'Ready': 3, 'Out for Delivery': 4, 'Delivered': 5 };
-    return map[status] ?? 0;
+const getTimelineIndex = (status, orderType) => {
+    const s = (status || '').toLowerCase();
+    const map = {
+        'placed': 0,
+        'order placed': 0,
+        'order received': 0,
+        'confirmed': 0, // Consolidated with Received
+        'preparing': 1,
+        'in progress': 1,
+        'ready': 2,
+        'out for delivery': 3,
+        'delivered': 4,
+        'served': 4
+    };
+    return map[s] ?? 0;
 };
 
 // ====================
@@ -278,7 +292,7 @@ const OrdersTab = () => {
                                 </div>
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-50">
-                                <p className="text-xs text-gray-500">{(order.items || []).map(i => `${i.name} x${i.qty}`).join(', ')}</p>
+                                <p className="text-xs text-gray-500">{(order.items || []).map(i => `${i.name} x${i.quantity || i.qty || 1}`).join(', ')}</p>
                             </div>
                         </div>
                     ))}
@@ -290,7 +304,17 @@ const OrdersTab = () => {
 
 // --- ORDER DETAIL ---
 const OrderDetail = ({ order, onBack }) => {
-    const currentStep = getTimelineIndex(order.status);
+    const isDineIn = order.orderType === 'Dine-In';
+    const isCollection = order.orderType === 'Collection' || order.orderType === 'Takeaway';
+    
+    // Adjust timeline based on order type
+    const baseTimeline = ['Order Received', 'Preparing'];
+    const deliveryTimeline = [...baseTimeline, 'Ready', 'Out for Delivery', 'Delivered'];
+    const pickupTimeline = [...baseTimeline, 'Ready', 'Collected'];
+    const dineInTimeline = [...baseTimeline, 'Ready', 'Served'];
+    
+    const timeline = isDineIn ? dineInTimeline : (isCollection ? pickupTimeline : deliveryTimeline);
+    const currentStep = getTimelineIndex(order.status, order.orderType);
     const navigate = useNavigate();
 
     return (
@@ -308,13 +332,13 @@ const OrderDetail = ({ order, onBack }) => {
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor(order.status)}`}>{order.status}</span>
                         </div>
                         <div className="relative">
-                            {ORDER_TIMELINE.map((step, idx) => (
+                            {timeline.map((step, idx) => (
                                 <div key={idx} className="flex items-start mb-6 last:mb-0">
                                     <div className="flex flex-col items-center mr-4">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${idx <= currentStep ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 ${idx <= currentStep ? 'bg-primary text-white ring-4 ring-primary/10' : 'bg-gray-100 text-gray-400'}`}>
                                             {idx <= currentStep ? <CheckCircle2 size={16} /> : idx + 1}
                                         </div>
-                                        {idx < ORDER_TIMELINE.length - 1 && <div className={`w-0.5 h-8 ${idx < currentStep ? 'bg-primary' : 'bg-gray-200'}`} />}
+                                        {idx < timeline.length - 1 && <div className={`w-0.5 h-8 transition-all duration-500 ${idx < currentStep ? 'bg-primary' : 'bg-gray-200'}`} />}
                                     </div>
                                     <div className="pt-1">
                                         <p className={`font-semibold text-sm ${idx <= currentStep ? 'text-slate-900' : 'text-gray-400'}`}>{step}</p>
@@ -335,10 +359,10 @@ const OrderDetail = ({ order, onBack }) => {
                                         <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover" />
                                         <div>
                                             <p className="font-semibold text-slate-900 text-sm">{item.name}</p>
-                                            <p className="text-xs text-gray-500">Qty: {item.qty}</p>
+                                            <p className="text-xs text-gray-500">Qty: {item.quantity || item.qty || 1}</p>
                                         </div>
                                     </div>
-                                    <span className="font-bold text-slate-900">£{(item.price * item.qty).toFixed(2)}</span>
+                                    <span className="font-bold text-slate-900">£{(parseFloat(String(item.price).replace(/[^0-9.]/g, '')) * (item.quantity || item.qty || 1)).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
@@ -358,6 +382,14 @@ const OrderDetail = ({ order, onBack }) => {
                                 <Mail size={18} className="text-primary" />
                                 <span className="text-sm text-gray-600">{order.contact?.email || order.customerEmail || 'Not provided'}</span>
                             </div>
+                            <div className="pt-4 border-t border-gray-50 mt-4">
+                                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-2">Order Method</span>
+                                <div className="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">
+                                    <Package size={14} className="mr-2" />
+                                    {order.orderType || 'Pickup'}
+                                    {order.tableNumber && <span className="ml-2 text-primary">• Table {order.tableNumber}</span>}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -366,7 +398,9 @@ const OrderDetail = ({ order, onBack }) => {
                         <h3 className="text-xl font-playfair text-slate-900 mb-6">Order Summary</h3>
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm text-gray-600"><span>Item Subtotal</span><span>£{(order.total || 0).toFixed(2)}</span></div>
-                            <div className="flex justify-between text-sm text-gray-600"><span>Delivery Fee</span><span className="text-green-600 font-semibold">Free</span></div>
+                            {(!isDineIn && !isCollection) && (
+                                <div className="flex justify-between text-sm text-gray-600"><span>Delivery Fee</span><span className="text-green-600 font-semibold">Free</span></div>
+                            )}
                             <div className="flex justify-between text-lg font-bold text-slate-900 pt-3 border-t border-gray-100"><span>Total</span><span className="text-primary">£{(order.total || 0).toFixed(2)}</span></div>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3">

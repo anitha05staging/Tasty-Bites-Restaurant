@@ -50,7 +50,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         { path: '.', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
         { path: 'orders', icon: <ShoppingBag size={18} />, label: 'Orders' },
         { path: 'menu', icon: <Utensils size={18} />, label: 'Menu Items' },
-        { path: 'categories', icon: <Layers size={18} />, label: 'Categories' },
         { path: 'tables', icon: <Grid2X2 size={18} />, label: 'Tables' },
         { path: 'waiters', icon: <Users size={18} />, label: 'Waiters' },
         { path: 'chef', icon: <ChefHat size={18} />, label: 'Chef Menu' },

@@ -32,9 +32,8 @@ import { toast } from 'react-toastify';
 
 const StatusBadge = ({ status }) => {
     const variants = {
-        'Pending': 'bg-amber-50 text-amber-600 border-amber-100',
-        'Confirmed': 'bg-blue-50 text-blue-600 border-blue-100',
-        'In Progress': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+        'Order Received': 'bg-amber-50 text-amber-600 border-amber-100',
+        'Preparing': 'bg-indigo-50 text-indigo-600 border-indigo-100',
         'Ready': 'bg-purple-50 text-purple-600 border-purple-100',
         'Completed': 'bg-emerald-50 text-emerald-600 border-emerald-100',
         'Delivered': 'bg-emerald-50 text-emerald-600 border-emerald-100',
@@ -48,128 +47,190 @@ const StatusBadge = ({ status }) => {
     );
 };
 
-const DetailModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
+const DetailModal = ({ order, isOpen, onClose }) => {
     if (!isOpen || !order) return null;
 
-    const statuses = ['Pending', 'Confirmed', 'In Progress', 'Ready', 'Completed', 'Cancelled'];
-
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+                className="bg-white rounded-[3rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border border-slate-100"
             >
-                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <div>
-                        <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-                            Order details <span className="text-slate-300 font-light">#{order.orderId}</span>
-                        </h2>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Order Summary</p>
+                {/* Header Section */}
+                <div className="px-10 py-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/20 backdrop-blur-xl relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-admin-primary/5 via-transparent to-transparent opacity-20" />
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="px-4 py-1.5 bg-slate-900 text-white text-[10px] font-black rounded-xl uppercase tracking-[0.2em] shadow-2xl shadow-slate-900/20">
+                                Order #{order.orderId}
+                            </span>
+                        </div>
+                        <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Order Snapshot</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Real-time status management</p>
                     </div>
-                    <button onClick={onClose} className="p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-900">
-                        <XCircle size={24} />
+                    <button 
+                        onClick={onClose} 
+                        className="w-14 h-14 flex items-center justify-center bg-white hover:bg-slate-900 hover:text-white rounded-[1.5rem] transition-all duration-300 border border-slate-100 shadow-xl shadow-slate-200/50 text-slate-400 group relative z-10"
+                    >
+                        <XCircle size={24} className="group-hover:rotate-90 transition-transform duration-300" />
                     </button>
                 </div>
 
-                <div className="p-8 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-10">
-                    {/* Left Column: Items */}
-                    <div className="lg:col-span-7 space-y-6">
-                        <div className="bg-slate-50 rounded-[2.5rem] p-8 border border-slate-100">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 flex items-center gap-2">
-                                <ShoppingBag size={12} /> Ordered Items ({order.items.length})
-                            </h4>
-                            <div className="space-y-4">
-                                {order.items.map((item, idx) => {
-                                    const qty = item.qty || item.quantity || 1;
-                                    const price = parseFloat(String(item.price || 0).replace(/[^0-9.]/g, '')) || 0;
-                                    return (
-                                        <div key={idx} className="flex gap-6 items-center bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm group hover:shadow-md transition-all">
-                                            <div className="w-20 h-20 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 flex-shrink-0">
-                                                {item.image ? (
-                                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-slate-200"><ShoppingBag size={32} /></div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h5 className="font-black text-slate-900 text-lg">{item.name}</h5>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Unit Price: £{price.toFixed(2)}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs mx-auto mb-2 shadow-lg shadow-slate-900/10">
-                                                    {qty}
+                {/* Status Timeline */}
+                <div className="px-10 py-8 bg-white border-b border-slate-50">
+                    <div className="flex items-center justify-between max-w-3xl mx-auto relative px-4">
+                        <div className="absolute h-0.5 bg-slate-100 top-1/2 left-0 right-0 -translate-y-1/2 z-0" />
+                        
+                        {['Order Received', 'In Progress', 'Ready', 'Completed'].map((status, index) => {
+                            const statuses = ['Order Received', 'In Progress', 'Ready', 'Completed'];
+                            const currentIndex = statuses.indexOf(order.status);
+                            const isCompleted = index < currentIndex;
+                            const isActive = index === currentIndex;
+                            
+                            return (
+                                <div key={status} className="relative z-10 flex flex-col items-center gap-3 group">
+                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white transition-all duration-500 shadow-xl ${
+                                        isCompleted ? 'bg-emerald-500 text-white scale-110' : 
+                                        isActive ? 'bg-slate-900 text-white scale-125 ring-4 ring-slate-100 animate-pulse' : 
+                                        'bg-slate-100 text-slate-300'
+                                    }`}>
+                                        {isCompleted ? <Check size={18} /> : 
+                                         isActive ? <div className="w-2 h-2 bg-admin-primary rounded-full" /> : 
+                                         <div className="w-1.5 h-1.5 bg-slate-400 rounded-full" />}
+                                    </div>
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${
+                                        isActive ? 'text-slate-900 scale-105' : 'text-slate-300'
+                                    } transition-all`}>
+                                        {status === 'Order Received' ? 'Received' : status}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="p-10 overflow-y-auto flex-1 custom-scrollbar">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        {/* Left Column: Items */}
+                        <div className="lg:col-span-7 space-y-8">
+                            <div>
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                                    <ShoppingBag size={12} className="text-admin-primary" /> Purchased Items ({order.items.length})
+                                </h4>
+                                <div className="space-y-4">
+                                    {order.items.map((item, idx) => {
+                                        const qty = item.qty || item.quantity || 1;
+                                        const price = parseFloat(String(item.price || 0).replace(/[^0-9.]/g, '')) || 0;
+                                        return (
+                                            <div key={idx} className="flex gap-6 items-center bg-slate-50/50 p-5 rounded-[2rem] border border-slate-100/50 group hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500">
+                                                <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden border border-slate-100 flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                                                    {item.image ? (
+                                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                                            <UtensilsCrossed size={32} />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <p className="font-black text-slate-900">£{(price * qty).toFixed(2)}</p>
+                                                <div className="flex-1">
+                                                    <h5 className="font-black text-slate-900 text-lg leading-tight mb-1">{item.name}</h5>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                                                        <CreditCard size={10} /> £{price.toFixed(2)} / unit
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-xs font-black text-slate-400 mb-1">x{qty}</div>
+                                                    <p className="font-black text-slate-900 text-lg">£{(price * qty).toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {order.instructions && (
+                                <div className="p-8 bg-amber-50/30 rounded-[2.5rem] border border-amber-100/50 border-dashed relative overflow-hidden">
+                                     <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full -mr-12 -mt-12" />
+                                    <h4 className="text-[10px] font-black uppercase text-amber-600 tracking-widest flex items-center gap-2 mb-4">
+                                        <AlertCircle size={14} /> Special Instructions
+                                    </h4>
+                                    <p className="text-base text-slate-700 font-medium italic leading-relaxed">"{order.instructions}"</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right Column: Customer & Summary */}
+                        <div className="lg:col-span-5 space-y-10">
+                             {/* Summary Card */}
+                             <div className="bg-[#0f1014] rounded-[3.5rem] p-12 text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)] relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-80 h-80 bg-admin-primary/10 rounded-full -mr-40 -mt-40 blur-[100px] group-hover:bg-admin-primary/20 transition-all duration-700" />
+                                <div className="relative z-10">
+                                    <div className="flex items-center justify-between mb-10">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Invoice Summary</p>
+                                        <div className="flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl">
+                                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Live System</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Base Amount</span>
+                                            <span className="font-black text-lg">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Taxes & Fees</span>
+                                            <span className="font-black text-lg text-slate-400">Included</span>
+                                        </div>
+                                        
+                                        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-10" />
+                                        
+                                        <div className="flex flex-col items-center text-center py-4">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Total Settled</p>
+                                            <h3 className="text-6xl font-black text-white tracking-tighter mb-4 shadow-sm">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</h3>
+                                            <div className="inline-flex items-center gap-2 px-6 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full">
+                                                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Payment Completed</span>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                            <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-end">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Settlement Amount</p>
-                                    <h3 className="text-4xl font-black text-slate-900 tracking-tight">£{Number(String(order.total || 0).replace(/[^0-9.]/g, '')).toFixed(2)}</h3>
-                                </div>
-                                <div className="bg-emerald-50 text-emerald-600 px-6 py-3 rounded-2xl border border-emerald-100 flex items-center gap-2">
-                                    <CreditCard size={16} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Paid</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {order.instructions && (
-                            <div className="p-8 bg-amber-50/50 rounded-[2.5rem] border border-amber-100 border-dashed">
-                                <h4 className="text-[10px] font-black uppercase text-amber-600 tracking-widest flex items-center gap-2 mb-4">
-                                    <AlertCircle size={14} /> Kitchen / Delivery Notes
+                            {/* Customer Details */}
+                            <div className="px-4">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 flex items-center gap-2">
+                                    <User size={12} className="text-admin-primary" /> Customer Information
                                 </h4>
-                                <p className="text-base text-slate-700 italic font-medium leading-relaxed">"{order.instructions}"</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right Column: Status & Info */}
-                    <div className="lg:col-span-5 space-y-10">
-                        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-slate-900/20">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-                                <RefreshCw size={12} /> Live Status
-                            </h4>
-                            <StatusBadge status={order.status} />
-                        </div>
-
-                        <div className="h-px bg-slate-100" />
-
-                        <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
-                                <User size={12} /> Guest Information
-                            </h4>
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-4 group">
-                                    <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-lg transition-all"><User className="text-slate-400" size={24} /></div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Customer Name</p>
-                                        <p className="text-lg font-black text-slate-900 mt-2">{order.customerName}</p>
+                                <div className="space-y-8">
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-xl transition-all"><User className="text-slate-400" size={24} /></div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Full Name</p>
+                                            <p className="text-lg font-black text-slate-900 leading-none">{order.customerName}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-4 group">
-                                    <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-lg transition-all"><Phone className="text-slate-400" size={22} /></div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Phone Number</p>
-                                        <p className="text-lg font-black text-slate-900 mt-2">{order.customerPhone || 'Not Provided'}</p>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-xl transition-all"><Phone className="text-slate-400" size={22} /></div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Phone Number</p>
+                                            <p className="text-lg font-black text-slate-900 leading-none">{order.customerPhone || 'None'}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-4 group">
-                                    <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-lg transition-all"><Clock className="text-slate-400" size={22} /></div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Ordered At</p>
-                                        <p className="text-lg font-black text-slate-900 mt-2">{new Date(order.date).toLocaleString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-xl transition-all"><Clock className="text-slate-400" size={22} /></div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Service Time</p>
+                                            <p className="text-lg font-black text-slate-900 leading-none">{new Date(order.date).toLocaleString([], { hour: '2-digit', minute: '2-digit', weekday: 'short', month: 'short', day: 'numeric' })}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-4 group">
-                                    <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-lg transition-all"><MapPin className="text-slate-400" size={22} /></div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Service Type</p>
-                                        <p className="text-lg font-black text-slate-900 mt-2">{order.orderType} {order.tableNumber ? `• Room ${order.tableNumber}` : ''}</p>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:shadow-xl transition-all"><MapPin className="text-slate-400" size={22} /></div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Service Type</p>
+                                            <p className="text-lg font-black text-slate-900 leading-none">{order.orderType} {order.tableNumber ? `• Room ${order.tableNumber}` : ''}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -177,9 +238,13 @@ const DetailModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
                     </div>
                 </div>
 
-                <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-                    <button onClick={onClose} className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl hover:shadow-slate-900/20">
-                        Close
+                <div className="px-10 py-10 border-t border-slate-50 bg-slate-50/10 backdrop-blur-md flex justify-end">
+                    <button 
+                        onClick={onClose} 
+                        className="px-14 py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-slate-900/10 active:scale-95 flex items-center gap-3 group"
+                    >
+                        <span>Perfect, Close Snapshot</span>
+                        <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
             </motion.div>
@@ -194,7 +259,7 @@ const EditModal = ({ order, isOpen, onClose, onUpdate }) => {
         orderType: 'Collection',
         tableNumber: '',
         instructions: '',
-        status: 'Pending'
+        status: 'Order Received'
     });
     
     useEffect(() => {
@@ -205,14 +270,14 @@ const EditModal = ({ order, isOpen, onClose, onUpdate }) => {
                 orderType: order.orderType || 'Collection',
                 tableNumber: order.tableNumber || '',
                 instructions: order.instructions || '',
-                status: order.status || 'Pending'
+                status: order.status || 'Order Received'
             });
         }
     }, [order, isOpen]);
 
     if (!isOpen || !order) return null;
 
-    const statuses = ['Pending', 'Confirmed', 'In Progress', 'Ready', 'Completed', 'Cancelled'];
+    const statuses = ['Order Received', 'In Progress', 'Ready', 'Completed', 'Cancelled'];
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
@@ -223,8 +288,8 @@ const EditModal = ({ order, isOpen, onClose, onUpdate }) => {
             >
                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
                     <div className="text-left">
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Modify Order <span className="text-slate-300 font-light">#{order.orderId}</span></h2>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 text-left">Management Controls</p>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Edit Order <span className="text-slate-300 font-light">#{order.orderId}</span></h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 text-left">Edit</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"><XCircle size={24} /></button>
                 </div>
@@ -295,7 +360,7 @@ const EditModal = ({ order, isOpen, onClose, onUpdate }) => {
                     </div>
 
                     <div className="space-y-2 text-left">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Special Instructions</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Notes</label>
                         <textarea 
                             rows={3}
                             value={formData.instructions}
@@ -318,7 +383,7 @@ const EditModal = ({ order, isOpen, onClose, onUpdate }) => {
                         onClick={() => { onUpdate(order.id, formData); onClose(); }}
                         className="flex-1 px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20"
                     >
-                        Apply Changes
+                        Save
                     </button>
                 </div>
             </motion.div>
@@ -478,8 +543,8 @@ const AdminOrdersPage = () => {
             {/* Page Title */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Order Management</h1>
-                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Process and fulfill customer orders</p>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Orders</h1>
+                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Manage orders</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button 
@@ -497,7 +562,7 @@ const AdminOrdersPage = () => {
                                     `#${o.orderId}`,
                                     new Date(o.date).toLocaleDateString(),
                                     o.customerName,
-                                    `"${o.customerPhone || ''}"`,
+                                    `="${o.customerPhone || ''}"`,
                                     o.orderType,
                                     o.tableNumber || '',
                                     o.total,
@@ -519,7 +584,7 @@ const AdminOrdersPage = () => {
                         className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
                     >
                         <Download size={16} />
-                        Export Data
+                        Export
                     </button>
                 </div>
             </div>
@@ -529,12 +594,12 @@ const AdminOrdersPage = () => {
                 <div className="flex flex-wrap lg:flex-nowrap items-end gap-6">
                     {/* Search Field */}
                     <div className="flex flex-col gap-2 flex-1 min-w-[280px]">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Search Database</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Search</label>
                         <div className="relative group">
                             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={18} />
                             <input 
                                 type="text" 
-                                placeholder="Order # or guest name..."
+                                placeholder="Search..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-14 pr-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 focus:bg-white focus:border-slate-200 outline-none transition-all shadow-sm placeholder:text-slate-400 placeholder:font-bold h-[52px]"
@@ -546,17 +611,17 @@ const AdminOrdersPage = () => {
 
                     {/* Status Filter */}
                     <div className="flex flex-col gap-2 min-w-[160px]">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Order Status</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
                         <div className="relative">
                             <select 
                                 value={filterStatus} 
                                 onChange={(e) => setFilterStatus(e.target.value)}
                                 className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-100 transition-all h-[52px]"
                             >
-                                <option value="All">All Statuses</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Confirmed">Confirmed</option>
-                                <option value="In Progress">In Progress</option>
+                                <option value="All">All</option>
+                                <option value="Order Received">Order Received</option>
+                                <option value="Preparing">Preparing</option>
+                                <option value="Ready">Ready</option>
                                 <option value="Completed">Completed</option>
                                 <option value="Cancelled">Cancelled</option>
                             </select>
@@ -573,8 +638,8 @@ const AdminOrdersPage = () => {
                                 onChange={(e) => setFilterType(e.target.value)}
                                 className="w-full pl-5 pr-10 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none hover:bg-slate-100 transition-all h-[52px]"
                             >
-                                <option value="All">All Types</option>
-                                <option value="Collection">Collection Only</option>
+                                <option value="All">All</option>
+                                <option value="Collection">Collection</option>
                                 <option value="Dine-In">Dine-In</option>
                             </select>
                             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
@@ -583,7 +648,7 @@ const AdminOrdersPage = () => {
 
                     {/* Date Filter */}
                     <div className="flex flex-col gap-2 min-w-[180px]">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Filter by Date</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Date</label>
                         <div className="relative group">
                             <Flatpickr
                                 value={dateFilter}
@@ -605,7 +670,7 @@ const AdminOrdersPage = () => {
                 {loading ? (
                     <div className="py-40 flex flex-col items-center">
                         <Loader2 className="animate-spin text-slate-300" size={48} />
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-6">Refreshing active orders...</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-6">Loading...</p>
                     </div>
                 ) : filteredOrders.length > 0 ? (
                     <div className="overflow-visible">
@@ -613,7 +678,7 @@ const AdminOrdersPage = () => {
                             <thead>
                                 <tr className="border-b border-slate-100 bg-slate-50/50">
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Info</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
@@ -729,8 +794,8 @@ const AdminOrdersPage = () => {
                         <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-8 text-slate-200">
                             <ShoppingBag size={48} />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">No matching orders</h3>
-                        <p className="text-sm text-slate-500 mt-2 max-w-sm text-center font-medium font-inter">Try adjusting your filters or search query to find who you're looking for.</p>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">None Found</h3>
+                        <p className="text-sm text-slate-500 mt-2 max-w-sm text-center font-medium font-inter">No orders match.</p>
                     </div>
                 )}
             </div>
@@ -753,7 +818,9 @@ const AdminOrdersPage = () => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => { setIsDeleteModalOpen(false); setItemToCancel(null); }}
                 onConfirm={handleConfirmCancel}
-                title="Cancel & Remove Order"
+                title="Cancel Order"
+                confirmText="Confirm Cancellation"
+                variant="warning"
                 message="Are you sure you want to cancel and archive this order? This action cannot be undone."
                 itemName={itemToCancel ? `Order #${itemToCancel.orderId} - ${itemToCancel.customerName}` : ''}
             />

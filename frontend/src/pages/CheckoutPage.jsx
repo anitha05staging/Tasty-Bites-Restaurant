@@ -115,7 +115,7 @@ const CheckoutPage = () => {
         try {
             const orderItems = cartItems.map(item => ({
                 name: item.name,
-                qty: item.quantity,
+                quantity: item.quantity,
                 price: parseFloat(String(item.price).replace(/[^0-9.]/g, '')),
                 image: item.image
             }));
@@ -405,10 +405,6 @@ const CheckoutPage = () => {
                                 <div className="flex justify-between text-slate-500 text-sm font-medium">
                                     <span>Subtotal</span>
                                     <span>£{subtotal.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between text-slate-500 text-sm font-medium">
-                                    <span>Delivery Fee</span>
-                                    <span className="text-green-600 font-bold uppercase text-[10px] tracking-widest">Free</span>
                                 </div>
                                 <div className="flex justify-between text-xl font-bold text-slate-900 pt-4 border-t border-slate-100">
                                     <span>Total</span>

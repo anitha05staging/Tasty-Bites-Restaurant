@@ -17,7 +17,8 @@ import {
     X
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api, { getImageUrl } from '../../services/api';
+import { getImageUrl } from '../../services/api';
+import { adminInfoApi } from '../services/adminApi';
 
 const InfoField = ({ label, icon: Icon, value, onChange, placeholder, type = "text" }) => (
     <div className="space-y-2">
@@ -63,7 +64,7 @@ const AdminInfoPage = () => {
 
     const fetchInfo = async () => {
         try {
-            const data = await api.getRestaurantInfo();
+            const data = await adminInfoApi.get();
             if (data) {
                 setInfo({
                     name: data.name,
@@ -98,7 +99,7 @@ const AdminInfoPage = () => {
 
             try {
                 toast.info('Uploading logo...');
-                const data = await api.uploadLogo(formData);
+                const data = await adminInfoApi.uploadLogo(formData);
                 if (data.success) {
                     setInfo({ ...info, logo: data.logoUrl });
                     toast.success('Logo uploaded successfully');
@@ -113,7 +114,7 @@ const AdminInfoPage = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await api.updateRestaurantInfo({
+            await adminInfoApi.update({
                 ...info,
                 openingHours: hours
             });
@@ -223,15 +224,15 @@ const AdminInfoPage = () => {
         <div className="max-w-5xl mx-auto space-y-12 pb-20">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Restaurant Profile</h1>
-                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Manage public business information</p>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Info</h1>
+                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Business details</p>
                 </div>
                 <button 
                     onClick={handleSave}
                     disabled={saving}
                     className="flex inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-black shadow-lg shadow-slate-900/10 transition-all disabled:opacity-50"
                 >
-                    {saving ? <Loader2 className="animate-spin" size={18} /> : <><Save size={18} /> Save Changes</>}
+                    {saving ? <Loader2 className="animate-spin" size={18} /> : <><Save size={18} /> Save</>}
                 </button>
             </div>
 
@@ -261,7 +262,7 @@ const AdminInfoPage = () => {
                     </div>
 
                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
-                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Social Media</h4>
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Social</h4>
                         <div className="space-y-4">
                             {['Instagram', 'Facebook', 'Twitter'].map(social => (
                                 <div key={social} className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer border border-transparent hover:border-slate-200 group">
@@ -280,7 +281,7 @@ const AdminInfoPage = () => {
                     <div className="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <InfoField 
-                                label="Restaurant Name" 
+                                label="Name" 
                                 icon={Store} 
                                 value={info.name} 
                                 onChange={(val) => setInfo({...info, name: val})}
@@ -288,7 +289,7 @@ const AdminInfoPage = () => {
                             />
                             <div className="md:col-span-2">
                                 <InfoField 
-                                    label="Official Email" 
+                                    label="Email" 
                                     icon={Mail} 
                                     value={info.email} 
                                     onChange={(val) => setInfo({...info, email: val})}
@@ -296,14 +297,14 @@ const AdminInfoPage = () => {
                                 />
                             </div>
                             <InfoField 
-                                label="Contact Number" 
+                                label="Phone" 
                                 icon={Phone} 
                                 value={info.phone} 
                                 onChange={(val) => setInfo({...info, phone: val})}
                                 placeholder="+44 ..."
                             />
                             <InfoField 
-                                label="Website URL" 
+                                label="Website" 
                                 icon={Globe} 
                                 value={info.website} 
                                 onChange={(val) => setInfo({...info, website: val})}
@@ -312,7 +313,7 @@ const AdminInfoPage = () => {
                         </div>
 
                         <InfoField 
-                            label="Physical Address" 
+                            label="Address" 
                             icon={MapPin} 
                             value={info.address} 
                             onChange={(val) => setInfo({...info, address: val})}
@@ -320,7 +321,7 @@ const AdminInfoPage = () => {
                         />
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">About Description</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">About</label>
                             <textarea 
                                 value={info.description || ''}
                                 onChange={(e) => setInfo({...info, description: e.target.value})}
@@ -340,7 +341,7 @@ const AdminInfoPage = () => {
                                         className="space-y-6"
                                     >
                                         <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Edit Opening Schedule</h4>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Edit Hours</h4>
                                             <button onClick={() => setIsEditingHours(false)} className="text-slate-400 hover:text-slate-900"><X size={16} /></button>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,auto] gap-8 items-start">
@@ -372,7 +373,7 @@ const AdminInfoPage = () => {
                                             }}
                                             className="w-full py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-900/10 mt-2"
                                         >
-                                            Update Schedule
+                                            Save
                                         </button>
                                     </motion.div>
                                 ) : (
@@ -386,7 +387,7 @@ const AdminInfoPage = () => {
                                                 <Clock size={24} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Opening Schedule</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hours</p>
                                                 <p className="text-base font-black text-slate-900 mt-1">{hours.days || 'Mon-Sun'}: {hours.open || '11:00'} - {hours.close || '22:30'}</p>
                                             </div>
                                         </div>
@@ -394,7 +395,7 @@ const AdminInfoPage = () => {
                                             onClick={() => setIsEditingHours(true)}
                                             className="px-6 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
                                         >
-                                            Edit Schedule
+                                            Edit
                                         </button>
                                     </motion.div>
                                 )}

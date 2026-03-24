@@ -84,14 +84,14 @@ const AdminDashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
-                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Live Overview</p>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Overview</h1>
+                    <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-widest">Current Status</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={fetchData}
                         className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm group"
-                        title="Refresh Data"
+                        title="Refresh"
                     >
                         <RefreshCw size={18} className={loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
                     </button>
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
                         className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-900/20"
                     >
                         <Plus size={16} strokeWidth={3} />
-                        New Menu Item
+                        Add Item
                     </button>
                 </div>
             </div>
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
             {/* Main Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <OperationWidget 
-                    title="Orders Today" 
+                    title="Today's Orders" 
                     value={todayOrders.length} 
                     status="Live"
                     icon={ShoppingBag} 
@@ -117,21 +117,21 @@ const AdminDashboard = () => {
                 <OperationWidget 
                     title="Pending Orders" 
                     value={pendingOrders.length} 
-                    status="Action Required"
+                    status="Awaiting Action"
                     icon={AlertCircle} 
                     colorClass="bg-amber-500"
                 />
                 <OperationWidget 
-                    title="Today's Bookings" 
+                    title="Bookings" 
                     value={todayBookings.length} 
-                    status="Fully Booked"
+                    status="Today"
                     icon={Calendar} 
                     colorClass="bg-blue-500"
                 />
                 <OperationWidget 
-                    title="Customer Reviews" 
+                    title="Reviews" 
                     value={testimonials.length} 
-                    status="Live Feedback"
+                    status="Latest"
                     icon={Star} 
                     colorClass="bg-purple-500"
                 />
@@ -142,15 +142,15 @@ const AdminDashboard = () => {
 
             {/* Quick Overview Section */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                {/* Recent Orders Table */}
+                {/* Latest Orders Table */}
                 <div className="xl:col-span-2 space-y-6">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-slate-900">Recent Orders</h2>
+                        <h2 className="text-xl font-bold text-slate-900">Latest Orders</h2>
                         <button 
                             onClick={() => navigate('orders')}
                             className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-widest hover:translate-x-1 transition-transform"
                         >
-                            View All Orders <ArrowRight size={14} />
+                            View All <ArrowRight size={14} />
                         </button>
                     </div>
                     
@@ -159,18 +159,18 @@ const AdminDashboard = () => {
                             <table className="w-full text-left">
                                 <thead className="bg-slate-50/50 border-b border-slate-100">
                                     <tr>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Order ID</th>
+                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
                                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Price</th>
                                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Action</th>
+                                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">View</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {orders.slice(0, 6).map((order) => (
                                         <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
                                             <td className="px-6 py-4">
-                                                <span className="text-sm font-bold text-slate-900 leading-none">#{order.orderId}</span>
+                                                <span className="text-sm font-bold text-slate-900 leading-none">#{order.orderId || order.id}</span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <p className="text-sm font-bold text-slate-900">{order.customerName}</p>
@@ -202,7 +202,7 @@ const AdminDashboard = () => {
                                     {orders.length === 0 && (
                                         <tr>
                                             <td colSpan="5" className="px-6 py-20 text-center text-slate-400 uppercase tracking-widest font-bold text-xs">
-                                                No incoming orders yet
+                                                None
                                             </td>
                                         </tr>
                                     )}
@@ -215,7 +215,7 @@ const AdminDashboard = () => {
                 {/* Status Column */}
                 <div className="space-y-10">
                     <div className="space-y-6">
-                        <h2 className="text-xl font-bold text-slate-900">Today's Bookings</h2>
+                        <h2 className="text-xl font-bold text-slate-900">Bookings</h2>
                         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
                             {bookings.slice(0, 3).map((booking) => (
                                 <div key={booking.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-50 hover:border-slate-200 transition-all group">
@@ -234,21 +234,21 @@ const AdminDashboard = () => {
                             ))}
                             {bookings.length === 0 && (
                                 <div className="py-10 text-center text-slate-400 uppercase tracking-widest font-bold text-[10px]">
-                                    No bookings today
+                                    None
                                 </div>
                             )}
                             <button 
                                 onClick={() => navigate('bookings')}
                                 className="w-full py-4 bg-slate-900 text-white hover:bg-black rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all mt-2 shadow-lg shadow-slate-900/10"
                             >
-                                Manage Reservations
+                                View All
                             </button>
                         </div>
                     </div>
 
-            {/* Dashboard Footer (Optional/Empty now) */}
+            {/* Dashboard Footer */}
             <div className="pt-10 border-t border-slate-100 flex items-center justify-between">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Tasty Bites Admin System • v2.1.0</p>
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Tasty Bites Admin • v2.1.0</p>
             </div>
                 </div>
             </div>

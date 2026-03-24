@@ -1,6 +1,6 @@
 import express from 'express';
 import { Reservation } from '../models/index.js';
-import { authenticate, optionalAuth } from '../middleware/auth.js';
+import { authenticate, optionalAuth, isAdmin } from '../middleware/auth.js';
 import { sendBookingConfirmation } from '../services/email.js';
 
 const router = express.Router();
@@ -58,11 +58,8 @@ router.post('/', optionalAuth, async (req, res) => {
 });
 
 // ADMIN: GET /api/reservations/admin/all (List all reservations)
-router.get('/admin/all', authenticate, async (req, res) => {
+router.get('/admin/all', authenticate, isAdmin, async (req, res) => {
     try {
-        const { User } = await import('../models/index.js');
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const reservations = await Reservation.findAll({
             order: [['date', 'DESC'], ['time', 'DESC']]
@@ -77,6 +74,8 @@ router.get('/admin/all', authenticate, async (req, res) => {
 // GET /api/reservations
 router.get('/', authenticate, async (req, res) => {
     try {
+        const user = await User.findByPk(req.userId);
+        if (!user) return res.status(401).json({ error: 'User not found or session expired' });
         const reservations = await Reservation.findAll({
             where: { userId: req.userId },
             order: [['date', 'DESC']]
@@ -89,11 +88,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // ADMIN: PATCH /api/reservations/:id/status (Update reservation status)
-router.patch('/:id/status', authenticate, async (req, res) => {
+router.patch('/:id/status', authenticate, isAdmin, async (req, res) => {
     try {
-        const { User } = await import('../models/index.js');
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const { status } = req.body;
         const reservation = await Reservation.findByPk(req.params.id);

@@ -6,7 +6,6 @@ import reservationRoutes from './routes/reservations.js';
 import contactRoutes from './routes/contact.js';
 import cateringRoutes from './routes/catering.js';
 import orderRoutes from './routes/orders.js';
-import categoryRoutes from './routes/categories.js';
 import authRoutes from './routes/auth.js';
 import addressRoutes from './routes/addresses.js';
 import faqRoutes from './routes/faqs.js';
@@ -274,10 +273,19 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/faqs', faqRoutes);
-app.use('/api/categories', categoryRoutes);
 app.use('/api/restaurant', restaurantRoutes);
 app.use('/api/tables', tableRoutes);
 app.use('/api/staff', staffRoutes);
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('SERVER_ERROR:', err);
+    res.status(500).json({ 
+        error: 'Internal Server Error',
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
 
 db.sync({ alter: true }).then(() => {
     console.log('✅ Database synced successfully');

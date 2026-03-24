@@ -1,7 +1,7 @@
 import express from 'express';
 import { CateringEnquiry } from '../models/index.js';
 import { sendCateringNotification } from '../services/email.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -37,11 +37,8 @@ router.post('/', async (req, res) => {
 });
 
 // ADMIN: GET /api/catering/admin/all (List all enquiries)
-router.get('/admin/all', authenticate, async (req, res) => {
+router.get('/admin/all', authenticate, isAdmin, async (req, res) => {
     try {
-        const { User } = await import('../models/index.js');
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const enquiries = await CateringEnquiry.findAll({
             order: [['createdAt', 'DESC']]
@@ -54,11 +51,8 @@ router.get('/admin/all', authenticate, async (req, res) => {
 });
 
 // ADMIN: PATCH /api/catering/:id/status (Update status)
-router.patch('/:id/status', authenticate, async (req, res) => {
+router.patch('/:id/status', authenticate, isAdmin, async (req, res) => {
     try {
-        const { User } = await import('../models/index.js');
-        const user = await User.findByPk(req.userId);
-        if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
 
         const { status } = req.body;
         const enquiry = await CateringEnquiry.findByPk(req.params.id);

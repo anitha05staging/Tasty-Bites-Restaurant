@@ -59,8 +59,8 @@ const OrderConfirmationPage = () => {
 
     const steps = [
         { id: 1, label: 'Order Placed', icon: ShoppingBag, active: true },
-        { id: 2, label: 'Preparing Your Food', icon: ChefHat, active: true },
-        { id: 3, label: isDineIn ? 'Almost Ready' : 'Ready for Pickup', icon: isDineIn ? Utensils : MapPin, active: false },
+        { id: 2, label: 'Preparing Your Food', icon: ChefHat, active: status === 'Preparing' || status === 'Ready' || isReady },
+        { id: 3, label: isDineIn ? 'Almost Ready' : 'Ready for Pickup', icon: isDineIn ? Utensils : MapPin, active: status === 'Ready' || isReady },
     ];
 
     return (
@@ -90,7 +90,7 @@ const OrderConfirmationPage = () => {
                     <p className="text-slate-500 text-lg mb-10 max-w-lg mx-auto leading-relaxed">
                         {isDineIn
                             ? "We've sent your order to our chefs. Sit back and relax, your meal is being prepared with love."
-                            : `Awesome! We'll have your food ready for collection at Tasty Bites by ${collectionTime || 'scheduled time'}.`}
+                            : `Awesome! We'll have your food ready for collection at Tasty Bites by ${collectionTime || 'selected time'}.`}
                     </p>
 
                     {/* Progress Tracker */}

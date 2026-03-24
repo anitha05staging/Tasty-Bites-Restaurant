@@ -1,6 +1,6 @@
 import express from 'express';
 import { RestaurantInfo } from '../models/index.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, isAdmin } from '../middleware/auth.js';
 import multer from 'multer';
 import path from 'node:path';
 
@@ -21,8 +21,8 @@ const upload = multer({
     limits: { fileSize: 2 * 1024 * 1024 } // 2MB
 });
 
-// POST /api/restaurant/logo
-router.post('/logo', authenticate, upload.single('logo'), async (req, res) => {
+// POST /api/restaurant/logo (Admin only)
+router.post('/logo', authenticate, isAdmin, upload.single('logo'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
 });
 
 // PUT /api/restaurant (Admin only)
-router.put('/', authenticate, async (req, res) => {
+router.put('/', authenticate, isAdmin, async (req, res) => {
     try {
         const body = req.body;
         

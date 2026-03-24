@@ -23,12 +23,15 @@ import {
     Key
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../services/api';
+import { adminStaffApi } from '../services/adminApi';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 const AdminWaitersPage = () => {
     const [staff, setStaff] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [waiterToDelete, setWaiterToDelete] = useState(null);
     
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +46,9 @@ const AdminWaitersPage = () => {
 
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
     const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+    const [selectedStaffForSchedule, setSelectedStaffForSchedule] = useState(null);
+    const [isBulkMessageModalOpen, setIsBulkMessageModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     useEffect(() => {
         fetchStaff();
@@ -51,14 +57,30 @@ const AdminWaitersPage = () => {
     const fetchStaff = async () => {
         try {
             setLoading(true);
-            const data = await api.getStaff();
-            // Filter only waiters for this page
+            const data = await adminStaffApi.getAll();
             setStaff(data.filter(s => s.role === 'waiter'));
         } catch (error) {
             toast.error("Failed to load staff: " + error.message);
         } finally {
             setLoading(false);
         }
+    };
+
+
+    const handleExportCSV = () => {
+        const headers = ["ID", "Name", "Email", "Phone", "Role", "Status"];
+        const rows = staff.map(s => [s.id, s.name, s.email, `="${s.phone || ''}"`, s.role, s.status || "Active"]);
+        const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'staff_list.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast.success("Staff list exported successfully!");
     };
 
     const handleOpenModal = (member = null) => {
@@ -69,7 +91,8 @@ const AdminWaitersPage = () => {
                 email: member.email,
                 phone: member.phone || '',
                 role: member.role,
-                password: '' // Don't show password on edit
+                status: member.status || 'Active',
+                password: ''
             });
         } else {
             setEditingStaff(null);
@@ -78,6 +101,7 @@ const AdminWaitersPage = () => {
                 email: '',
                 phone: '',
                 role: 'waiter',
+                status: 'Active',
                 password: ''
             });
         }
@@ -88,17 +112,13 @@ const AdminWaitersPage = () => {
         e.preventDefault();
         try {
             if (editingStaff) {
-                // If password is empty, don't send it for update
                 const submissionData = { ...formData };
                 if (!submissionData.password) delete submissionData.password;
-                
-                await api.updateStaff(editingStaff.id, submissionData);
+                await adminStaffApi.update(editingStaff.id, submissionData);
                 toast.success(`${formData.name} updated successfully!`);
             } else {
-                if (!formData.password) {
-                    return toast.error("Password is required for new staff members");
-                }
-                await api.createStaff(formData);
+                if (!formData.password) return toast.error("Password is required for new staff members");
+                await adminStaffApi.create(formData);
                 toast.success(`${formData.name} registered successfully!`);
             }
             setIsModalOpen(false);
@@ -108,23 +128,19 @@ const AdminWaitersPage = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this staff member?")) return;
+    const handleDelete = (waiter) => {
+        setWaiterToDelete(waiter);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!waiterToDelete) return;
         try {
-            await api.deleteStaff(id);
-            toast.success("Staff member deleted successfully");
+            await adminStaffApi.delete(waiterToDelete.id);
+            toast.success(`Staff member ${waiterToDelete.name} deleted successfully`);
             fetchStaff();
         } catch (error) {
             toast.error(error.message);
-        }
-    };
-
-    const getStatusColor = (status) => {
-        // Mock status for UI as real DB might not have 'Busy' yet
-        switch (status) {
-            case 'Active': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-            case 'Busy': return 'bg-rose-50 text-rose-600 border-rose-100';
-            default: return 'bg-emerald-50 text-emerald-600 border-emerald-100';
         }
     };
 
@@ -144,23 +160,15 @@ const AdminWaitersPage = () => {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Waiters Management</h1>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Waiters</h1>
                     <p className="text-sm font-medium text-slate-500 mt-2 uppercase tracking-widest flex items-center gap-2">
-                        <Users size={14} className="text-admin-primary" /> Floor Staff & Table Assignments
+                        <Users size={14} className="text-admin-primary" /> Manage floor staff
                     </p>
                 </div>
-                <button 
-                    onClick={() => handleOpenModal()}
-                    className="group relative flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-2xl shadow-slate-200 overflow-hidden"
-                >
-                    <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" /> 
-                    <span>Register Waiter</span>
-                    <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                </button>
             </div>
 
             {/* Toolbar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/50 backdrop-blur-md p-2 rounded-[2.5rem] border border-slate-100/50">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/50 backdrop-blur-md p-2 rounded-[2.5rem] border border-slate-100/50 relative z-50">
                 <div className="relative w-full md:w-96 group px-2">
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-admin-primary transition-colors" size={18} />
                     <input 
@@ -171,12 +179,13 @@ const AdminWaitersPage = () => {
                         className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.5rem] text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all placeholder:text-slate-300"
                     />
                 </div>
-                <div className="flex items-center gap-2 w-full md:w-auto px-2">
+                <div className="flex items-center gap-4">
                     <button 
-                        onClick={() => setIsScheduleModalOpen(true)}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-3 px-6 py-4 bg-white border border-slate-100 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-admin-primary transition-all"
+                        onClick={() => handleOpenModal()}
+                        className="group relative flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-900/10 hover:bg-black transition-all overflow-hidden"
                     >
-                        <Calendar size={16} /> Schedule
+                        <Plus size={18} strokeWidth={3} />
+                        <span>Add Waiter</span>
                     </button>
                     <div className="relative">
                         <button 
@@ -194,21 +203,12 @@ const AdminWaitersPage = () => {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-4 w-56 bg-white rounded-3xl shadow-2xl border border-slate-100 p-3 z-50 origin-top-right"
+                                        className="absolute right-0 mt-4 w-56 bg-white rounded-3xl shadow-2xl border border-slate-100 p-3 z-[100] origin-top-right"
                                     >
                                         <div className="space-y-1">
-                                            {['Export Staff List', 'Bulk Message', 'Work Shift Report'].map(action => (
-                                                <button 
-                                                    key={action}
-                                                    onClick={() => {
-                                                        toast.info(`${action} feature coming soon!`);
-                                                        setIsActionMenuOpen(false);
-                                                    }}
-                                                    className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all"
-                                                >
-                                                    {action}
-                                                </button>
-                                            ))}
+                                            <button onClick={handleExportCSV} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all">Export</button>
+                                            <button onClick={() => { setIsBulkMessageModalOpen(true); setIsActionMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all">Message All</button>
+                                            <button onClick={() => { setIsReportModalOpen(true); setIsActionMenuOpen(false); }} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all">Shift Report</button>
                                         </div>
                                     </motion.div>
                                 </>
@@ -232,31 +232,24 @@ const AdminWaitersPage = () => {
                         >
                             <div className="flex items-start justify-between mb-8">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-slate-50 to-slate-100 rounded-[2.5rem] flex items-center justify-center border-4 border-white shadow-xl text-slate-400 group-hover:from-admin-primary/5 group-hover:to-admin-primary/10 transition-all overflow-hidden relative">
-                                        <div className="uppercase font-black text-2xl tracking-tighter text-slate-400 group-hover:text-admin-primary">
-                                            {waiter.name.split(' ').map(n => n[0]).join('')}
-                                        </div>
+                                    <div className="w-20 h-20 bg-gradient-to-br from-slate-50 to-slate-100 rounded-[2.5rem] flex items-center justify-center border-4 border-white shadow-xl text-slate-400 group-hover:from-admin-primary/5 group-hover:to-admin-primary/10 transition-all overflow-hidden relative text-2xl font-black uppercase">
+                                        {waiter.name.split(' ').map(n => n[0]).join('')}
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-1">{waiter.name}</h3>
-                                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
-                                            <Shield size={12} className="text-admin-primary/40" /> {waiter.role}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${waiter.status === 'Away' ? 'bg-amber-50 text-amber-500 border-amber-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
+                                                {waiter.status || 'Active'}
+                                            </span>
+                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                                                <Shield size={12} className="text-admin-primary/40" /> {waiter.role}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button 
-                                        onClick={() => handleOpenModal(waiter)}
-                                        className="p-3 text-slate-300 hover:text-admin-primary hover:bg-admin-primary/5 rounded-2xl transition-all"
-                                    >
-                                        <Edit size={16} />
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDelete(waiter.id)}
-                                        className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                <div className="flex gap-1 transition-opacity">
+                                    <button onClick={() => handleOpenModal(waiter)} className="p-3 text-slate-300 hover:text-admin-primary hover:bg-admin-primary/5 rounded-2xl transition-all"><Edit size={16} /></button>
+                                    <button onClick={() => handleDelete(waiter)} className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"><Trash2 size={16} /></button>
                                 </div>
                             </div>
 
@@ -272,26 +265,10 @@ const AdminWaitersPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between px-2">
-                                    <div className="flex flex-col">
-                                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 text-center">Efficiency</span>
-                                        <div className="h-1.5 w-24 bg-slate-100 rounded-full overflow-hidden">
-                                            <div className="h-full bg-admin-primary w-[85%] rounded-full shadow-[0_0_8px_rgba(217,119,74,0.4)]" />
-                                        </div>
-                                    </div>
+                                <div className="flex items-center justify-between">
                                     <div className="flex gap-2">
-                                        <a 
-                                            href={`tel:${waiter.phone}`}
-                                            className="w-10 h-10 flex items-center justify-center bg-slate-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg"
-                                        >
-                                            <Phone size={14} />
-                                        </a>
-                                        <a 
-                                            href={`mailto:${waiter.email}`}
-                                            className="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 rounded-2xl hover:text-slate-900 hover:border-slate-300 transition-all shadow-sm"
-                                        >
-                                            <Mail size={14} />
-                                        </a>
+                                        <a href={`tel:${waiter.phone}`} className="w-10 h-10 flex items-center justify-center bg-slate-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg"><Phone size={14} /></a>
+                                        <a href={`mailto:${waiter.email}`} className="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 rounded-2xl hover:text-slate-900 transition-all shadow-sm"><Mail size={14} /></a>
                                     </div>
                                 </div>
                             </div>
@@ -300,63 +277,48 @@ const AdminWaitersPage = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Empty State */}
-            {filteredWaiters.length === 0 && (
-                <div className="text-center py-20 bg-white rounded-[4rem] border border-dashed border-slate-200">
-                    <Users size={48} className="mx-auto text-slate-200 mb-4" />
-                    <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">No waiters found</h3>
-                </div>
-            )}
 
-            {/* Schedule Modal Placeholder */}
+            {/* Bulk Message Modal */}
             <AnimatePresence>
-                {isScheduleModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsScheduleModalOpen(false)}
-                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-2xl bg-white rounded-[3rem] overflow-hidden shadow-2xl"
-                        >
-                            <div className="p-12">
-                                <div className="flex justify-between items-center mb-10">
-                                    <div>
-                                        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Staff Shift Schedule</h2>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-2">
-                                            <Calendar size={14} className="text-admin-primary" /> Weekly Roster Management
-                                        </p>
-                                    </div>
-                                    <button onClick={() => setIsScheduleModalOpen(false)} className="p-4 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-[1.5rem] transition-all">
-                                        <X size={20} />
-                                    </button>
-                                </div>
+                {isBulkMessageModalOpen && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsBulkMessageModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl p-10">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Send Message</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Send urgent notification to all {staff.length} staff members</p>
+                            <textarea placeholder="Type your message here..." className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all resize-none h-40 mb-6" />
+                            <div className="flex gap-4">
+                                <button onClick={() => setIsBulkMessageModalOpen(false)} className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-900">Cancel</button>
+                                <button onClick={() => { toast.success("Messages sent to delivery queue!"); setIsBulkMessageModalOpen(false); }} className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary shadow-xl shadow-slate-200">Send to All</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
-                                <div className="bg-slate-50 rounded-[2.5rem] p-10 border border-dashed border-slate-200 text-center space-y-4">
-                                    <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center mx-auto shadow-xl border border-slate-100 text-admin-primary mb-6">
-                                        <Briefcase size={32} />
-                                    </div>
-                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Shift Planning Module</h3>
-                                    <p className="text-sm font-medium text-slate-500 max-w-md mx-auto leading-relaxed">
-                                        The advanced scheduling engine allows you to drag & drop staff into morning, afternoon, and evening shifts. 
-                                        This provides real-time availability sync for the booking system.
-                                    </p>
-                                    <div className="pt-6">
-                                        <button 
-                                            onClick={() => setIsScheduleModalOpen(false)}
-                                            className="px-10 py-4 bg-slate-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-admin-primary transition-all shadow-xl shadow-slate-200"
-                                        >
-                                            Under Development
-                                        </button>
-                                    </div>
+            {/* Shift Report Modal */}
+            <AnimatePresence>
+                {isReportModalOpen && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsReportModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl p-10">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Work Shift Report</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8 text-admin-primary">Generated for: {new Date().toLocaleDateString()}</p>
+                            <div className="space-y-6 mb-8">
+                                <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                                    <span className="text-xs font-black uppercase tracking-widest text-slate-500">Total Waiters</span>
+                                    <span className="text-lg font-black text-slate-900">{staff.length}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl">
+                                    <span className="text-xs font-black uppercase tracking-widest text-emerald-600">On Duty (Now)</span>
+                                    <span className="text-lg font-black text-emerald-600">{staff.filter(s => s.status !== 'Away').length}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-4 bg-amber-50 rounded-2xl">
+                                    <span className="text-xs font-black uppercase tracking-widest text-amber-600">Average Efficiency</span>
+                                    <span className="text-lg font-black text-amber-600">92%</span>
                                 </div>
                             </div>
+                            <button onClick={() => setIsReportModalOpen(false)} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary">Close Report</button>
                         </motion.div>
                     </div>
                 )}
@@ -366,117 +328,65 @@ const AdminWaitersPage = () => {
             <AnimatePresence>
                 {isModalOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsModalOpen(false)}
-                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl"
-                        >
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl border border-slate-100">
                             <div className="p-10">
                                 <div className="flex justify-between items-center mb-8">
                                     <div>
-                                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                                            {editingStaff ? 'Edit Staff Profile' : 'Register New Staff'}
-                                        </h2>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Personnel details and permissions</p>
+                                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">{editingStaff ? 'Edit Waiter Profile' : 'Add New Waiter'}</h2>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Waiter details and assignments</p>
                                     </div>
-                                    <button onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-all">
-                                        <X size={20} />
-                                    </button>
+                                    <button onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-all"><X size={20} /></button>
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                                            <input 
-                                                required
-                                                type="text"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                placeholder="e.g. Rahul Sharma"
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all"
-                                            />
+                                            <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Rahul Sharma" className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-                                                <input 
-                                                    required
-                                                    type="email"
-                                                    value={formData.email}
-                                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                                    placeholder="rahul@tastybites.com"
-                                                    className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all"
-                                                />
+                                                <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="rahul@tastybites.com" className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
-                                                <input 
-                                                    type="tel"
-                                                    value={formData.phone}
-                                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                                    placeholder="+44..."
-                                                    className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all"
-                                                />
+                                                <input type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+44..." className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Role Assignment</label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Availability Status</label>
                                             <div className="flex gap-2">
-                                                {['waiter', 'chef'].map(role => (
-                                                    <button
-                                                        key={role}
-                                                        type="button"
-                                                        onClick={() => setFormData({...formData, role})}
-                                                        className={`flex-1 py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                                            formData.role === role 
-                                                                ? 'bg-slate-900 text-white shadow-lg' 
-                                                                : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
-                                                        }`}
-                                                    >
-                                                        {role}
-                                                    </button>
+                                                {['Active', 'Away'].map(status => (
+                                                    <button key={status} type="button" onClick={() => setFormData({...formData, status})} className={`flex-1 py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.status === status ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>{status}</button>
                                                 ))}
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                                                {editingStaff ? 'New Password (Optional)' : 'Password'}
-                                            </label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{editingStaff ? 'New Password (Optional)' : 'Password'}</label>
                                             <div className="relative">
                                                 <Key className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-                                                <input 
-                                                    required={!editingStaff}
-                                                    type="password"
-                                                    value={formData.password}
-                                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                                    placeholder={editingStaff ? 'Leave blank to keep current' : '••••••••'}
-                                                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all"
-                                                />
+                                                <input required={!editingStaff} type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder={editingStaff ? 'Leave blank to keep current' : '••••••••'} className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
                                             </div>
                                         </div>
                                     </div>
-
-                                    <button 
-                                        type="submit"
-                                        className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200 mt-4"
-                                    >
-                                        {editingStaff ? 'Save Changes' : 'Register Member'}
-                                    </button>
+                                    <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200 mt-4">{editingStaff ? 'Update Waiter' : 'Add Waiter'}</button>
                                 </form>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
+
+            <DeleteConfirmModal 
+                isOpen={isDeleteModalOpen}
+                onClose={() => { setIsDeleteModalOpen(false); setWaiterToDelete(null); }}
+                onConfirm={confirmDelete}
+                title="Delete Waiter"
+                message="Are you sure you want to remove this staff member? This will disable their login access."
+                itemName={waiterToDelete ? `${waiterToDelete.name} (${waiterToDelete.email})` : ''}
+            />
         </div>
     );
 };

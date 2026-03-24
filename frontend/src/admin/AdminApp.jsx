@@ -7,7 +7,6 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import AdminMenuPage from './pages/AdminMenuPage';
-import AdminCategoriesPage from './pages/AdminCategoriesPage';
 import AdminReservationsPage from './pages/AdminReservationsPage';
 import AdminInfoPage from './pages/AdminInfoPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
@@ -40,7 +39,6 @@ function AdminApp() {
             <Route index element={<AdminDashboard />} />
             <Route path="orders" element={<AdminOrdersPage />} />
             <Route path="menu" element={<AdminMenuPage />} />
-            <Route path="categories" element={<AdminCategoriesPage />} />
             <Route path="bookings" element={<AdminReservationsPage />} />
             <Route path="tables" element={<AdminTablesPage />} />
             <Route path="waiters" element={<AdminWaitersPage />} />
