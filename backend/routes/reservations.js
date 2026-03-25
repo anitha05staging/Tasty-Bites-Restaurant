@@ -1,5 +1,5 @@
 import express from 'express';
-import { Reservation } from '../models/index.js';
+import { Reservation, User } from '../models/index.js';
 import { authenticate, optionalAuth, isAdmin } from '../middleware/auth.js';
 import { sendBookingConfirmation } from '../services/email.js';
 

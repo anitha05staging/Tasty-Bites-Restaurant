@@ -57,8 +57,8 @@ const getTransporter = async () => {
     return transporterInstance;
 };
 
-// Use a non-gmail From address for SendGrid to avoid DMARC spam flagging
-const FROM_EMAIL = 'notifications@tastybites-restaurant.onrender.com'; 
+// Use the verified sender address from environment variables
+const FROM_EMAIL = process.env.FROM_EMAIL || 'tastybitesrestaurant7@gmail.com'; 
 const RESTAURANT_EMAIL = process.env.RESTAURANT_EMAIL || 'tastybitesrestaurant7@gmail.com';
 const RESTAURANT_ADDRESS = "123 Spice Route, London, UK"; // Replace with actual address if available
 
@@ -153,8 +153,7 @@ const sendEmail = async (options) => {
                 replyTo: replyTo || RESTAURANT_EMAIL || FROM_EMAIL,
                 categories: ['Transactional', subject.split(' ')[0]],
                 mailSettings: {
-                    sandbox_mode: { enable: false },
-                    spam_check: { enable: true }
+                    sandbox_mode: { enable: false }
                 },
                 trackingSettings: {
                     click_tracking: { enable: false },

@@ -22,7 +22,8 @@ import {
     Square,
     AlertCircle,
     ChevronDown,
-    ChefHat
+    ChefHat,
+    Check
 } from 'lucide-react';
 import { adminMenuApi, adminStaffApi } from '../services/adminApi';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
@@ -151,7 +152,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                             {isViewMode ? 'Dish Details' : (item ? 'Edit Dish' : 'Add New Dish')}
                         </h2>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                            {isViewMode ? 'Detailed dish information' : 'Manage your menu item details'}
+                            {isViewMode ? 'View information about this dish' : (item ? 'Update dish details' : 'Enter details for the new dish')}
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400"><X size={20} /></button>
@@ -191,12 +192,12 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         </span>
                                         {formData.vegetarian && (
                                             <span className="px-4 py-2 bg-emerald-500/90 backdrop-blur-md text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">
-                                                <Leaf size={12} /> VEG
+                                                <Leaf size={12} /> Vegetarian
                                             </span>
                                         )}
                                         {formData.popular && (
                                             <span className="px-4 py-2 bg-amber-500/90 backdrop-blur-md text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">
-                                                <Flame size={12} /> SPECIAL
+                                                <Flame size={12} /> Popular
                                             </span>
                                         )}
                                     </motion.div>
@@ -209,8 +210,8 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-none">
                                             {formData.name}
                                         </h3>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Price Point</p>
+                                        <div className="text-right mt-1.5">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Price</p>
                                             <p className="text-3xl font-black text-slate-900 tracking-tighter italic">£{formData.price}</p>
                                         </div>
                                     </div>
@@ -220,27 +221,27 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100">
-                                    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100/50">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Assigned Team</p>
+                                    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all cursor-default">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Assigned Chef</p>
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-admin-primary text-sm font-black italic">
-                                                {item.chefName ? item.chefName.split(' ').map(n => n[0]).join('') : '?'}
+                                                {item?.chefName ? item.chefName.split(' ').map(n => n[0]).join('').substring(0, 2) : '?'}
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-slate-900">{item.chefName || 'Culinary Team'}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase">Head Chef Assignment</p>
+                                                <p className="text-sm font-black text-slate-900">{item?.chefName || 'Not Assigned'}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Prepares this dish</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100/50">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Preparation Info</p>
+                                    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all cursor-default">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">How It's Made</p>
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-admin-primary">
                                                 <Utensils size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-slate-900">Standard Prep</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase">Freshly Made to Order</p>
+                                                <p className="text-sm font-black text-slate-900">Freshly Prepared</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Made to order for best taste</p>
                                             </div>
                                         </div>
                                     </div>
@@ -252,13 +253,13 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                             {/* Standard Edit Form */}
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Name</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Name</label>
                                     <input
                                         required
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-admin-primary/20 outline-none transition-all shadow-sm"
-                                        placeholder="Enter dish name"
+                                        placeholder="Type the name of the dish"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -269,7 +270,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         value={formData.description}
                                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                                         className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-medium text-slate-600 focus:bg-white focus:border-admin-primary/20 outline-none transition-all resize-none shadow-sm"
-                                        placeholder="Describe the dish..."
+                                        placeholder="What is this dish? Describe the ingredients and taste."
                                     />
                                 </div>
                             </div>
@@ -289,14 +290,14 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Chef</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Assigned Chef</label>
                                     <div className="relative">
                                         <select
                                             value={formData.chefId}
                                             onChange={e => setFormData({ ...formData, chefId: e.target.value })}
                                             className="w-full pl-5 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-admin-primary/20 outline-none transition-all appearance-none cursor-pointer shadow-sm"
                                         >
-                                            <option value="">No Chef assigned</option>
+                                            <option value="">Not assigned yet</option>
                                             {chefs.map(chef => <option key={chef.id} value={chef.id}>{chef.name}</option>)}
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
@@ -336,7 +337,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Photo</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Image</label>
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
                                     className="relative w-full h-40 rounded-2xl border-2 border-dashed border-slate-200 hover:border-admin-primary/40 hover:bg-admin-primary/[0.02] transition-all cursor-pointer overflow-hidden group flex flex-col items-center justify-center bg-slate-50 shadow-inner"
@@ -348,7 +349,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-xl shadow-slate-200/50 mx-auto mb-2 text-slate-300 transition-all">
                                                 <Upload size={20} />
                                             </div>
-                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Upload Photo</p>
+                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Upload an Image</p>
                                         </div>
                                     )}
                                     <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
@@ -514,10 +515,10 @@ const AdminMenuPage = () => {
                         <table className="w-full text-left border-collapse min-w-[700px]">
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                                    <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Item Details</th>
+                                    <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Dish</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Price</th>
-                                    <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Badges</th>
+                                    <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Features</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                                 </tr>
                             </thead>
