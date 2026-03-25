@@ -157,21 +157,102 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                     <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400"><X size={20} /></button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                    {/* View Image Header if in view mode */}
-                    {isViewMode && previewImage && (
-                        <div className="w-full aspect-video rounded-3xl overflow-hidden border border-slate-100 shadow-inner bg-slate-50">
-                            <img src={previewImage} alt={formData.name} className="w-full h-full object-cover" />
-                        </div>
-                    )}
-
-                    <div className="space-y-6">
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Name</label>
-                                {isViewMode ? (
-                                    <p className="text-2xl font-black text-slate-900 ml-1">{formData.name}</p>
+                <div className="flex-1 overflow-y-auto">
+                    {/* Enhanced View UI */}
+                    {isViewMode ? (
+                        <div className="flex flex-col">
+                            {/* Cinematic Image Header */}
+                            <div className="relative w-full aspect-[16/9] overflow-hidden">
+                                {previewImage ? (
+                                    <motion.img 
+                                        initial={{ scale: 1.1 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ duration: 1.5 }}
+                                        src={previewImage} 
+                                        alt={formData.name} 
+                                        className="w-full h-full object-cover" 
+                                    />
                                 ) : (
+                                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
+                                        <ImageIcon size={64} strokeWidth={1} />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
+                                
+                                <div className="absolute bottom-8 left-8 right-8">
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.2 }}
+                                        className="flex flex-wrap gap-3"
+                                    >
+                                        <span className="px-4 py-2 bg-white/90 backdrop-blur-md text-admin-primary rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl border border-white/20">
+                                            {formData.category}
+                                        </span>
+                                        {formData.vegetarian && (
+                                            <span className="px-4 py-2 bg-emerald-500/90 backdrop-blur-md text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">
+                                                <Leaf size={12} /> VEG
+                                            </span>
+                                        )}
+                                        {formData.popular && (
+                                            <span className="px-4 py-2 bg-amber-500/90 backdrop-blur-md text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">
+                                                <Flame size={12} /> SPECIAL
+                                            </span>
+                                        )}
+                                    </motion.div>
+                                </div>
+                            </div>
+
+                            <div className="px-8 pb-10 -mt-2 space-y-8 relative z-10">
+                                <div className="space-y-4">
+                                    <div className="flex items-start justify-between gap-6">
+                                        <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-none">
+                                            {formData.name}
+                                        </h3>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Price Point</p>
+                                            <p className="text-3xl font-black text-slate-900 tracking-tighter italic">£{formData.price}</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-lg font-medium text-slate-500 leading-relaxed max-w-xl">
+                                        {formData.description}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100">
+                                    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100/50">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Assigned Team</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-admin-primary text-sm font-black italic">
+                                                {item.chefName ? item.chefName.split(' ').map(n => n[0]).join('') : '?'}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-slate-900">{item.chefName || 'Culinary Team'}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase">Head Chef Assignment</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100/50">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Preparation Info</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-white shadow-lg flex items-center justify-center text-admin-primary">
+                                                <Utensils size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-slate-900">Standard Prep</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase">Freshly Made to Order</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="p-8 space-y-6">
+                            {/* Standard Edit Form */}
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Name</label>
                                     <input
                                         required
                                         value={formData.name}
@@ -179,13 +260,9 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-admin-primary/20 outline-none transition-all shadow-sm"
                                         placeholder="Enter dish name"
                                     />
-                                )}
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Description</label>
-                                {isViewMode ? (
-                                    <p className="text-sm font-medium text-slate-600 ml-1 leading-relaxed">{formData.description}</p>
-                                ) : (
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Description</label>
                                     <textarea
                                         required
                                         rows={3}
@@ -194,16 +271,12 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-medium text-slate-600 focus:bg-white focus:border-admin-primary/20 outline-none transition-all resize-none shadow-sm"
                                         placeholder="Describe the dish..."
                                     />
-                                )}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Category</label>
-                                {isViewMode ? (
-                                    <p className="px-5 py-4 bg-slate-50 rounded-2xl font-black text-admin-primary uppercase tracking-widest text-xs inline-block">{formData.category}</p>
-                                ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Category</label>
                                     <div className="relative">
                                         <select
                                             value={formData.category}
@@ -214,13 +287,9 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
                                     </div>
-                                )}
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Chef</label>
-                                {isViewMode ? (
-                                    <p className="px-5 py-4 bg-slate-50 rounded-2xl font-bold text-slate-700 text-xs inline-block">{item.chefName || 'Unassigned'}</p>
-                                ) : (
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Chef</label>
                                     <div className="relative">
                                         <select
                                             value={formData.chefId}
@@ -232,55 +301,61 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
                                     </div>
-                                )}
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Price</label>
-                                <p className="text-2xl font-black text-slate-900 ml-1">£{formData.price}</p>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-4">
-                            {formData.vegetarian && (
-                                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
-                                    <Leaf size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Vegetarian</span>
                                 </div>
-                            )}
-                            {formData.popular && (
-                                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
-                                    <Flame size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Popular</span>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Price (£)</label>
+                                    <input
+                                        required
+                                        type="number"
+                                        step="0.01"
+                                        value={formData.price}
+                                        onChange={e => setFormData({ ...formData, price: e.target.value })}
+                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-admin-primary/20 outline-none transition-all shadow-sm"
+                                        placeholder="0.00"
+                                    />
                                 </div>
-                            )}
-                        </div>
+                            </div>
 
-                        {!isViewMode && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <label className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all cursor-pointer ${formData.popular ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <Flame size={18} />
+                                        <span className="text-xs font-black uppercase tracking-widest">Popular</span>
+                                    </div>
+                                    <input type="checkbox" className="hidden" checked={formData.popular} onChange={e => setFormData({ ...formData, popular: e.target.checked })} />
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.popular ? 'border-amber-500 bg-amber-500' : 'border-slate-200'}`}>{formData.popular && <Check size={12} className="text-white" />}</div>
+                                </label>
+                                <label className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all cursor-pointer ${formData.vegetarian ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <Leaf size={18} />
+                                        <span className="text-xs font-black uppercase tracking-widest">Vegetarian</span>
+                                    </div>
+                                    <input type="checkbox" className="hidden" checked={formData.vegetarian} onChange={e => setFormData({ ...formData, vegetarian: e.target.checked })} />
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.vegetarian ? 'border-emerald-500 bg-emerald-500' : 'border-slate-200'}`}>{formData.vegetarian && <Check size={12} className="text-white" />}</div>
+                                </label>
+                            </div>
+
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Photo</label>
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="relative w-48 aspect-square mx-auto rounded-[2rem] border-2 border-dashed border-slate-200 hover:border-admin-primary/40 hover:bg-admin-primary/[0.02] transition-all cursor-pointer overflow-hidden group flex flex-col items-center justify-center bg-slate-50 shadow-inner"
+                                    className="relative w-full h-40 rounded-2xl border-2 border-dashed border-slate-200 hover:border-admin-primary/40 hover:bg-admin-primary/[0.02] transition-all cursor-pointer overflow-hidden group flex flex-col items-center justify-center bg-slate-50 shadow-inner"
                                 >
                                     {previewImage ? (
-                                        <>
-                                            <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                                                <Upload size={24} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest mt-2">Change Photo</span>
-                                            </div>
-                                        </>
+                                        <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="text-center group-hover:scale-105 transition-transform p-4">
-                                            <div className="w-12 h-12 bg-white rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-slate-200/50 mx-auto mb-3 text-slate-300 group-hover:text-admin-primary group-hover:shadow-admin-primary/20 transition-all">
-                                                <ImageIcon size={24} />
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-xl shadow-slate-200/50 mx-auto mb-2 text-slate-300 transition-all">
+                                                <Upload size={20} />
                                             </div>
-                                            <p className="text-xs font-black text-slate-600">Upload Image</p>
+                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Upload Photo</p>
                                         </div>
                                     )}
                                     <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-8 border-t border-slate-100 flex gap-4">
@@ -441,7 +516,6 @@ const AdminMenuPage = () => {
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Item Details</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
-                                    <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Chef</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Price</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Badges</th>
                                     <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
@@ -460,18 +534,6 @@ const AdminMenuPage = () => {
                                             <span className="px-4 py-1.5 bg-white border border-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
                                                 {item.category}
                                             </span>
-                                        </td>
-                                        <td className="px-4 py-6">
-                                            {item.chefName ? (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-admin-primary/10 flex items-center justify-center text-admin-primary text-[10px] font-black uppercase tracking-tighter">
-                                                        {item.chefName.split(' ').map(n => n[0]).join('')}
-                                                    </div>
-                                                    <span className="text-xs font-bold text-slate-700">{item.chefName}</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">Unassigned</span>
-                                            )}
                                         </td>
                                         <td className="px-4 py-6 text-base font-black text-slate-900 tracking-tighter">
                                             £{Number(String(item.price || 0).replace(/[^0-9.]/g, '')).toFixed(2)}
