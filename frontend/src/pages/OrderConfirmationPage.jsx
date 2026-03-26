@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ShoppingBag, ArrowRight, Utensils, Clock, MapPin, UserCheck, Heart } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowRight, Utensils, Clock, MapPin, UserCheck, Heart, ChefHat } from 'lucide-react';
 import { useLocation, Link, Navigate } from 'react-router-dom';
 import api from '../services/api';
 
