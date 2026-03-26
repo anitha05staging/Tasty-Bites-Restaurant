@@ -203,4 +203,19 @@ export const adminInfoApi = {
     }
 };
 
+export const adminReviewsApi = {
+    getAll: async () => {
+        const response = await adminApi.get('reviews/admin/all');
+        return response.data;
+    },
+    updateStatus: async (id, status) => {
+        const response = await adminApi.patch(`reviews/${id}/status`, { status });
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await adminApi.delete(`reviews/${id}`);
+        return response.data;
+    }
+};
+
 export default adminApi;
