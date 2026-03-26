@@ -137,6 +137,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
 
     const isViewMode = item?.viewOnly || false;
     const isChefAssignMode = item?.chefAssignOnly || false;
+    const modalWidth = isChefAssignMode ? 'max-w-md' : 'max-w-2xl';
 
     if (!isOpen) return null;
 
@@ -145,7 +146,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+                className={`bg-white w-full ${modalWidth} rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden`}
             >
                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                     <div>
@@ -193,50 +194,33 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                                     )}
                                 </div>
                                 
-                                {/* Details Table */}
-                                <div className="flex-1 w-full">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <h3 className="text-xl font-black text-slate-900">{formData.name}</h3>
-                                        <div className="flex gap-1.5">
-                                            {formData.popular && <span className="px-2 py-0.5 bg-amber-50 text-amber-600 rounded text-[10px] font-bold uppercase border border-amber-200">Popular</span>}
-                                            {formData.vegetarian && <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase border border-emerald-200">Veg</span>}
+                                {/* Details Content */}
+                                <div className="flex-1 w-full flex flex-col justify-center space-y-6">
+                                    <div className="space-y-3">
+                                        <h3 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{formData.name}</h3>
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <p className="text-3xl font-black text-slate-900 tracking-tighter mr-2">£{formData.price}</p>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-3 py-1 bg-opacity-50 rounded-lg border border-emerald-200/50 shadow-sm flex items-center gap-1">
+                                                <CheckSquare size={12} /> Available
+                                            </span>
+                                            {formData.popular && <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-amber-200/50 shadow-sm flex items-center gap-1"><Flame size={12}/> Popular</span>}
+                                            {formData.vegetarian && <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-200/50 shadow-sm flex items-center gap-1"><Leaf size={12}/> Veg</span>}
                                         </div>
                                     </div>
                                     
-                                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                                        <table className="w-full text-sm text-left">
-                                            <tbody className="divide-y divide-slate-100">
-                                                <tr className="hover:bg-slate-50 transition-colors">
-                                                    <th className="py-3 px-4 font-bold text-slate-500 w-1/3 bg-slate-50 border-r border-slate-200 uppercase text-[10px] tracking-widest">Price</th>
-                                                    <td className="py-3 px-4 font-black text-slate-900">£{formData.price}</td>
-                                                </tr>
-                                                <tr className="hover:bg-slate-50 transition-colors">
-                                                    <th className="py-3 px-4 font-bold text-slate-500 w-1/3 bg-slate-50 border-r border-slate-200 uppercase text-[10px] tracking-widest">Category</th>
-                                                    <td className="py-3 px-4 font-bold text-slate-900">{formData.category}</td>
-                                                </tr>
-                                                <tr className="hover:bg-slate-50 transition-colors">
-                                                    <th className="py-3 px-4 font-bold text-slate-500 w-1/3 bg-slate-50 border-r border-slate-200 uppercase text-[10px] tracking-widest">Description</th>
-                                                    <td className="py-3 px-4 font-medium text-slate-600">{formData.description || 'N/A'}</td>
-                                                </tr>
-                                                <tr className="hover:bg-slate-50 transition-colors">
-                                                    <th className="py-3 px-4 font-bold text-slate-500 w-1/3 bg-slate-50 border-r border-slate-200 uppercase text-[10px] tracking-widest">Assigned Chef</th>
-                                                    <td className="py-3 px-4 font-bold text-slate-900">
-                                                        <div className="flex items-center gap-2">
-                                                            <ChefHat size={14} className="text-slate-400" />
-                                                            {item?.chefName || 'Not Assigned'}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr className="hover:bg-slate-50 transition-colors">
-                                                    <th className="py-3 px-4 font-bold text-slate-500 w-1/3 bg-slate-50 border-r border-slate-200 uppercase text-[10px] tracking-widest">Status</th>
-                                                    <td className="py-3 px-4 font-bold text-emerald-600">
-                                                        <div className="flex items-center gap-2">
-                                                            <CheckSquare size={14} /> Available
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    {formData.description && (
+                                        <p className="text-sm font-medium text-slate-500 leading-relaxed border-l-2 border-admin-primary/20 pl-4">{formData.description}</p>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:bg-white transition-all">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Utensils size={12}/> Category</p>
+                                            <p className="text-sm font-bold text-slate-900">{formData.category}</p>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:bg-white transition-all">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><ChefHat size={12}/> Assigned Chef</p>
+                                            <p className="text-sm font-bold text-slate-900">{item?.chefName || 'Not Assigned'}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -331,21 +315,29 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
 
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Dish Image</label>
-                                <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="relative w-full h-40 rounded-2xl border-2 border-dashed border-slate-200 hover:border-admin-primary/40 hover:bg-admin-primary/[0.02] transition-all cursor-pointer overflow-hidden group flex flex-col items-center justify-center bg-slate-50 shadow-inner"
-                                >
-                                    {previewImage ? (
-                                        <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="text-center group-hover:scale-105 transition-transform p-4">
-                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-xl shadow-slate-200/50 mx-auto mb-2 text-slate-300 transition-all">
-                                                <Upload size={20} />
+                                <div className="flex flex-col sm:flex-row items-start lg:items-center gap-6">
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="relative w-32 h-32 rounded-2xl border-2 border-dashed border-slate-200 hover:border-admin-primary/40 hover:bg-admin-primary/[0.02] transition-all cursor-pointer overflow-hidden group flex flex-col items-center justify-center bg-slate-50 shadow-inner flex-shrink-0"
+                                    >
+                                        {previewImage ? (
+                                            <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="text-center group-hover:scale-105 transition-transform p-3">
+                                                <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm mx-auto mb-2 text-slate-300 transition-all">
+                                                    <Upload size={16} />
+                                                </div>
+                                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Upload</p>
                                             </div>
-                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Upload an Image</p>
-                                        </div>
-                                    )}
-                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
+                                        )}
+                                        <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-bold text-slate-900 mb-3">Upload an appetizing photo</p>
+                                        <button type="button" onClick={() => fileInputRef.current?.click()} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all shadow-sm">
+                                            {previewImage ? 'Change Image' : 'Select File'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
