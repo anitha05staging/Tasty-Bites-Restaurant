@@ -20,6 +20,7 @@ import TermsConditions from './pages/TermsConditions';
 import ReturnCancellation from './pages/ReturnCancellation';
 import DineInMenuPage from './pages/DineInMenuPage';
 import { CartProvider, useCart } from './context/CartContext';
+import { UserAuthProvider } from './context/AuthContext';
 import { RestaurantProvider } from './context/RestaurantContext';
 import CartPopover from './components/CartPopover';
 import OrderTypeModal from './components/OrderTypeModal';
@@ -77,7 +78,7 @@ const AppContent = () => {
 
 function App() {
     return (
-        <AuthProvider>
+        <UserAuthProvider>
             <RestaurantProvider>
                 <CartProvider>
                     <Router>
@@ -98,7 +99,7 @@ function App() {
                     </Router>
                 </CartProvider>
             </RestaurantProvider>
-        </AuthProvider>
+        </UserAuthProvider>
     );
 }
 

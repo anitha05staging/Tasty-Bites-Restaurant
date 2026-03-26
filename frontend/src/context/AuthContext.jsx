@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const UserAuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem('tastybites_user');
         return saved ? JSON.parse(saved) : null;
