@@ -136,6 +136,7 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
     };
 
     const isViewMode = item?.viewOnly || false;
+    const isChefAssignMode = item?.chefAssignOnly || false;
 
     if (!isOpen) return null;
 
@@ -149,18 +150,36 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                 <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                            {isViewMode ? 'Dish Details' : (item ? 'Edit Dish' : 'Add New Dish')}
+                            {isViewMode ? 'Dish Details' : isChefAssignMode ? 'Assign Kitchen Staff' : (item && !item.chefAssignOnly ? 'Edit Dish' : 'Add New Dish')}
                         </h2>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                            {isViewMode ? 'View information about this dish' : (item ? 'Update dish details' : 'Enter details for the new dish')}
+                            {isViewMode ? 'View information about this dish' : isChefAssignMode ? 'Select a chef for this item' : (item ? 'Update dish details' : 'Enter details for the new dish')}
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400"><X size={20} /></button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                    {/* Enhanced View UI */}
-                    {isViewMode ? (
+                    {isChefAssignMode ? (
+                        <div className="p-8 space-y-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Assigned Chef for {formData.name}</label>
+                                    <div className="relative">
+                                        <select
+                                            value={formData.chefId}
+                                            onChange={e => setFormData({ ...formData, chefId: e.target.value })}
+                                            className="w-full pl-5 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base font-bold text-slate-900 focus:bg-white focus:border-admin-primary/20 outline-none transition-all appearance-none cursor-pointer shadow-sm"
+                                        >
+                                            <option value="">Not assigned yet</option>
+                                            {chefs.map(chef => <option key={chef.id} value={chef.id}>{chef.name}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : isViewMode ? (
                         <div className="flex flex-col">
                             {/* Cinematic Image Header */}
                             <div className="relative w-full aspect-[16/9] overflow-hidden">
@@ -527,8 +546,7 @@ const AdminMenuPage = () => {
                                     <tr key={item.id} className="group hover:bg-slate-50/30 transition-colors">
                                         <td className="px-4 py-6">
                                             <div className="max-w-xs">
-                                                <p className="text-base font-black text-slate-900 tracking-tight mb-1">{item.name}</p>
-                                                <p className="text-[11px] font-medium text-slate-400 line-clamp-1">{item.description}</p>
+                                                <p className="text-sm font-black text-slate-900 tracking-tight">{item.name}</p>
                                             </div>
                                         </td>
                                         <td className="px-4 py-6">
@@ -562,7 +580,7 @@ const AdminMenuPage = () => {
                                                     <Edit2 size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => { setSelectedItem(item); setIsModalOpen(true); }}
+                                                    onClick={() => { setSelectedItem({...item, chefAssignOnly: true}); setIsModalOpen(true); }}
                                                     className="p-3 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-2xl transition-all"
                                                     title="Assign Chef"
                                                 >

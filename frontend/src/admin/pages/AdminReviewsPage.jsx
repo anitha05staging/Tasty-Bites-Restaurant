@@ -105,81 +105,98 @@ const AdminReviewsPage = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loading ? (
-                    <div className="col-span-full py-40 flex flex-col items-center">
-                        <Loader2 className="animate-spin text-slate-300" size={48} />
-                    </div>
-                ) : filtered.length > 0 ? filtered.map((review) => (
-                    <motion.div 
-                        key={review.id}
-                        layout
-                        className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
-                    >
-                        {review.status === 'Pending' && (
-                            <div className="absolute top-0 right-0 px-4 py-1.5 bg-amber-500 text-[8px] font-black text-white uppercase tracking-widest rounded-bl-xl">
-                                New
-                            </div>
-                        )}
-                        
-                        <div className="flex items-center gap-4 mb-5">
-                            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 font-black text-sm">
-                                {review.userName.charAt(0)}
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-black text-slate-900 tracking-tight">{review.userName}</h3>
-                                <div className="flex items-center gap-1 mt-0.5">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={10} className={i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'} />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <p className="text-sm text-slate-600 leading-relaxed mb-6 italic">"{review.comment}"</p>
-                        
-                        <div className="flex items-center justify-between pt-5 border-t border-slate-50">
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                <Calendar size={12} />
-                                {new Date(review.date).toLocaleDateString('en-GB')}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {review.status === 'Approved' ? (
-                                    <button 
-                                        onClick={() => handleUpdateStatus(review.id, 'Pending')}
-                                        className="p-2 text-slate-400 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-all"
-                                        title="Hide"
-                                    >
-                                        <EyeOff size={16} />
-                                    </button>
-                                ) : (
-                                    <button 
-                                        onClick={() => handleUpdateStatus(review.id, 'Approved')}
-                                        className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                                        title="Approve"
-                                    >
-                                        <CheckCircle size={16} />
-                                    </button>
-                                )}
-                                <button 
-                                    onClick={() => handleDelete(review.id)}
-                                    className="p-2 text-rose-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-all"
-                                    title="Delete"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
-                )) : (
-                    <div className="col-span-full py-40 flex flex-col items-center">
-                        <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 text-slate-200">
-                            <Star size={40} />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900">None Found</h3>
-                        <p className="text-sm text-slate-500 mt-2 text-center italic">Feedback shows up here.</p>
-                    </div>
-                )}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left min-w-[800px]">
+                        <thead className="bg-slate-50/50 border-b border-slate-100">
+                            <tr>
+                                <th className="px-8 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Guest</th>
+                                <th className="px-6 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rating</th>
+                                <th className="px-6 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest max-w-sm">Comment</th>
+                                <th className="px-6 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
+                                <th className="px-6 py-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="5" className="py-20 text-center">
+                                        <Loader2 className="animate-spin text-slate-300 mx-auto" size={40} />
+                                    </td>
+                                </tr>
+                            ) : filtered.length > 0 ? filtered.map((review) => (
+                                <tr key={review.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 font-black text-sm uppercase shadow-inner">
+                                                {(review.userName || 'G').charAt(0)}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-900 mb-0.5">{review.userName}</span>
+                                                <span className={`text-[9px] font-black uppercase tracking-widest ${review.status === 'Approved' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                                    {review.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-6">
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={14} className={i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'} />
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-6 max-w-sm">
+                                        <p className="text-sm text-slate-600 italic line-clamp-2">"{review.comment}"</p>
+                                    </td>
+                                    <td className="px-6 py-6">
+                                        <span className="text-[12px] font-black text-slate-900">
+                                            {new Date(review.date).toLocaleDateString('en-GB')}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-6 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {review.status === 'Approved' ? (
+                                                <button 
+                                                    onClick={() => handleUpdateStatus(review.id, 'Pending')}
+                                                    className="p-2.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
+                                                    title="Hide from public"
+                                                >
+                                                    <EyeOff size={18} />
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => handleUpdateStatus(review.id, 'Approved')}
+                                                    className="px-4 py-2 flex items-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+                                                    title="Approve"
+                                                >
+                                                    <CheckCircle size={14} /> Approve
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => handleDelete(review.id)}
+                                                className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                                                title="Delete forever"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="5" className="py-32 text-center">
+                                        <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-200">
+                                            <MessageSquare size={40} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-900">None Found</h3>
+                                        <p className="text-sm text-slate-500 mt-2 text-center italic">Feedback shows up here.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

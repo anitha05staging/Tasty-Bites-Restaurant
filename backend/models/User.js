@@ -7,6 +7,7 @@ const User = sequelize.define('User', {
     password: { type: DataTypes.STRING, allowNull: false },
     phone: { type: DataTypes.STRING, defaultValue: '' },
     role: { type: DataTypes.ENUM('admin', 'user', 'waiter', 'chef'), defaultValue: 'admin' },
+    staffCode: { type: DataTypes.STRING, unique: true, allowNull: true },
     status: { type: DataTypes.STRING, defaultValue: 'Active' }
 }, { 
     timestamps: true,

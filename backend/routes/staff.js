@@ -54,13 +54,20 @@ router.post('/', authenticate, isAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Invalid role for staff member' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Auto-generate staffCode and password if not provided
+        const generatedPassword = password || Math.random().toString(36).slice(-10);
+        const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+        
+        // Generate a random 6-character alphanumeric staff code
+        const staffCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
         const staff = await User.create({
             name,
             email,
             password: hashedPassword,
             role,
             phone,
+            staffCode,
             status: req.body.status || 'Active'
         });
 

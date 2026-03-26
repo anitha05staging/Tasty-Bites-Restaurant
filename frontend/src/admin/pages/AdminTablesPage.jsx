@@ -209,107 +209,76 @@ const AdminTablesPage = () => {
                 </div>
             </div>
 
-            {/* Tables Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                <AnimatePresence mode='popLayout'>
-                    {filteredTables.map((table) => (
-                        <motion.div
-                            layout
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            key={table.id}
-                            className="group bg-white rounded-[3.5rem] border border-slate-100 p-8 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all relative overflow-hidden"
-                        >
-                            {/* Card Decorative Elements */}
-                            <div className={`absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.03] group-hover:opacity-[0.08] transition-opacity ${
-                                table.status === 'Available' ? 'bg-emerald-500' : 
-                                table.status === 'Occupied' ? 'bg-rose-500' : 'bg-amber-500'
-                            }`} />
-
-                            <div className="flex justify-between items-start mb-8 relative z-10">
-                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-inner transform group-hover:rotate-12 transition-transform duration-500 ${
-                                    table.status === 'Occupied' ? 'bg-rose-50 text-rose-500' : 
-                                    table.status === 'Reserved' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
-                                }`}>
-                                    <Grid2X2 size={28} />
-                                </div>
-                                <div className="flex gap-1 transition-opacity duration-300">
-                                    <button 
-                                        onClick={() => handleOpenModal(table)}
-                                        className="p-3 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all"
-                                    >
-                                        <Edit size={16} />
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDelete(table)}
-                                        className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 relative z-10">
-                                <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{table.number}</h3>
-                                        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${getStatusColor(table.status)}`}>
+            {/* Tables List */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div className="w-full overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Table Number</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Details</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Status</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {filteredTables.map((table) => (
+                                <tr key={table.id} className="group hover:bg-slate-50/30 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${
+                                                table.status === 'Occupied' ? 'bg-rose-50 text-rose-500' : 
+                                                table.status === 'Reserved' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
+                                            }`}>
+                                                <Grid2X2 size={20} />
+                                            </div>
+                                            <span className="text-xl font-black text-slate-900 tracking-tight">{table.number}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3 text-slate-500 font-bold text-[10px] uppercase tracking-widest">
+                                            <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl"><Users size={12}/> {table.capacity}</span>
+                                            <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl"><MapPin size={12}/> {table.location}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className={`inline-block px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm ${getStatusColor(table.status)}`}>
                                             {table.status}
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-                                        <span className="flex items-center gap-1"><Users size={12}/> {table.capacity}</span>
-                                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                                        <span className="flex items-center gap-1"><MapPin size={12}/> {table.location}</span>
-                                    </div>
-                                </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-2 transition-opacity duration-300">
 
-                                <div className="pt-6 border-t border-slate-50">
-                                    {table.status === 'Occupied' ? (
-                                        <div className="p-5 bg-rose-50/50 rounded-3xl border border-rose-100/30 mb-5 group/order cursor-pointer hover:bg-rose-50 transition-colors">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em]">Active Order</p>
-                                                <ArrowRight size={12} className="text-rose-300 group-hover/order:translate-x-1 transition-transform" />
-                                            </div>
-                                            <span className="text-sm font-black text-rose-600">Occupied</span>
+                                            <button 
+                                                onClick={() => handleOpenModal(table)}
+                                                className="p-3 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all"
+                                                title="Edit Table"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(table)}
+                                                className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                                                title="Delete Table"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
-                                    ) : table.status === 'Reserved' ? (
-                                        <div className="p-5 bg-amber-50/50 rounded-3xl border border-amber-100/30 mb-5">
-                                            <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Reservation</p>
-                                            <div className="flex items-center gap-2 text-amber-600 font-black text-sm">
-                                                <Clock size={14} /> 7:30 PM
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="py-6 text-center group-hover:scale-105 transition-transform duration-500">
-                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Clean</span>
-                                        </div>
-                                    )}
-
-                                    <button 
-                                        onClick={() => handleOpenModal(table)}
-                                        className="w-full py-5 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden shadow-sm group/btn bg-slate-900 text-white hover:bg-black hover:shadow-xl hover:shadow-slate-200"
-                                    >
-                                        <span className="relative z-10">
-                                            {table.waiter ? `Waiter: ${table.waiter.name.split(' ')[0]}` : 'Edit Details'}
-                                        </span>
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-            </div>
-
-            {/* Empty State */}
-            {filteredTables.length === 0 && (
-                <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200">
-                    <Grid2X2 size={48} className="mx-auto text-slate-200 mb-4" />
-                    <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">No tables found</h3>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    
+                    {/* Empty State */}
+                    {filteredTables.length === 0 && (
+                        <div className="text-center py-20 bg-slate-50/50">
+                            <Grid2X2 size={48} className="mx-auto text-slate-200 mb-4" />
+                            <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">No tables found</h3>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
 
 
             {/* Add/Edit Modal */}

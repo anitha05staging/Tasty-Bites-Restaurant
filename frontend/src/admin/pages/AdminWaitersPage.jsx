@@ -40,8 +40,7 @@ const AdminWaitersPage = () => {
         name: '',
         email: '',
         phone: '',
-        role: 'waiter',
-        password: ''
+        role: 'waiter'
     });
 
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -103,8 +102,7 @@ const AdminWaitersPage = () => {
                 email: member.email,
                 phone: member.phone || '',
                 role: member.role,
-                status: member.status || 'Active',
-                password: ''
+                status: member.status || 'Active'
             });
         } else {
             setEditingStaff(null);
@@ -113,8 +111,7 @@ const AdminWaitersPage = () => {
                 email: '',
                 phone: '',
                 role: 'waiter',
-                status: 'Active',
-                password: ''
+                status: 'Active'
             });
         }
         setIsModalOpen(true);
@@ -125,13 +122,11 @@ const AdminWaitersPage = () => {
         try {
             if (editingStaff) {
                 const submissionData = { ...formData };
-                if (!submissionData.password) delete submissionData.password;
                 await adminStaffApi.update(editingStaff.id, submissionData);
                 toast.success(`${formData.name} updated successfully!`);
             } else {
-                if (!formData.password) return toast.error("Password is required for new staff members");
-                await adminStaffApi.create(formData);
-                toast.success(`${formData.name} registered successfully!`);
+                const response = await adminStaffApi.create(formData);
+                toast.success(`${formData.name} registered! Access Code: ${response.staffCode || 'Auto-generated'}`);
             }
             setIsModalOpen(false);
             fetchStaff();
@@ -257,71 +252,94 @@ const AdminWaitersPage = () => {
                 </div>
             </div>
 
-            {/* Staff Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                <AnimatePresence mode='popLayout'>
-                    {filteredWaiters.map((waiter) => (
-                        <motion.div
-                            layout
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            key={waiter.id}
-                            className="bg-white rounded-[3.5rem] border border-slate-100 p-8 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all group relative overflow-hidden"
-                        >
-                            <div className="flex items-start justify-between mb-8">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-slate-50 to-slate-100 rounded-[2.5rem] flex items-center justify-center border-4 border-white shadow-xl text-slate-400 group-hover:from-admin-primary/5 group-hover:to-admin-primary/10 transition-all overflow-hidden relative text-2xl font-black uppercase">
-                                        {waiter.name.split(' ').map(n => n[0]).join('')}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight mb-1">{waiter.name}</h3>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${waiter.status === 'Away' ? 'bg-amber-50 text-amber-500 border-amber-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
-                                                {waiter.status || 'Active'}
-                                            </span>
-                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
-                                                <Shield size={12} className="text-admin-primary/40" /> {waiter.role}
-                                            </span>
+            {/* Waiters Table */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden mt-6">
+                <div className="w-full overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Staff Member</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Contact</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Status</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Assigned Tables</th>
+                                <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {filteredWaiters.map((waiter) => (
+                                <tr key={waiter.id} className="group hover:bg-slate-50/30 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-admin-primary/5 rounded-2xl flex items-center justify-center text-admin-primary font-black uppercase shadow-sm text-lg">
+                                                {waiter.name.split(' ').map(n => n[0]).join('').substring(0,2)}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm font-black text-slate-900 tracking-tight leading-tight">{waiter.name}</h3>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                                                    <Shield size={10} className="text-admin-primary/40" /> {waiter.staffCode || `WTR-${String(waiter.id).padStart(3, '0')}`}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-1 transition-opacity">
-                                    <button 
-                                        onClick={() => handleOpenTableModal(waiter)} 
-                                        className="p-3 text-slate-300 hover:text-admin-primary hover:bg-admin-primary/5 rounded-2xl transition-all flex flex-col items-center gap-1"
-                                        title="Assign Tables"
-                                    >
-                                        <LayoutGrid size={16} />
-                                        <span className="text-[8px] font-black">{waiter.Tables?.length || 0}</span>
-                                    </button>
-                                    <button onClick={() => handleOpenModal(waiter)} className="p-3 text-slate-300 hover:text-admin-primary hover:bg-admin-primary/5 rounded-2xl transition-all"><Edit size={16} /></button>
-                                    <button onClick={() => handleDelete(waiter)} className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"><Trash2 size={16} /></button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="bg-slate-50 rounded-[2rem] p-6 space-y-3 border border-slate-100/50">
-                                    <div className="flex items-center gap-3 text-slate-600">
-                                        <div className="p-2 bg-white rounded-xl border border-slate-100 shadow-sm text-slate-400"><Mail size={14}/></div>
-                                        <span className="text-xs font-bold truncate">{waiter.email}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-slate-600">
-                                        <div className="p-2 bg-white rounded-xl border border-slate-100 shadow-sm text-slate-400"><Phone size={14}/></div>
-                                        <span className="text-xs font-bold">{waiter.phone || 'No phone set'}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="flex gap-2">
-                                        <a href={`tel:${waiter.phone}`} className="w-10 h-10 flex items-center justify-center bg-slate-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg"><Phone size={14} /></a>
-                                        <a href={`mailto:${waiter.email}`} className="w-10 h-10 flex items-center justify-center bg-white border border-slate-100 text-slate-400 rounded-2xl hover:text-slate-900 transition-all shadow-sm"><Mail size={14} /></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                                                <Mail size={12} className="text-slate-400"/> {waiter.email}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                                                <Phone size={12} className="text-slate-400"/> {waiter.phone || 'N/A'}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm ${waiter.status === 'Away' ? 'bg-amber-50 text-amber-500 border-amber-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
+                                            {waiter.status || 'Active'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+                                            {waiter.Tables && waiter.Tables.length > 0 ? (
+                                                waiter.Tables.map(t => (
+                                                    <div key={t.id} title={`Capacity: ${t.capacity} | ${t.location}`} className="px-2 py-1 bg-white border border-slate-100 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'Occupied' ? 'bg-rose-500' : t.status === 'Reserved' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+                                                        <span className="text-[10px] font-black text-slate-700">T{t.number || t.id}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">None</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-2 transition-opacity">
+                                            <button 
+                                                onClick={() => handleOpenTableModal(waiter)} 
+                                                className="relative p-2.5 bg-slate-100 text-slate-600 hover:text-admin-primary hover:bg-admin-primary/10 rounded-xl transition-all"
+                                                title="Assign Tables"
+                                            >
+                                                <LayoutGrid size={16} />
+                                                {waiter.Tables && waiter.Tables.length > 0 && (
+                                                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-admin-primary text-white rounded-full text-[8px] font-black flex items-center justify-center shadow-sm">
+                                                        {waiter.Tables.length}
+                                                    </span>
+                                                )}
+                                            </button>
+                                            <button onClick={() => handleOpenModal(waiter)} className="p-2.5 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all" title="Edit Profile"><Edit size={16} /></button>
+                                            <button onClick={() => handleDelete(waiter)} className="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all" title="Delete"><Trash2 size={16} /></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    
+                    {filteredWaiters.length === 0 && (
+                        <div className="text-center py-20 bg-slate-50/50">
+                            <Users size={48} className="mx-auto text-slate-200 mb-4" />
+                            <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">No staff found</h3>
+                        </div>
+                    )}
+                </div>
             </div>
 
 
@@ -410,14 +428,7 @@ const AdminWaitersPage = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{editingStaff ? 'New Password (Optional)' : 'Password'}</label>
-                                            <div className="relative">
-                                                <Key className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-                                                <input required={!editingStaff} type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder={editingStaff ? 'Leave blank to keep current' : '••••••••'} className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
-                                            </div>
-                                        </div>
-                                    </div>
+                                     </div>
                                     <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200 mt-4">{editingStaff ? 'Update Waiter' : 'Add Waiter'}</button>
                                 </form>
                             </div>
