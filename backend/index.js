@@ -304,8 +304,18 @@ db.sync({ alter: true }).then(async () => {
             console.log('🌱 No users found. Auto-seeding initial data...');
             await seed(false);
         }
+
+        // Data Patch: Ensure Table 3 is 'Balcony'
+        const { Table } = await import('./models/index.js');
+        const [updatedRows] = await Table.update(
+            { location: 'Balcony' },
+            { where: { number: '3' } }
+        );
+        if (updatedRows > 0) {
+            console.log('🛋️ Production Data Patch: Table 3 updated to Balcony');
+        }
     } catch (seedErr) {
-        console.error('⚠️ Auto-seed check failed:', seedErr);
+        console.error('⚠️ Auto-seed or data patch check failed:', seedErr);
     }
 
     app.listen(PORT, '0.0.0.0', () => {
