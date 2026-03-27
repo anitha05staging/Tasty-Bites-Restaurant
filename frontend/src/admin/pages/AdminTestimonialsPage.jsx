@@ -99,15 +99,29 @@ const TestimonialModal = ({ isOpen, onClose, testimonial, onSave }) => {
                     </div>
                 </div>
 
-                <button 
-                    onClick={() => { onSave(formData); onClose(); }}
-                    className="w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-900/10 transition-all active:scale-95"
-                >
-                    Save
-                </button>
+                <div className="flex gap-4">
+                    <button type="button" onClick={onClose} className="flex-1 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</button>
+                    <button 
+                        onClick={() => { onSave(formData); onClose(); }}
+                        className="flex-[2] py-4 bg-slate-900 hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-900/10 transition-all active:scale-95"
+                    >
+                        Save
+                    </button>
+                </div>
             </motion.div>
         </div>
     );
+};
+
+const toSentenceCase = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+const formatReviewContent = (str) => {
+    if (!str) return "";
+    // Capitalize first letter and handle subsequent sentences roughly
+    return str.toLowerCase().replace(/(^\w|[.!?]\s+\w)/g, (c) => c.toUpperCase());
 };
 
 const AdminTestimonialsPage = () => {
@@ -211,22 +225,22 @@ const AdminTestimonialsPage = () => {
                     <h1 className="text-4xl font-playfair font-black text-slate-900 mb-3 tracking-tight">Testimonials</h1>
                     <p className="text-slate-500 font-medium text-sm">Review and manage all customer testimonials in one place.</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                     <div className="relative w-full sm:w-80">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                         <input 
                             type="text" 
                             placeholder="Search testimonials..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-admin-primary/10 transition-all shadow-sm"
+                            className="w-full pl-12 pr-6 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-900 outline-none focus:ring-4 focus:ring-admin-primary/10 transition-all shadow-sm"
                         />
                     </div>
                     <button 
                         onClick={() => { setSelectedTestimonial(null); setIsModalOpen(true); }}
-                        className="flex items-center justify-center gap-3 bg-slate-900 hover:bg-black text-white px-8 py-4 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-slate-900/30 transition-all active:scale-95 group"
+                        className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-900/20 transition-all active:scale-95 group shrink-0"
                     >
-                        <Plus size={20} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
+                        <Plus size={16} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
                         Add Testimonial
                     </button>
                 </div>
@@ -242,7 +256,7 @@ const AdminTestimonialsPage = () => {
                         className="w-full pl-10 pr-10 py-3 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none appearance-none cursor-pointer hover:border-slate-200 transition-all shadow-sm"
                     >
                         {['All', 'Featured', 'Approved', 'Pending', 'Rejected'].map(s => (
-                            <option key={s} value={s}>{s} Status</option>
+                            <option key={s} value={s}>{s}</option>
                         ))}
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
@@ -265,14 +279,14 @@ const AdminTestimonialsPage = () => {
                 </div>
             ) : (
                 <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden mt-6">
-                    <div className="w-full uppercase">
+                    <div className="w-full">
                         <table className="w-full text-left border-collapse min-w-full">
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Customer</th>
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Review Content</th>
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">Status</th>
-                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right whitespace-nowrap">Management</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -288,7 +302,7 @@ const AdminTestimonialsPage = () => {
                                         >
                                             <td className="px-8 py-6">
                                                 <div className="flex flex-col gap-1">
-                                                    <span className="font-black text-slate-900 text-sm tracking-tight uppercase whitespace-nowrap">{t.name}</span>
+                                                    <span className="font-black text-slate-900 text-sm tracking-tight whitespace-nowrap">{toSentenceCase(t.name)}</span>
                                                     <div className="flex items-center gap-1">
                                                         {[...Array(5)].map((_, i) => (
                                                             <Star 
@@ -302,11 +316,11 @@ const AdminTestimonialsPage = () => {
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6 max-w-[500px]">
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-slate-600 font-medium text-xs truncate leading-relaxed">
-                                                        "{t.content}"
+                                                <div className="flex flex-col gap-1.5">
+                                                    <p className="text-slate-600 font-medium text-xs leading-relaxed max-w-[400px]">
+                                                        "{formatReviewContent(t.content)}"
                                                     </p>
-                                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest whitespace-nowrap shrink-0 border-l border-slate-100 pl-3">{t.date || 'RECENT'}</span>
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t.date || 'RECENT FEEDBACK'}</span>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6">
@@ -318,21 +332,21 @@ const AdminTestimonialsPage = () => {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button 
                                                         onClick={() => handleAction(t.id, 'Featured')}
-                                                        className="p-2.5 bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white rounded-xl transition-all shadow-sm"
+                                                        className="p-2.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-xl transition-all shadow-sm border border-amber-100"
                                                         title="Feature"
                                                     >
                                                         <Star size={16} />
                                                     </button>
                                                     <button 
                                                         onClick={() => handleAction(t.id, 'Approved')}
-                                                        className="p-2.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl transition-all shadow-sm"
+                                                        className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl transition-all shadow-sm border border-emerald-100"
                                                         title="Approve"
                                                     >
                                                         <CheckCircle size={16} />
                                                     </button>
                                                     <button 
                                                         onClick={() => handleAction(t.id, 'Rejected')}
-                                                        className="p-2.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-sm"
+                                                        className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-sm border border-rose-100"
                                                         title="Reject"
                                                     >
                                                         <XCircle size={16} />

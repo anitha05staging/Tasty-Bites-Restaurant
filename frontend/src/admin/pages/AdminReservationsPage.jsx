@@ -225,8 +225,7 @@ const AdminReservationsPage = () => {
                                             <div className="flex items-center justify-end gap-2">
                                                 <button 
                                                     onClick={() => handleUpdateStatus(res.id, 'Confirmed')}
-                                                    className={`p-2.5 rounded-xl transition-all shadow-sm ${['Confirmed','Completed','Cancelled'].includes(res.status) ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60' : 'bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white border border-slate-200 hover:border-slate-900'}`}
-                                                    disabled={['Confirmed','Completed','Cancelled'].includes(res.status)}
+                                                    className="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white border border-slate-200 hover:border-slate-900 rounded-xl transition-all shadow-sm"
                                                     title="Confirm"
                                                 >
                                                     <CalendarCheck size={18} />
@@ -234,8 +233,7 @@ const AdminReservationsPage = () => {
                                                 
                                                 <button 
                                                     onClick={() => handleUpdateStatus(res.id, 'Completed')}
-                                                    className={`p-2.5 rounded-xl transition-all shadow-sm ${['Completed','Cancelled'].includes(res.status) ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 hover:border-emerald-500'}`}
-                                                    disabled={['Completed','Cancelled'].includes(res.status)}
+                                                    className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 hover:border-emerald-500 rounded-xl transition-all shadow-sm"
                                                     title="Complete"
                                                 >
                                                     <CheckCircle2 size={18} />
@@ -243,8 +241,7 @@ const AdminReservationsPage = () => {
                                                 
                                                 <button 
                                                     onClick={() => confirmCancel(res)}
-                                                    className={`p-2.5 rounded-xl transition-all shadow-sm ${res.status === 'Cancelled' ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60' : 'bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-200 hover:border-rose-500'}`}
-                                                    disabled={res.status === 'Cancelled'}
+                                                    className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-200 hover:border-rose-500 rounded-xl transition-all shadow-sm"
                                                     title="Cancel Booking"
                                                 >
                                                     <XCircle size={18} />

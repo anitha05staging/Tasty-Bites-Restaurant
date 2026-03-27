@@ -40,8 +40,7 @@ const AdminTablesPage = () => {
         number: '',
         capacity: 2,
         location: 'Indoor',
-        status: 'Available',
-        waiterId: ''
+        status: 'Available'
     });
 
     useEffect(() => {
@@ -77,8 +76,7 @@ const AdminTablesPage = () => {
                 number: table.number,
                 capacity: table.capacity,
                 location: table.location,
-                status: table.status,
-                waiterId: table.waiterId || ''
+                status: table.status
             });
         } else {
             setEditingTable(null);
@@ -244,6 +242,11 @@ const AdminTablesPage = () => {
                                             <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl"><MapPin size={12}/> {table.location}</span>
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] border shadow-sm whitespace-nowrap inline-block text-center min-w-[90px] ${getStatusColor(table.status)}`}>
+                                            {table.status}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-center">
                                         {table.waiter ? (
                                             <div className="flex flex-col items-center">
@@ -257,7 +260,7 @@ const AdminTablesPage = () => {
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 transition-opacity duration-300">
+                                        <div className="flex items-center justify-end gap-2">
 
                                             <button 
                                                 onClick={() => handleOpenModal(table)}
@@ -367,41 +370,23 @@ const AdminTablesPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
-                                            <select 
-                                                value={formData.status}
-                                                onChange={(e) => setFormData({...formData, status: e.target.value})}
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all appearance-none cursor-pointer"
-                                            >
-                                                <option value="Available">Available</option>
-                                                <option value="Occupied">Occupied</option>
-                                                <option value="Reserved">Reserved</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assign Waiter</label>
-                                            <select 
-                                                value={formData.waiterId}
-                                                onChange={(e) => setFormData({...formData, waiterId: e.target.value})}
-                                                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all appearance-none cursor-pointer"
-                                            >
-                                                <option value="">No Waiter Assigned</option>
-                                                {staff.map(s => (
-                                                    <option key={s.id} value={s.id}>{s.name} {s.status === 'Away' ? '(AWAY)' : ''}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
+                                        <select 
+                                            value={formData.status}
+                                            onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                            className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all appearance-none cursor-pointer"
+                                        >
+                                            <option value="Available">Available</option>
+                                            <option value="Occupied">Occupied</option>
+                                            <option value="Reserved">Reserved</option>
+                                        </select>
                                     </div>
 
-                                    <button 
-                                        type="submit"
-                                        className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200 mt-4"
-                                    >
-                                        {editingTable ? 'Save' : 'Save'}
-                                    </button>
+                                    <div className="flex gap-4 mt-4">
+                                        <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-5 bg-white border border-slate-200 text-slate-500 rounded-[2rem] text-xs font-black uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</button>
+                                        <button type="submit" className="flex-[2] py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200">Save</button>
+                                    </div>
                                 </form>
                             </div>
                         </motion.div>

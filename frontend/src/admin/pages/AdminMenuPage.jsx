@@ -347,12 +347,12 @@ const MenuModal = ({ isOpen, onClose, item, onSave }) => {
                 </div>
 
                 <div className="p-8 border-t border-slate-100 flex gap-4">
-                    <button type="button" onClick={onClose} className="flex-1 px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">Close</button>
+                    <button type="button" onClick={onClose} className="flex-1 px-8 py-3.5 bg-white border border-slate-200 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</button>
                     {!isViewMode && (
                         <button
                             onClick={handleSubmit}
                             disabled={saving}
-                            className="flex-[1.5] bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10 transition-all disabled:opacity-50"
+                            className="flex-[1.5] bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10 transition-all disabled:opacity-50"
                         >
                             {saving ? <Loader2 className="animate-spin" size={16} /> : 'Save'}
                         </button>

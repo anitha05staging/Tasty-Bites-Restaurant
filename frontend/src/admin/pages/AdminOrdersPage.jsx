@@ -174,6 +174,31 @@ const DetailModal = ({ order, isOpen, onClose }) => {
                         </div>
                     </div>
                 </div>
+
+                <div className="px-8 py-6 border-t border-slate-100 bg-slate-50/30 flex gap-4">
+                    <button 
+                        onClick={onClose}
+                        className="flex-1 px-8 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:text-slate-900 transition-all"
+                    >
+                        Close
+                    </button>
+                    {!['Completed', 'Delivered', 'Cancelled'].includes(order.status) && (
+                        <button 
+                            onClick={() => {
+                                const nextStatus = order.status === 'Order Received' ? 'Preparing' : 
+                                                 order.status === 'Preparing' ? 'Ready' : 
+                                                 order.status === 'Ready' ? 'Delivered' : 'Completed';
+                                onUpdateStatus(order.id, nextStatus);
+                                onClose();
+                            }}
+                            className="flex-[2] px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-900/10"
+                        >
+                            Update to {order.status === 'Order Received' ? 'Preparing' : 
+                                      order.status === 'Preparing' ? 'Ready' : 
+                                      order.status === 'Ready' ? 'Delivered' : 'Next Status'}
+                        </button>
+                    )}
+                </div>
             </motion.div>
         </div>
     );

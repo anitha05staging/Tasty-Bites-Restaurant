@@ -306,7 +306,7 @@ const AdminWaitersPage = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 transition-opacity">
+                                        <div className="flex items-center justify-end gap-2">
                                             <button 
                                                 onClick={() => handleOpenTableModal(waiter)} 
                                                 className="relative p-2.5 bg-slate-100 text-slate-600 hover:text-admin-primary hover:bg-admin-primary/10 rounded-xl transition-all"
@@ -378,7 +378,10 @@ const AdminWaitersPage = () => {
                                     <span className="text-lg font-black text-amber-600">92%</span>
                                 </div>
                             </div>
-                            <button onClick={() => setIsReportModalOpen(false)} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary">Close</button>
+                            <div className="flex gap-4">
+                                <button onClick={() => setIsReportModalOpen(false)} className="flex-1 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</button>
+                                <button onClick={() => setIsReportModalOpen(false)} className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all">Submit Report</button>
+                            </div>
                         </motion.div>
                     </div>
                 )}
@@ -424,7 +427,10 @@ const AdminWaitersPage = () => {
                                             </div>
                                         </div>
                                      </div>
-                                    <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200 mt-4">Save</button>
+                                    <div className="flex gap-4 mt-6">
+                                        <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-5 bg-white border border-slate-200 text-slate-500 rounded-[2rem] text-xs font-black uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</button>
+                                        <button type="submit" className="flex-[2] py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200">Save</button>
+                                    </div>
                                 </form>
                             </div>
                         </motion.div>

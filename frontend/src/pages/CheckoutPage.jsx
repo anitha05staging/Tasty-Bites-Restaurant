@@ -382,7 +382,7 @@ const CheckoutPage = () => {
                                 Order Summary
                             </h2>
 
-                            <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 mb-8 custom-scrollbar">
+                            <div className="max-h-[400px] overflow-y-auto pt-4 pr-2 space-y-4 mb-8 custom-scrollbar">
                                 {cartItems.map((item) => (
                                     <div key={item.id} className="flex gap-4">
                                         <div className="relative shrink-0 overflow-visible">

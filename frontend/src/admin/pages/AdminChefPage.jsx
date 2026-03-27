@@ -431,7 +431,7 @@ const AdminChefPage = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2 transition-opacity">
+                                                <div className="flex items-center justify-end gap-2">
                                                     <button onClick={() => handleOpenStaffModal(chef)} className="p-2.5 text-slate-400 hover:text-admin-primary hover:bg-admin-primary/5 rounded-xl transition-all" title="Edit Profile"><Edit size={16}/></button>
                                                     <button onClick={() => handleStaffDelete(chef)} className="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all" title="Remove Chef"><Trash2 size={16} /></button>
                                                 </div>
@@ -476,9 +476,10 @@ const AdminChefPage = () => {
                                     <input required type="text" placeholder="Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
                                     <input required type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
                                     <input type="tel" placeholder="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-admin-primary/20 outline-none transition-all" />
-                                    <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200">
-                                        {editingStaff ? 'Save' : 'Save'}
-                                    </button>
+                                    <div className="flex gap-4">
+                                        <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-5 bg-white border border-slate-200 text-slate-500 rounded-[2rem] text-xs font-black uppercase tracking-widest hover:text-slate-900 transition-all">Cancel</button>
+                                        <button type="submit" className="flex-[2] py-5 bg-slate-900 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-admin-primary transition-all shadow-xl shadow-slate-200">Save</button>
+                                    </div>
                                 </form>
                             </div>
                         </motion.div>
