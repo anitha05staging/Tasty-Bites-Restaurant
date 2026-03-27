@@ -689,15 +689,21 @@ const ReservationsTab = () => {
                                         <CalendarCheck size={22} />
                                     </div>
                                     <div>
-                                        <p className="font-bold text-slate-900">{res.id}</p>
-                                        <p className="text-sm text-gray-600">{res.date} at {res.time}</p>
+                                        <p className="font-bold text-slate-900">#{res.bookingRef || res.id}</p>
+                                        <p className="text-sm text-gray-600">
+                                            {new Date(res.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} at {res.time}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-4">
                                     <span className="text-sm text-gray-600">{res.guests || 0} guests</span>
-                                    <span className="text-sm text-gray-600">•</span>
-                                    <span className="text-sm text-gray-600">{res.occasion || 'General'}</span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${res.status === 'Upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>{res.status}</span>
+                                    {res.occasion && res.occasion !== 'None' && (
+                                        <>
+                                            <span className="text-sm text-gray-600">•</span>
+                                            <span className="text-sm text-gray-600">{res.occasion}</span>
+                                        </>
+                                    )}
+                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${res.status === 'Upcoming' ? 'bg-blue-100 text-blue-700' : res.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-gray-100 text-gray-500'}`}>{res.status}</span>
                                 </div>
                             </div>
                         </div>
