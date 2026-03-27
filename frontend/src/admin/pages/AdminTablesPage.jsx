@@ -153,7 +153,7 @@ const AdminTablesPage = () => {
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight">Tables</h1>
                     <p className="text-sm font-medium text-slate-500 mt-2 uppercase tracking-widest flex items-center gap-2">
-                        <MapPin size={14} className="text-admin-primary" /> Manage tables and staff
+                        <MapPin size={14} className="text-admin-primary" /> Manage restaurant tables
                     </p>
                 </div>
                 <button 
