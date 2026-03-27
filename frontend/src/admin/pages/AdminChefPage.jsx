@@ -23,7 +23,9 @@ import {
     Key,
     Shield,
     Mail,
-    Phone
+    Phone,
+    ExternalLink,
+    ShoppingBag
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { adminOrdersApi, adminStaffApi } from '../services/adminApi';
@@ -37,6 +39,9 @@ const AdminChefPage = () => {
     const [chefs, setChefs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'staff'
+    const [expandedOrders, setExpandedOrders] = useState([]);
+    const [selectedOrderForDetail, setSelectedOrderForDetail] = useState(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     
     // Staff Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -137,6 +142,19 @@ const AdminChefPage = () => {
     const handleStaffDelete = (chef) => {
         setChefToDelete(chef);
         setIsDeleteModalOpen(true);
+    };
+
+    const toggleExpand = (orderId) => {
+        setExpandedOrders(prev => 
+            prev.includes(orderId) 
+                ? prev.filter(id => id !== orderId) 
+                : [...prev, orderId]
+        );
+    };
+
+    const handleViewDetail = (order) => {
+        setSelectedOrderForDetail(order);
+        setIsDetailModalOpen(true);
     };
 
     const confirmDelete = async () => {
@@ -290,34 +308,47 @@ const AdminChefPage = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 max-w-[350px]">
-                                            <div className="relative group/scroll">
-                                                <div className="max-h-[150px] overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-2">
-                                                    {order.items?.map((item, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between p-2 bg-slate-50/50 rounded-xl border border-slate-100/50 hover:bg-white hover:shadow-sm transition-all group/item">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[11px] font-black text-slate-800 tracking-tight leading-none mb-0.5">{item.name || 'Item'}</span>
-                                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Kitchen Prepared</span>
+                                        <td className="px-6 py-4 max-w-[400px]">
+                                            <div className="flex flex-col gap-2">
+                                                <div className={`grid ${expandedOrders.includes(order.id) ? 'grid-cols-2' : 'grid-cols-1'} gap-x-6 gap-y-1.5 transition-all duration-300`}>
+                                                    {(expandedOrders.includes(order.id) ? order.items : order.items?.slice(0, 3))?.map((item, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between py-1 border-b border-slate-50 last:border-0">
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="text-[11px] font-bold text-slate-700 truncate tracking-tight">{item.name || 'Item'}</span>
+                                                                {expandedOrders.includes(order.id) && <span className="text-[9px] text-slate-400 uppercase font-medium">Standard Prep</span>}
                                                             </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] font-black text-admin-primary px-2 py-0.5 bg-admin-primary/10 rounded-lg">x{item.quantity || 1}</span>
-                                                            </div>
+                                                            <span className="text-[10px] font-black text-admin-primary px-2 py-0.5 bg-admin-primary/5 rounded-lg flex-shrink-0 ml-4">x{item.quantity || 1}</span>
                                                         </div>
                                                     ))}
-                                                    {(!order.items || order.items.length === 0) && <span className="text-xs text-slate-400 italic py-4 block text-center">No items listed for this order</span>}
+                                                    {(!order.items || order.items.length === 0) && <span className="text-xs text-slate-400 italic">No items listed</span>}
                                                 </div>
-                                                {order.items?.length > 4 && (
-                                                    <div className="absolute bottom-0 left-0 right-2 h-8 bg-gradient-to-t from-white/80 to-transparent pointer-events-none group-hover/scroll:opacity-0 transition-opacity" />
+
+                                                {order.items?.length > 3 && (
+                                                    <div className="flex items-center gap-3 mt-1">
+                                                        <button 
+                                                            onClick={() => toggleExpand(order.id)}
+                                                            className="text-[10px] font-black text-admin-primary uppercase tracking-widest hover:underline flex items-center gap-1"
+                                                        >
+                                                            {expandedOrders.includes(order.id) ? 'Show Less' : `+ ${order.items.length - 3} More Items`}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleViewDetail(order)}
+                                                            className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 flex items-center gap-1 ml-auto"
+                                                        >
+                                                            Full Detail <ExternalLink size={10} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                
+                                                {order.items?.length <= 3 && order.items?.length > 0 && (
+                                                    <button 
+                                                        onClick={() => handleViewDetail(order)}
+                                                        className="text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-400 flex items-center gap-1 mt-1"
+                                                    >
+                                                        View <ExternalLink size={10} />
+                                                    </button>
                                                 )}
                                             </div>
-                                            {order.items?.length > 10 && (
-                                                <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between items-center">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                        <ShoppingBag size={10} /> {order.items.length} Total Items
-                                                    </span>
-                                                    <span className="text-[9px] font-black text-admin-primary bg-admin-primary/5 px-2 py-1 rounded-lg uppercase animate-pulse">Large Order ⚡</span>
-                                                </div>
-                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm ${
@@ -463,6 +494,73 @@ const AdminChefPage = () => {
                 message="Are you sure you want to remove this chef from the team? This action will revoke their kitchen access."
                 itemName={chefToDelete ? `${chefToDelete.name} (${chefToDelete.email})` : ''}
             />
+
+            {/* Order Detail Modal (Option 4) */}
+            <AnimatePresence>
+                {isDetailModalOpen && selectedOrderForDetail && (
+                    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDetailModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-2xl bg-white rounded-[3rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                            <div className="p-8 border-b border-slate-50 flex justify-between items-start bg-slate-50/30">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className="px-3 py-1 bg-admin-primary/10 text-admin-primary rounded-full text-[10px] font-black uppercase tracking-widest">Order #${String(selectedOrderForDetail.orderId || selectedOrderForDetail.id).slice(-4)}</span>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedOrderForDetail.orderType === 'Dine-In' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'}`}>{selectedOrderForDetail.orderType}</span>
+                                    </div>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Kitchen Ticket</h2>
+                                </div>
+                                <button onClick={() => setIsDetailModalOpen(false)} className="p-3 bg-white text-slate-400 hover:text-slate-900 rounded-2xl shadow-sm border border-slate-100 transition-all"><X size={20} /></button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-8 mb-8 text-left">
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer</span>
+                                        <p className="font-bold text-slate-900">{selectedOrderForDetail.customerName || 'Guest'}</p>
+                                    </div>
+                                    <div className="space-y-1 text-right">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Table / Spot</span>
+                                        <p className="font-bold text-slate-900">{selectedOrderForDetail.tableNumber ? `Table ${selectedOrderForDetail.tableNumber}` : 'Takeaway'}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="bg-slate-50 rounded-[2rem] p-6 space-y-3 border border-slate-100">
+                                        {selectedOrderForDetail.items?.map((item, idx) => (
+                                            <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm text-left">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 bg-admin-primary/5 rounded-xl flex items-center justify-center text-admin-primary">
+                                                        <span className="font-black text-xs">{idx + 1}</span>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-black text-slate-900 tracking-tight">{item.name}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Preparation Required</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-xs font-black text-admin-primary bg-admin-primary/10 px-4 py-2 rounded-xl">x{item.quantity || 1}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-8 border-t border-slate-50 bg-slate-50/30 flex gap-4">
+                                <button onClick={() => setIsDetailModalOpen(false)} className="flex-1 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:text-slate-900 transition-all">Close</button>
+                                <button 
+                                    onClick={() => {
+                                        if (selectedOrderForDetail.status === 'Order Received') handleUpdateOrderStatus(selectedOrderForDetail.id, 'Preparing');
+                                        else if (selectedOrderForDetail.status === 'Preparing') handleUpdateOrderStatus(selectedOrderForDetail.id, 'Ready');
+                                        setIsDetailModalOpen(false);
+                                    }}
+                                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary shadow-xl shadow-slate-200"
+                                >
+                                    Proceed Status
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
