@@ -339,7 +339,7 @@ const CateringPage = () => {
 
                             <div className="space-y-8">
                                 {[
-                                    { icon: <Mail size={18} />, label: "Email", value: "catering@tastybites.co.uk" },
+                                    { icon: <Mail size={18} />, label: "Email", value: "tastybitesrestaurant7@gmail.com" },
                                     { icon: <Phone size={18} />, label: "Phone", value: "+44 123 456 7890" }
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-center gap-6 group">

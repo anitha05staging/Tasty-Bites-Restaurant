@@ -229,7 +229,7 @@ const CheckoutPage = () => {
                                                         value={customerData.email}
                                                         onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
                                                         className={`w-full pl-12 pr-4 py-4 rounded-2xl border ${errors.email ? 'border-red-500 bg-red-50/10' : 'border-slate-100 bg-slate-50/50'} focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-900 transition-all placeholder:text-[11px] sm:placeholder:text-sm text-sm`}
-                                                        placeholder="john@example.com"
+                                                        placeholder="tastybitesrestaurant7@gmail.com"
                                                     />
                                                 </div>
                                                 {errors.email && <p className="text-red-500 text-[10px] mt-1 font-bold uppercase tracking-tight">{errors.email}</p>}

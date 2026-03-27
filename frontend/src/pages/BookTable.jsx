@@ -259,7 +259,7 @@ const BookTable = () => {
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                     className={`w-full pl-12 sm:pl-16 pr-6 py-4 bg-slate-50 border-2 ${errors.email ? 'border-red-500/50' : 'border-slate-100 focus:border-primary/60'} rounded-2xl text-slate-900 placeholder:text-slate-200 placeholder:text-[11px] sm:placeholder:text-sm focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-sm text-sm sm:text-base`}
-                                                    placeholder="your@email.com"
+                                                    placeholder="tastybitesrestaurant7@gmail.com"
                                                 />
                                             </div>
                                             {errors.email && <p className="text-red-400 text-[10px] font-bold uppercase tracking-wider ml-1">{errors.email}</p>}
