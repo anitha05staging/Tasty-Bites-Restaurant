@@ -504,7 +504,7 @@ const AdminChefPage = () => {
                             <div className="p-8 border-b border-slate-50 flex justify-between items-start bg-slate-50/30">
                                 <div>
                                     <div className="flex items-center gap-3 mb-2">
-                                        <span className="px-3 py-1 bg-admin-primary/10 text-admin-primary rounded-full text-[10px] font-black uppercase tracking-widest">Order #${String(selectedOrderForDetail.orderId || selectedOrderForDetail.id).slice(-4)}</span>
+                                        <span className="px-3 py-1 bg-admin-primary/10 text-admin-primary rounded-full text-[10px] font-black uppercase tracking-widest">Order {String(selectedOrderForDetail.orderId || selectedOrderForDetail.id).slice(-4)}</span>
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedOrderForDetail.orderType === 'Dine-In' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'}`}>{selectedOrderForDetail.orderType}</span>
                                     </div>
                                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">Kitchen Ticket</h2>
@@ -552,9 +552,9 @@ const AdminChefPage = () => {
                                         else if (selectedOrderForDetail.status === 'Preparing') handleUpdateOrderStatus(selectedOrderForDetail.id, 'Ready');
                                         setIsDetailModalOpen(false);
                                     }}
-                                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary shadow-xl shadow-slate-200"
+                                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-admin-primary shadow-xl shadow-slate-200 transition-all"
                                 >
-                                    Proceed Status
+                                    UPDATE STATUS
                                 </button>
                             </div>
                         </motion.div>
