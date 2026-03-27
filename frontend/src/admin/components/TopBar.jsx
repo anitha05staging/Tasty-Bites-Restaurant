@@ -55,7 +55,7 @@ const TopBar = ({ onToggleSidebar }) => {
                                     >
                                         <div className="px-4 py-3 border-b border-slate-50 mb-2">
                                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account</p>
-                                            <p className="text-sm font-black text-slate-900 mt-1 truncate" title={user?.email || 'tastybitesrestaurant7@gmail.com'}>{user?.email || 'tastybitesrestaurant7@gmail.com'}</p>
+                                            <p className="text-sm font-black text-slate-900 mt-1 truncate" title={user?.email || 'admin@tastybites.com'}>{user?.email || 'admin@tastybites.com'}</p>
                                         </div>
                                         <div className="space-y-1">
                                             <NavLink 

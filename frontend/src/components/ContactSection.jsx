@@ -157,7 +157,7 @@ const ContactSection = () => {
                                         type="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        placeholder="tastybitesrestaurant7@gmail.com"
+                                        placeholder="john@example.com"
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all outline-none placeholder:text-[11px] sm:placeholder:text-sm text-sm"
                                     />
                                 </div>

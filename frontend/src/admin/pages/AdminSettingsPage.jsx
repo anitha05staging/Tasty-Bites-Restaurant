@@ -119,7 +119,7 @@ const AdminSettingsPage = () => {
                                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" size={18} />
                                     <input 
                                         type="email" 
-                                        value={user?.email || 'tastybitesrestaurant7@gmail.com'}
+                                        value={user?.email || 'admin@tastybites.com'}
                                         readOnly
                                         className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-500 cursor-not-allowed outline-none transition-all shadow-sm"
                                     />
